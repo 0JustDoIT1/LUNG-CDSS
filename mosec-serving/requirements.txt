@@ -1,0 +1,11 @@
+mosec
+torch
+torchvision
+timm
+openslide-python
+scikit-image
+scipy
+numpy
+Pillow
+matplotlib
+google-cloud-storage

@@ -1,0 +1,41 @@
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+
+  frontend:
+    build:
+      context: ../frontend
+    expose:
+      - "80"
+
+  backend:
+    build:
+      context: ../backend
+    env_file:
+      - ../backend/.env
+    expose:
+      - "8000"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: lung_cdss
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
