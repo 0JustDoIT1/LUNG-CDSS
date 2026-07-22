@@ -36,5 +36,5 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             cd ~/lung-cdss/infra
-            docker-compose down
-            docker-compose up --build -d
+            docker compose down
+            docker compose up --build -d
