@@ -56,7 +56,7 @@ class PatchDataset(Dataset):
         return self.transform(patch)
 
 
-def extract_embeddings(model, transform, svs_path, coords, patch_size, batch_size=64, num_workers=2):
+def extract_embeddings(model, transform, svs_path, coords, patch_size, batch_size=64, num_workers=0):
     dataset = PatchDataset(svs_path, coords, patch_size, transform)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
