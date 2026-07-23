@@ -73,7 +73,7 @@ class LungCDSSWorker(Worker):
         heatmap_img = generate_heatmap(thumbnail, coords, attention, slide.level_dimensions[0], patch_size=PATCH_SIZE)
         print(f"[{case_id}] 히트맵 생성 완료", flush=True)
 
-        top_patches = extract_top_attention_patches(attention, coords, slide, patch_size=PATCH_SIZE, top_pct=0.1)
+        top_patches = extract_top_attention_patches(attention, coords, slide, patch_size=PATCH_SIZE, top_n=5)
         slide.close()
         os.remove(local_svs_path)
         print(f"[{case_id}] 상위 패치 {len(top_patches)}개 추출 완료", flush=True)
