@@ -5,10 +5,10 @@ UNI2-h 특징추출.
 import torch
 import timm
 from timm.layers import SwiGLUPacked
-from torch.utils.data import Dataset, DataLoader
-import openslide
+from concurrent.futures import ThreadPoolExecutor
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"[feature_extraction] device: {DEVICE}", flush=True)
 
 TIMM_KWARGS = {
     "img_size": 224,
@@ -28,7 +28,6 @@ TIMM_KWARGS = {
 
 
 def load_uni2h():
-    """서버 시작 시 1회만 호출."""
     model = timm.create_model("hf-hub:MahmoodLab/UNI2-h", pretrained=True, **TIMM_KWARGS)
     model.eval().to(DEVICE)
     transform = timm.data.create_transform(
@@ -37,35 +36,31 @@ def load_uni2h():
     return model, transform
 
 
-class PatchDataset(Dataset):
-    def __init__(self, svs_path, coords, patch_size, transform):
-        self.svs_path = svs_path
-        self.coords = coords
-        self.patch_size = patch_size
-        self.transform = transform
-        self.slide = None
+def extract_embeddings(model, transform, slide, coords, patch_size, batch_size=256, max_io_workers=12):
+    """
+    이미 열려있는 slide 객체를 받아서 패치별 임베딩 추출.
+    패치 이미지 읽기(I/O)는 ThreadPoolExecutor로 병렬화.
+    반환: [N_patches, 1536] float16 텐서
+    """
 
-    def __len__(self):
-        return len(self.coords)
-
-    def __getitem__(self, idx):
-        if self.slide is None:
-            self.slide = openslide.OpenSlide(self.svs_path)
-        x0, y0, level = self.coords[idx]
-        patch = self.slide.read_region((x0, y0), level, (self.patch_size, self.patch_size)).convert("RGB")
-        return self.transform(patch)
-
-
-def extract_embeddings(model, transform, svs_path, coords, patch_size, batch_size=64, num_workers=0):
-    dataset = PatchDataset(svs_path, coords, patch_size, transform)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
+    def read_and_transform(coord):
+        x0, y0, level = coord
+        patch = slide.read_region((int(x0), int(y0)), level, (patch_size, patch_size)).convert("RGB")
+        return transform(patch)
 
     embeddings = []
     with torch.no_grad():
-        for batch in loader:
-            batch = batch.to(DEVICE, non_blocking=True)
+        for i in range(0, len(coords), batch_size):
+            batch_coords = coords[i:i + batch_size]
+
+            with ThreadPoolExecutor(max_workers=max_io_workers) as executor:
+                batch_tensors = list(executor.map(read_and_transform, batch_coords))
+
+            batch = torch.stack(batch_tensors).to(DEVICE, non_blocking=True)
+
             with torch.autocast(device_type="cuda" if DEVICE == "cuda" else "cpu", dtype=torch.float16):
                 feats = model(batch)
+
             embeddings.append(feats.cpu().to(torch.float16))
 
     if embeddings:

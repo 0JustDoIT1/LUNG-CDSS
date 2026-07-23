@@ -55,7 +55,7 @@ class LungCDSSWorker(Worker):
         print(f"[{case_id}] 패치 좌표 생성 완료: {len(coords)}개", flush=True)
 
         bag_features = extract_embeddings(
-            self.uni2h_model, self.uni2h_transform, local_svs_path, coords, patch_size=PATCH_SIZE
+            self.uni2h_model, self.uni2h_transform, slide, coords, patch_size=PATCH_SIZE
         )
         print(f"[{case_id}] UNI2-h 특징추출 완료: {bag_features.shape}", flush=True)
 

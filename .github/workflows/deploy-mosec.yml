@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'mosec-serving/**'
+      - "mosec-serving/**"
 
 jobs:
   deploy:
@@ -26,10 +26,10 @@ jobs:
       - name: Build and push image
         run: |
           docker build --secret id=hf_token,src=<(echo "${{ secrets.HF_TOKEN }}") \
+            --cache-from us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest \
             -t us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest \
             ./mosec-serving
           docker push us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest
-
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy mosec-serving \
