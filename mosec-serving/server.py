@@ -55,7 +55,7 @@ class LungCDSSWorker(Worker):
         print(f"[{case_id}] 패치 좌표 생성 완료: {len(coords)}개", flush=True)
 
         bag_features = extract_embeddings(
-            self.uni2h_model, self.uni2h_transform, slide, coords, patch_size=PATCH_SIZE
+            self.uni2h_model, self.uni2h_transform, local_svs_path, coords, patch_size=PATCH_SIZE
         )
         print(f"[{case_id}] UNI2-h 특징추출 완료: {bag_features.shape}", flush=True)
 
@@ -96,7 +96,7 @@ class LungCDSSWorker(Worker):
             })
         print(f"[{case_id}] 핵 형태 분석 완료", flush=True)
 
-        nuclei_summary = summarize_nuclei_metrics(all_nuclei)
+        nuclei_summary = summarize_nuclei_metrics(all_nuclei, n_patches=len(top_patches))
 
         slide_thumb_path = upload_image_to_gcs(thumbnail, f"reports/{case_id}/original.png")
         heatmap_path = upload_image_to_gcs(heatmap_img, f"reports/{case_id}/heatmap.png")
