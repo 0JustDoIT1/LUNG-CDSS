@@ -23,5 +23,6 @@ RUN --mount=type=secret,id=hf_token \
     mlp_layer=SwiGLUPacked, act_layer=torch.nn.SiLU, reg_tokens=8, dynamic_img_size=True)"
 
 ENV HF_HUB_OFFLINE=1
+ENV PYTHONUNBUFFERED=1
 
 CMD ["python", "server.py"]
