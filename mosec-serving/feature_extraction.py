@@ -30,27 +30,13 @@ TIMM_KWARGS = {
 }
 
 
-# def load_uni2h():
-#     model = timm.create_model("hf-hub:MahmoodLab/UNI2-h", pretrained=True, **TIMM_KWARGS)
-#     model.eval().to(DEVICE)
-
-#     if DEVICE == "cuda":
-#         model = model.half()
-#         print("[feature_extraction] model cast to fp16", flush=True)
-
-#     transform = timm.data.create_transform(
-#         **timm.data.resolve_data_config(model.pretrained_cfg, model=model)
-#     )
-#     return model, transform
-
 def load_uni2h():
     model = timm.create_model("hf-hub:MahmoodLab/UNI2-h", pretrained=True, **TIMM_KWARGS)
     model.eval().to(DEVICE)
 
     if DEVICE == "cuda":
         model = model.half()
-        model = torch.compile(model)
-        print("[feature_extraction] model compiled", flush=True)
+        print("[feature_extraction] model cast to fp16", flush=True)
 
     transform = timm.data.create_transform(
         **timm.data.resolve_data_config(model.pretrained_cfg, model=model)
