@@ -23,13 +23,26 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
+      # - name: Build and push image
+      #   run: |
+      #     docker build --secret id=hf_token,src=<(echo "${{ secrets.HF_TOKEN }}") \
+      #       --cache-from us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest \
+      #       -t us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest \
+      #       ./mosec-serving
+      #     docker push us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build and push image
         run: |
-          docker build --secret id=hf_token,src=<(echo "${{ secrets.HF_TOKEN }}") \
-            --cache-from us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest \
+          docker buildx build --secret id=hf_token,src=<(echo "${{ secrets.HF_TOKEN }}") \
+            --cache-from type=registry,ref=us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:buildcache \
+            --cache-to type=registry,ref=us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:buildcache,mode=max \
             -t us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest \
+            --push \
             ./mosec-serving
-          docker push us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest
+
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy mosec-serving \
