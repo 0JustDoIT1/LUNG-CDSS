@@ -44,30 +44,39 @@ class LungCDSSWorker(Worker):
 
     def forward(self, data: dict) -> dict:
         case_id = data["case_id"]
+        print(f"[{case_id}] 시작", flush=True)
+
         local_svs_path = f"/tmp/{uuid.uuid4()}.svs"
         download_slide_from_gcs(data["slide_gcs_path"], local_svs_path)
+        print(f"[{case_id}] GCS 다운로드 완료", flush=True)
 
         slide = openslide.OpenSlide(local_svs_path)
         coords = get_tissue_patch_coords(slide)
+        print(f"[{case_id}] 패치 좌표 생성 완료: {len(coords)}개", flush=True)
+
         bag_features = extract_embeddings(
             self.uni2h_model, self.uni2h_transform, local_svs_path, coords, patch_size=PATCH_SIZE
         )
+        print(f"[{case_id}] UNI2-h 특징추출 완료: {bag_features.shape}", flush=True)
 
         with torch.no_grad():
             x = bag_features.to(self.device).float()
             output = self.model(x, return_attention=True)
             probs = F.softmax(output["logits"], dim=1)[0]
             attention = output["attention"][0].cpu().numpy()
+        print(f"[{case_id}] AMD-MIL 분류 완료", flush=True)
 
         luad_prob = probs[1].item()
         lusc_prob = probs[0].item()
 
         thumbnail = get_slide_thumbnail(slide, max_size=4096)
         heatmap_img = generate_heatmap(thumbnail, coords, attention, slide.level_dimensions[0], patch_size=PATCH_SIZE)
+        print(f"[{case_id}] 히트맵 생성 완료", flush=True)
 
         top_patches = extract_top_attention_patches(attention, coords, slide, patch_size=PATCH_SIZE, top_pct=0.1)
         slide.close()
         os.remove(local_svs_path)
+        print(f"[{case_id}] 상위 패치 {len(top_patches)}개 추출 완료", flush=True)
 
         nuclei_patches_result = []
         all_nuclei = []
@@ -85,11 +94,13 @@ class LungCDSSWorker(Worker):
                 "original_gcs_path": original_path,
                 "overlay_gcs_path": overlay_path,
             })
+        print(f"[{case_id}] 핵 형태 분석 완료", flush=True)
 
         nuclei_summary = summarize_nuclei_metrics(all_nuclei)
 
         slide_thumb_path = upload_image_to_gcs(thumbnail, f"reports/{case_id}/original.png")
         heatmap_path = upload_image_to_gcs(heatmap_img, f"reports/{case_id}/heatmap.png")
+        print(f"[{case_id}] 결과 이미지 업로드 완료", flush=True)
 
         return {
             "prediction_label": "LUAD" if luad_prob > lusc_prob else "LUSC",
