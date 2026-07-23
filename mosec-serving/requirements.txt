@@ -1,6 +1,6 @@
 mosec
-torch
-torchvision
+torch==2.3.1
+torchvision==0.18.1
 timm
 openslide-python
 scikit-image
