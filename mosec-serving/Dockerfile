@@ -25,4 +25,4 @@ RUN --mount=type=secret,id=hf_token \
 ENV HF_HUB_OFFLINE=1
 ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "server.py"]
+CMD ["python", "server.py", "--timeout", "900000"]
