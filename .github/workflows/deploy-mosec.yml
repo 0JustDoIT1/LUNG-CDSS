@@ -49,4 +49,5 @@ jobs:
             --image=us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest \
             --region=us-central1 --gpu=1 --gpu-type=nvidia-l4 --no-gpu-zonal-redundancy \
             --memory=16Gi --cpu=8 --no-cpu-throttling --port=8000 --timeout=900 \
-            --min-instances=0 --max-instances=2 --no-allow-unauthenticated
+            --min-instances=0 --max-instances=2 --no-allow-unauthenticated \
+            --set-env-vars="INTERNAL_CALLBACK_TOKEN=${{ secrets.INTERNAL_CALLBACK_TOKEN }},DJANGO_CALLBACK_URL=https://lung-cdss.kro.kr/api"

@@ -13,6 +13,7 @@ from feature_extraction import load_uni2h, extract_embeddings
 from nuclei_analysis import extract_top_attention_patches, segment_nuclei, get_nuclei_overlay, summarize_nuclei_metrics
 from heatmap import generate_heatmap
 from gcs_utils import GCS_BUCKET, download_slide_from_gcs, upload_image_to_gcs, download_model_file_from_gcs
+from callback import update_step
 
 MODEL_WEIGHTS_PATH = f"gs://{GCS_BUCKET}/models/amd_mil_100test_best.pt"
 MODEL_CONFIG_PATH = f"gs://{GCS_BUCKET}/models/amd_mil_100test_config.json"
@@ -49,15 +50,18 @@ class LungCDSSWorker(Worker):
         local_svs_path = f"/tmp/{uuid.uuid4()}.svs"
         download_slide_from_gcs(data["slide_gcs_path"], local_svs_path)
         print(f"[{case_id}] GCS 다운로드 완료", flush=True)
+        update_step(case_id, "preprocessing")
 
         slide = openslide.OpenSlide(local_svs_path)
         coords = get_tissue_patch_coords(slide)
         print(f"[{case_id}] 패치 좌표 생성 완료: {len(coords)}개", flush=True)
+        update_step(case_id, "feature_extraction")
 
         bag_features = extract_embeddings(
             self.uni2h_model, self.uni2h_transform, local_svs_path, coords, patch_size=PATCH_SIZE
         )
         print(f"[{case_id}] UNI2-h 특징추출 완료: {bag_features.shape}", flush=True)
+        update_step(case_id, "classification")
 
         with torch.no_grad():
             x = bag_features.to(self.device).float()
@@ -65,6 +69,7 @@ class LungCDSSWorker(Worker):
             probs = F.softmax(output["logits"], dim=1)[0]
             attention = output["attention"][0].cpu().numpy()
         print(f"[{case_id}] AMD-MIL 분류 완료", flush=True)
+        update_step(case_id, "nuclei_detection")
 
         luad_prob = probs[1].item()
         lusc_prob = probs[0].item()
@@ -80,7 +85,7 @@ class LungCDSSWorker(Worker):
 
         nuclei_patches_result = []
         all_nuclei = []
-        for rank, p in enumerate(top_patches[:5]):
+        for rank, p in enumerate(top_patches):
             nuclei = segment_nuclei(p["image"])
             overlay_img, n_nuclei = get_nuclei_overlay(p["image"])
             all_nuclei.extend(nuclei)
@@ -95,6 +100,7 @@ class LungCDSSWorker(Worker):
                 "overlay_gcs_path": overlay_path,
             })
         print(f"[{case_id}] 핵 형태 분석 완료", flush=True)
+        update_step(case_id, "generating_result")
 
         nuclei_summary = summarize_nuclei_metrics(all_nuclei, n_patches=len(top_patches))
 

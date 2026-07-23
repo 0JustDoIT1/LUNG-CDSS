@@ -19,6 +19,14 @@ class Case(models.Model):
         ("LUAD", "LUAD"),
         ("LUSC", "LUSC"),
     ]
+    STEP_CHOICES = [
+        ("uploaded", "업로드 확인"),
+        ("preprocessing", "전처리"),
+        ("feature_extraction", "특징 추출"),
+        ("nuclei_detection", "핵 검출"),
+        ("classification", "분류"),
+        ("generating_result", "결과 생성"),
+    ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -26,6 +34,7 @@ class Case(models.Model):
 
     # AI 처리 상태 (업로드 → 분석 요청 → 완료/실패)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="uploaded")
+    current_step = models.CharField(max_length=30, choices=STEP_CHOICES, blank=True, null=True)
 
     # 파일 경로 (GCS)
     slide_gcs_path = models.TextField(blank=True, null=True)

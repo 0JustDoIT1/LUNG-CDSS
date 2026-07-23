@@ -7,6 +7,25 @@ from .models import Case, NucleiPatch, GenePrediction
 from .serializers import CaseListSerializer, CaseDetailSerializer
 from .services import call_mosec_predict
 
+import os
+
+INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
+
+
+@api_view(["POST"])
+def update_case_step(request, case_id):
+    if request.headers.get("X-Internal-Token") != INTERNAL_CALLBACK_TOKEN:
+        return Response({"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        case = Case.objects.get(id=case_id)
+    except Case.DoesNotExist:
+        return Response({"error": "not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    step = request.data.get("step")
+    case.current_step = step
+    case.save(update_fields=["current_step"])
+    return Response({"status": "ok"})
 
 @api_view(["GET", "POST"])
 def case_list_create(request):

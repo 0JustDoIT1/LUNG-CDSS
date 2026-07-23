@@ -9,3 +9,4 @@ numpy
 Pillow
 matplotlib
 google-cloud-storage
+requests
