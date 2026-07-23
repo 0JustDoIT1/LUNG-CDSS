@@ -6,6 +6,7 @@ __pycache__/
 *.pyc
 *.pyo
 .env
+!.env.local
 db.sqlite3
 *.egg-info/
 .pytest_cache/
@@ -27,6 +28,7 @@ hf_token.txt
 *.pth
 github-actions-key*
 *.key.json
+local-dev-key.json
 
 # ============================================================
 # Logs
@@ -56,3 +58,5 @@ lerna-debug.log*
 # infra 관련
 # ============================================================
 infra/nginx/ssl/
+
+*.svs

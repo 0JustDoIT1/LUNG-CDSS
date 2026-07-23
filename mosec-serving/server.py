@@ -105,5 +105,11 @@ class LungCDSSWorker(Worker):
 
 if __name__ == "__main__":
     server = Server()
-    server.append_worker(LungCDSSWorker, num=1, max_batch_size=1, max_wait_time=10)
+    server.append_worker(
+        LungCDSSWorker,
+        num=1,
+        max_batch_size=1,
+        max_wait_time=10,
+        timeout=900,
+    )
     server.run()

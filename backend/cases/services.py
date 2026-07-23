@@ -16,7 +16,7 @@ def _get_id_token(audience: str) -> str:
     return google.oauth2.id_token.fetch_id_token(auth_req, audience)
 
 
-def call_mosec_predict(case_id: str, slide_gcs_path: str, timeout: int = 280) -> dict:
+def call_mosec_predict(case_id: str, slide_gcs_path: str, timeout: int = 900) -> dict:
     """
     mosec에 추론 요청을 보내고 결과를 받아옴.
     mosec worker의 forward()가 반환하는 dict 형태 그대로 돌려줌.
