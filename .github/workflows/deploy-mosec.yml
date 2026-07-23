@@ -35,5 +35,5 @@ jobs:
           gcloud run deploy mosec-serving \
             --image=us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest \
             --region=us-central1 --gpu=1 --gpu-type=nvidia-l4 --no-gpu-zonal-redundancy \
-            --memory=16Gi --cpu=4 --no-cpu-throttling --port=8000 --timeout=900 \
+            --memory=16Gi --cpu=8 --no-cpu-throttling --port=8000 --timeout=900 \
             --min-instances=0 --max-instances=2 --no-allow-unauthenticated

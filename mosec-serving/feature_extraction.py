@@ -36,7 +36,7 @@ def load_uni2h():
     return model, transform
 
 
-def extract_embeddings(model, transform, slide, coords, patch_size, batch_size=256, max_io_workers=12):
+def extract_embeddings(model, transform, slide, coords, patch_size, batch_size=512, max_io_workers=16):
     """
     이미 열려있는 slide 객체를 받아서 패치별 임베딩 추출.
     패치 이미지 읽기(I/O)는 ThreadPoolExecutor로 병렬화.
