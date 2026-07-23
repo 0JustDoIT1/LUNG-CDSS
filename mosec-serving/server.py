@@ -104,7 +104,7 @@ class LungCDSSWorker(Worker):
 
 
 if __name__ == "__main__":
-    server = Server(timeout=900000)
+    server = Server()
     server.append_worker(
         LungCDSSWorker,
         num=1,
