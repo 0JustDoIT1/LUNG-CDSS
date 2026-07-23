@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Case, NucleiPatch, GenePrediction
 
-from .services.gcs import gcs_path_to_signed_url
+from .gcs_signed_url import gcs_path_to_signed_url
 
 
 class NucleiPatchSerializer(serializers.ModelSerializer):

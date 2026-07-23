@@ -38,6 +38,7 @@ class Case(models.Model):
 
     # 파일 경로 (GCS)
     slide_gcs_path = models.TextField(blank=True, null=True)
+    slide_thumbnail_gcs_path = models.TextField(blank=True, null=True)
     heatmap_gcs_path = models.TextField(blank=True, null=True)
 
     # 세포 형태 소견 (수치 + 화면 표시용 배지)

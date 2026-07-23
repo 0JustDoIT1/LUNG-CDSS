@@ -114,6 +114,7 @@ def predict_case(request, case_id):
         return Response({"error": "이미 분석이 진행 중입니다"}, status=status.HTTP_409_CONFLICT)
 
     case.status = "processing"
+    case.analyzed_at = timezone.now()
     case.save()
 
     try:
@@ -128,6 +129,7 @@ def predict_case(request, case_id):
     case.luad_probability = result["luad_probability"]
     case.lusc_probability = result["lusc_probability"]
     case.heatmap_gcs_path = result["heatmap_gcs_path"]
+    case.slide_thumbnail_gcs_path = result.get("slide_thumbnail_gcs_path")
 
     case.nuclei_density_score = result.get("nuclei_density_score")
     case.nuclei_density_level = result.get("nuclei_density_level")
