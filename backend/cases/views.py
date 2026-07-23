@@ -108,10 +108,10 @@ def predict_case(request, case_id):
     try:
         case = Case.objects.get(id=case_id)
     except Case.DoesNotExist:
-        return Response(
-            {"error": "케이스를 찾을 수 없습니다"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+        return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+
+    if case.status == "processing":
+        return Response({"error": "이미 분석이 진행 중입니다"}, status=status.HTTP_409_CONFLICT)
 
     case.status = "processing"
     case.save()
@@ -121,11 +121,7 @@ def predict_case(request, case_id):
     except Exception as e:
         case.status = "failed"
         case.save()
-
-        return Response(
-            {"error": str(e)},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
+        return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
     # Case 업데이트
     case.prediction_label = result["prediction_label"]
