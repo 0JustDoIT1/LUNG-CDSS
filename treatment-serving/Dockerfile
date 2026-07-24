@@ -1,4 +1,4 @@
-FROM vllm/vllm-openai:latest
+FROM vllm/vllm-openai:v0.6.0
 
 RUN --mount=type=secret,id=hf_token \
     python3 -c "from huggingface_hub import login; login(token=open('/run/secrets/hf_token').read().strip())"
