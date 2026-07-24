@@ -2,7 +2,7 @@ FROM vllm/vllm-openai:latest
 
 RUN --mount=type=secret,id=hf_token \
     HF_TOKEN=$(cat /run/secrets/hf_token) \
-    huggingface-cli login --token $HF_TOKEN
+    hf auth login --token $HF_TOKEN
 
 ENV HF_HOME=/root/.cache/huggingface
 
