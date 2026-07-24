@@ -1,0 +1,2257 @@
+[
+  {
+    "insertId": "byy5hsdtyzi",
+    "logName": "projects/shining-lamp-492601-f9/logs/cloudaudit.googleapis.com%2Fsystem_event",
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "methodName": "/Services.ReplaceService",
+      "resourceName": "namespaces/shining-lamp-492601-f9/services/treatment-serving",
+      "response": {
+        "@type": "type.googleapis.com/google.cloud.run.v1.Service",
+        "apiVersion": "serving.knative.dev/v1",
+        "kind": "Service",
+        "metadata": {
+          "annotations": {
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "568.0.0",
+            "run.googleapis.com/ingress": "all",
+            "run.googleapis.com/ingress-status": "all",
+            "run.googleapis.com/maxScale": "3",
+            "run.googleapis.com/operation-id": "d848e54c-0bd4-4a32-93d4-1f531f89198c",
+            "run.googleapis.com/urls": "[\"https://treatment-serving-369117807590.us-central1.run.app\"]",
+            "serving.knative.dev/creator": "github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com",
+            "serving.knative.dev/lastModifier": "github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com"
+          },
+          "creationTimestamp": "2026-07-24T20:23:41.631327Z",
+          "generation": 2,
+          "labels": {
+            "cloud.googleapis.com/location": "us-central1"
+          },
+          "name": "treatment-serving",
+          "namespace": "369117807590",
+          "resourceVersion": "AAZXYXBt25I",
+          "selfLink": "/apis/serving.knative.dev/v1/namespaces/369117807590/services/treatment-serving",
+          "uid": "a008e518-766d-4169-8326-cf7ad7e7f675"
+        },
+        "spec": {
+          "template": {
+            "metadata": {
+              "annotations": {
+                "autoscaling.knative.dev/maxScale": "1",
+                "run.googleapis.com/client-name": "gcloud",
+                "run.googleapis.com/client-version": "568.0.0",
+                "run.googleapis.com/cpu-throttling": "false",
+                "run.googleapis.com/gpu-zonal-redundancy-disabled": "true",
+                "run.googleapis.com/startup-cpu-boost": "true"
+              },
+              "labels": {
+                "client.knative.dev/nonce": "xntpyetxkf",
+                "run.googleapis.com/startupProbeType": "Custom"
+              }
+            },
+            "spec": {
+              "containerConcurrency": 80,
+              "containers": [
+                {
+                  "image": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/treatment:latest",
+                  "ports": [
+                    {
+                      "containerPort": 8000,
+                      "name": "http1"
+                    }
+                  ],
+                  "resources": {
+                    "limits": {
+                      "cpu": "4",
+                      "memory": "16Gi",
+                      "nvidia.com/gpu": "1"
+                    }
+                  },
+                  "startupProbe": {
+                    "failureThreshold": 5,
+                    "periodSeconds": 240,
+                    "tcpSocket": {
+                      "port": 8000
+                    },
+                    "timeoutSeconds": 240
+                  }
+                }
+              ],
+              "nodeSelector": {
+                "run.googleapis.com/accelerator": "nvidia-l4"
+              },
+              "serviceAccountName": "369117807590-compute@developer.gserviceaccount.com",
+              "timeoutSeconds": 300
+            }
+          },
+          "traffic": [
+            {
+              "latestRevision": true,
+              "percent": 100
+            }
+          ]
+        },
+        "status": {
+          "conditions": [
+            {
+              "lastTransitionTime": "2026-07-24T20:44:29.921495Z",
+              "message": "The user-provided container failed to start and listen on the port defined provided by the PORT=8000 environment variable within the allocated timeout. This can happen when the container port is misconfigured or if the timeout is too short. The health check timeout can be extended. Logs for this revision might contain more information.\n\nLogs URL: https://console.cloud.google.com/logs/viewer?project=shining-lamp-492601-f9&resource=cloud_run_revision/service_name/treatment-serving/revision_name/treatment-serving-00002-ch4&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22treatment-serving%22%0Aresource.labels.revision_name%3D%22treatment-serving-00002-ch4%22 \nFor more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start",
+              "reason": "HealthCheckContainerError",
+              "status": "False",
+              "type": "Ready"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T20:44:29.921495Z",
+              "message": "The user-provided container failed to start and listen on the port defined provided by the PORT=8000 environment variable within the allocated timeout. This can happen when the container port is misconfigured or if the timeout is too short. The health check timeout can be extended. Logs for this revision might contain more information.\n\nLogs URL: https://console.cloud.google.com/logs/viewer?project=shining-lamp-492601-f9&resource=cloud_run_revision/service_name/treatment-serving/revision_name/treatment-serving-00002-ch4&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22treatment-serving%22%0Aresource.labels.revision_name%3D%22treatment-serving-00002-ch4%22 \nFor more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start",
+              "reason": "HealthCheckContainerError",
+              "status": "False",
+              "type": "ConfigurationsReady"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T20:43:28.055006Z",
+              "message": "Provisioning revision instances to receive traffic.",
+              "status": "Unknown",
+              "type": "RoutesReady"
+            }
+          ],
+          "latestCreatedRevisionName": "treatment-serving-00002-ch4",
+          "observedGeneration": 2
+        }
+      },
+      "serviceName": "run.googleapis.com",
+      "status": {
+        "code": 9,
+        "message": "Ready condition status changed to False for Service treatment-serving with message: The user-provided container failed to start and listen on the port defined provided by the PORT=8000 environment variable within the allocated timeout. This can happen when the container port is misconfigured or if the timeout is too short. The health check timeout can be extended. Logs for this revision might contain more information.\n\nLogs URL: https://console.cloud.google.com/logs/viewer?project=shining-lamp-492601-f9&resource=cloud_run_revision/service_name/treatment-serving/revision_name/treatment-serving-00002-ch4&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22treatment-serving%22%0Aresource.labels.revision_name%3D%22treatment-serving-00002-ch4%22 \nFor more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start"
+      }
+    },
+    "receiveTimestamp": "2026-07-24T20:44:30.864482485Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2026-07-24T20:44:29.969950Z"
+  },
+  {
+    "insertId": "-ruzj5dm56y",
+    "logName": "projects/shining-lamp-492601-f9/logs/cloudaudit.googleapis.com%2Fsystem_event",
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "methodName": "/Services.ReplaceService",
+      "resourceName": "namespaces/shining-lamp-492601-f9/revisions/treatment-serving-00002-ch4",
+      "response": {
+        "@type": "type.googleapis.com/google.cloud.run.v1.Revision",
+        "apiVersion": "serving.knative.dev/v1",
+        "kind": "Revision",
+        "metadata": {
+          "annotations": {
+            "autoscaling.knative.dev/maxScale": "1",
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "568.0.0",
+            "run.googleapis.com/cpu-throttling": "false",
+            "run.googleapis.com/execution-environment": "gen2",
+            "run.googleapis.com/gpu-zonal-redundancy-disabled": "true",
+            "run.googleapis.com/operation-id": "d848e54c-0bd4-4a32-93d4-1f531f89198c",
+            "run.googleapis.com/startup-cpu-boost": "true",
+            "serving.knative.dev/creator": "github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com"
+          },
+          "creationTimestamp": "2026-07-24T20:43:27.188734Z",
+          "generation": 1,
+          "labels": {
+            "client.knative.dev/nonce": "xntpyetxkf",
+            "cloud.googleapis.com/location": "us-central1",
+            "run.googleapis.com/startupProbeType": "Custom",
+            "serving.knative.dev/configuration": "treatment-serving",
+            "serving.knative.dev/configurationGeneration": "2",
+            "serving.knative.dev/route": "treatment-serving",
+            "serving.knative.dev/service": "treatment-serving",
+            "serving.knative.dev/serviceUid": "a008e518-766d-4169-8326-cf7ad7e7f675"
+          },
+          "name": "treatment-serving-00002-ch4",
+          "namespace": "369117807590",
+          "ownerReferences": [
+            {
+              "apiVersion": "serving.knative.dev/v1",
+              "blockOwnerDeletion": true,
+              "controller": true,
+              "kind": "Configuration",
+              "name": "treatment-serving",
+              "uid": "d19edeb0-9ab5-41e0-aa25-c521d81e1034"
+            }
+          ],
+          "resourceVersion": "AAZXYXBszEw",
+          "selfLink": "/apis/serving.knative.dev/v1/namespaces/369117807590/revisions/treatment-serving-00002-ch4",
+          "uid": "24f6d5e6-2a99-4298-98a9-4bb9b3c12a65"
+        },
+        "spec": {
+          "containerConcurrency": 80,
+          "containers": [
+            {
+              "image": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/treatment@sha256:0c83fc4232f95811461730ab086262a17044e7aaad99851c3d5437041cae9a0a",
+              "name": "treatment-1",
+              "ports": [
+                {
+                  "containerPort": 8000,
+                  "name": "http1"
+                }
+              ],
+              "resources": {
+                "limits": {
+                  "cpu": "4",
+                  "memory": "16Gi",
+                  "nvidia.com/gpu": "1"
+                }
+              },
+              "startupProbe": {
+                "failureThreshold": 5,
+                "periodSeconds": 240,
+                "tcpSocket": {
+                  "port": 8000
+                },
+                "timeoutSeconds": 240
+              }
+            }
+          ],
+          "nodeSelector": {
+            "run.googleapis.com/accelerator": "nvidia-l4"
+          },
+          "serviceAccountName": "369117807590-compute@developer.gserviceaccount.com",
+          "timeoutSeconds": 300
+        },
+        "status": {
+          "conditions": [
+            {
+              "lastTransitionTime": "2026-07-24T20:44:29.886540Z",
+              "message": "The user-provided container failed to start and listen on the port defined provided by the PORT=8000 environment variable within the allocated timeout. This can happen when the container port is misconfigured or if the timeout is too short. The health check timeout can be extended. Logs for this revision might contain more information.\n\nLogs URL: https://console.cloud.google.com/logs/viewer?project=shining-lamp-492601-f9&resource=cloud_run_revision/service_name/treatment-serving/revision_name/treatment-serving-00002-ch4&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22treatment-serving%22%0Aresource.labels.revision_name%3D%22treatment-serving-00002-ch4%22 \nFor more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start",
+              "reason": "HealthCheckContainerError",
+              "status": "False",
+              "type": "Ready"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T20:44:29.886540Z",
+              "message": "The user-provided container failed to start and listen on the port defined provided by the PORT=8000 environment variable within the allocated timeout. This can happen when the container port is misconfigured or if the timeout is too short. The health check timeout can be extended. Logs for this revision might contain more information.\n\nLogs URL: https://console.cloud.google.com/logs/viewer?project=shining-lamp-492601-f9&resource=cloud_run_revision/service_name/treatment-serving/revision_name/treatment-serving-00002-ch4&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22treatment-serving%22%0Aresource.labels.revision_name%3D%22treatment-serving-00002-ch4%22 \nFor more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start",
+              "reason": "HealthCheckContainerError",
+              "status": "False",
+              "type": "ContainerHealthy"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T20:43:27.959580Z",
+              "message": "Container image import completed.",
+              "status": "True",
+              "type": "ContainerReady"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T20:43:29.310704Z",
+              "message": "Provisioning imported containers completed in 1.35s. Checking container health. This will wait for up to 20m for the configured startup probe, including an initial delay of 0s.",
+              "status": "True",
+              "type": "ResourcesAvailable"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T20:43:29.310704Z",
+              "message": "System will retry after 00:00 from lastTransitionTime for attempt 0.",
+              "reason": "ImmediateRetry",
+              "severity": "Info",
+              "status": "True",
+              "type": "Retry"
+            }
+          ],
+          "containerStatuses": [
+            {
+              "imageDigest": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/treatment@sha256:0c83fc4232f95811461730ab086262a17044e7aaad99851c3d5437041cae9a0a",
+              "name": "treatment-1"
+            }
+          ],
+          "imageDigest": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/treatment@sha256:0c83fc4232f95811461730ab086262a17044e7aaad99851c3d5437041cae9a0a",
+          "logUrl": "https://console.cloud.google.com/logs/viewer?project=shining-lamp-492601-f9&resource=cloud_run_revision/service_name/treatment-serving/revision_name/treatment-serving-00002-ch4&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22treatment-serving%22%0Aresource.labels.revision_name%3D%22treatment-serving-00002-ch4%22",
+          "observedGeneration": 1
+        }
+      },
+      "serviceName": "run.googleapis.com",
+      "status": {
+        "code": 9,
+        "message": "Ready condition status changed to False for Revision treatment-serving-00002-ch4 with message: The user-provided container failed to start and listen on the port defined provided by the PORT=8000 environment variable within the allocated timeout. This can happen when the container port is misconfigured or if the timeout is too short. The health check timeout can be extended. Logs for this revision might contain more information.\n\nLogs URL: https://console.cloud.google.com/logs/viewer?project=shining-lamp-492601-f9&resource=cloud_run_revision/service_name/treatment-serving/revision_name/treatment-serving-00002-ch4&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22treatment-serving%22%0Aresource.labels.revision_name%3D%22treatment-serving-00002-ch4%22 \nFor more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start"
+      }
+    },
+    "receiveTimestamp": "2026-07-24T20:44:30.063085734Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "ERROR",
+    "timestamp": "2026-07-24T20:44:29.896348Z"
+  },
+  {
+    "insertId": "6a63ceaa000e31ad10ef9adb",
+    "labels": {
+      "container_name": "treatment-1",
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-07-24T20:44:26.938941416Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "WARNING",
+    "textPayload": "Container called exit(2).",
+    "timestamp": "2026-07-24T20:44:26.930162Z"
+  },
+  {
+    "insertId": "6a63cea5000ee9209d9c9af3",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid",
+    "timestamp": "2026-07-24T20:44:21.977184Z"
+  },
+  {
+    "insertId": "6a63cea5000ee91d4247c564",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  Invalid JSON: trailing characters at line 1 column 133 [type=json_invalid, input_value='[\"--model\", \"google/medg...0.85\"]# trigger rebuild', input_type=str]",
+    "timestamp": "2026-07-24T20:44:21.977181Z"
+  },
+  {
+    "insertId": "6a63cea5000ee91aaf4764e0",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "api_server.py: error: argument --compilation-config/-cc: 1 validation error for CompilationConfig",
+    "timestamp": "2026-07-24T20:44:21.977178Z"
+  },
+  {
+    "insertId": "6a63cea5000ee91647885c7e",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [model_tag]",
+    "timestamp": "2026-07-24T20:44:21.977174Z"
+  },
+  {
+    "insertId": "6a63cea5000ee9139f5b9098",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-log-requests | --no-enable-log-requests]",
+    "timestamp": "2026-07-24T20:44:21.977171Z"
+  },
+  {
+    "insertId": "6a63cea5000ee91042fe96c5",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--gdn-prefill-backend {flashinfer,triton,cutedsl}]",
+    "timestamp": "2026-07-24T20:44:21.977168Z"
+  },
+  {
+    "insertId": "6a63cea5000ee90caa1055c2",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--shutdown-timeout SHUTDOWN_TIMEOUT]",
+    "timestamp": "2026-07-24T20:44:21.977164Z"
+  },
+  {
+    "insertId": "6a63cea5000ee90a5d7305a8",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--fail-on-environ-validation | --no-fail-on-environ-validation]",
+    "timestamp": "2026-07-24T20:44:21.977162Z"
+  },
+  {
+    "insertId": "6a63cea5000ee9061695dc30",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--disable-log-stats] [--aggregate-engine-logging]",
+    "timestamp": "2026-07-24T20:44:21.977158Z"
+  },
+  {
+    "insertId": "6a63cea5000ee904b7d4d239",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--weight-transfer-config WEIGHT_TRANSFER_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977156Z"
+  },
+  {
+    "insertId": "6a63cea5000ee9008caf89b2",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--performance-mode {balanced,interactivity,throughput}]",
+    "timestamp": "2026-07-24T20:44:21.977152Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8fdd722d73b",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--optimization-level OPTIMIZATION_LEVEL]",
+    "timestamp": "2026-07-24T20:44:21.977149Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8f80b61a5cb",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--profiler-config PROFILER_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977144Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8f5d6522824",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--structured-outputs-config STRUCTURED_OUTPUTS_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977141Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8e935c85186",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--additional-config ADDITIONAL_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977129Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8e6eb1391dd",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--kernel-config KERNEL_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977126Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8e3d1112a37",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--reasoning-config REASONING_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977123Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8e0f692c54b",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--attention-config ATTENTION_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977120Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8dd9cf9cb3b",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--compilation-config COMPILATION_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977117Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8da537f5e59",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--ec-transfer-config EC_TRANSFER_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977114Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8d7f895556f",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--kv-events-config KV_EVENTS_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977111Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8d31e1f19d9",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--kv-transfer-config KV_TRANSFER_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977107Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8d0cc6ad7d5",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--diffusion-config DIFFUSION_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977104Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8cd03a0877b",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--spec-model SPEC_MODEL] [--spec-tokens SPEC_TOKENS]",
+    "timestamp": "2026-07-24T20:44:21.977101Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8c954ba5530",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--spec-method {bailing_hybrid_mtp,custom_class,deepseek_mtp,dflash,draft_model,dspark,eagle,eagle3,ernie_mtp,exaone4_5_mtp,exaone_moe_mtp,extract_hidden_states,gemma4_mtp,glm4_moe_lite_mtp,glm4_moe_mtp,glm_ocr_mtp,hy_v3_mtp,longcat_flash_mtp,medusa,mimo_mtp,mimo_v2_mtp,minimax_m3_mtp,mlp_speculator,mtp,nemotron_h_mtp,ngram,ngram_gpu,pangu_ultra_moe_mtp,qwen3_5_mtp,qwen3_next_mtp,step3p5_mtp,suffix,None}]",
+    "timestamp": "2026-07-24T20:44:21.977097Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8c571df0f5d",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--speculative-config SPECULATIVE_CONFIG]",
+    "timestamp": "2026-07-24T20:44:21.977093Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8c2ac500554",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--linear-backend {aiter,auto,conch,cutlass,deep_gemm,emulation,exllama,fbgemm,flashinfer_b12x,flashinfer_cudnn,flashinfer_cutedsl,flashinfer_cutlass,flashinfer_trtllm,humming,machete,marlin,torch,triton,xpu,xpu_woq}]",
+    "timestamp": "2026-07-24T20:44:21.977090Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8be553ffac1",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--moe-backend {aiter,auto,cutlass,deep_gemm,deep_gemm_mega_moe,emulation,flashinfer_b12x,flashinfer_cutedsl,flashinfer_cutlass,flashinfer_trtllm,flydsl,hpc,humming,marlin,triton,triton_unfused}]",
+    "timestamp": "2026-07-24T20:44:21.977086Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8ba10ee3bc1",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-flashinfer-autotune | --no-enable-flashinfer-autotune]",
+    "timestamp": "2026-07-24T20:44:21.977082Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8b7c14cf600",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--ir-op-priority IR_OP_PRIORITY]",
+    "timestamp": "2026-07-24T20:44:21.977079Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8b49ad38ef7",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--max-cudagraph-capture-size MAX_CUDAGRAPH_CAPTURE_SIZE]",
+    "timestamp": "2026-07-24T20:44:21.977076Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8b0abfe6db3",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--cudagraph-capture-sizes CUDAGRAPH_CAPTURE_SIZES [CUDAGRAPH_CAPTURE_SIZES ...]]",
+    "timestamp": "2026-07-24T20:44:21.977072Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8adfc13738e",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--stream-interval STREAM_INTERVAL]",
+    "timestamp": "2026-07-24T20:44:21.977069Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8aa3b70a244",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--async-scheduling | --no-async-scheduling]",
+    "timestamp": "2026-07-24T20:44:21.977066Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8a7b09470cd",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--disable-hybrid-kv-cache-manager | --no-disable-hybrid-kv-cache-manager]",
+    "timestamp": "2026-07-24T20:44:21.977063Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8a394d889c1",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--prefill-schedule-interval PREFILL_SCHEDULE_INTERVAL]",
+    "timestamp": "2026-07-24T20:44:21.977059Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8a0a1e73822",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--watermark WATERMARK]",
+    "timestamp": "2026-07-24T20:44:21.977056Z"
+  },
+  {
+    "insertId": "6a63cea5000ee89c79e12eb9",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--scheduler-reserve-full-isl | --no-scheduler-reserve-full-isl]",
+    "timestamp": "2026-07-24T20:44:21.977052Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8995e8bc02f",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--scheduler-cls SCHEDULER_CLS]",
+    "timestamp": "2026-07-24T20:44:21.977049Z"
+  },
+  {
+    "insertId": "6a63cea5000ee895a047eb0c",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--disable-chunked-mm-input | --no-disable-chunked-mm-input]",
+    "timestamp": "2026-07-24T20:44:21.977045Z"
+  },
+  {
+    "insertId": "6a63cea5000ee891c8cc4d74",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-chunked-prefill | --no-enable-chunked-prefill]",
+    "timestamp": "2026-07-24T20:44:21.977041Z"
+  },
+  {
+    "insertId": "6a63cea5000ee88e58ddaf94",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--scheduling-policy {fcfs,priority}]",
+    "timestamp": "2026-07-24T20:44:21.977038Z"
+  },
+  {
+    "insertId": "6a63cea5000ee88bf78add82",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--long-prefill-token-threshold LONG_PREFILL_TOKEN_THRESHOLD]",
+    "timestamp": "2026-07-24T20:44:21.977035Z"
+  },
+  {
+    "insertId": "6a63cea5000ee88869a9e521",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--max-long-partial-prefills MAX_LONG_PARTIAL_PREFILLS]",
+    "timestamp": "2026-07-24T20:44:21.977032Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8841551be40",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--max-num-partial-prefills MAX_NUM_PARTIAL_PREFILLS]",
+    "timestamp": "2026-07-24T20:44:21.977028Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8800dd6d2cf",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--max-num-seqs MAX_NUM_SEQS]",
+    "timestamp": "2026-07-24T20:44:21.977024Z"
+  },
+  {
+    "insertId": "6a63cea5000ee87c6eeb771f",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--max-num-batched-tokens MAX_NUM_BATCHED_TOKENS]",
+    "timestamp": "2026-07-24T20:44:21.977020Z"
+  },
+  {
+    "insertId": "6a63cea5000ee879d466c287",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--jit-monitor-verbose | --no-jit-monitor-verbose]",
+    "timestamp": "2026-07-24T20:44:21.977017Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8758b975f94",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--jit-monitor-mode {error,warn}]",
+    "timestamp": "2026-07-24T20:44:21.977013Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8722fb26982",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-logging-iteration-details | --no-enable-logging-iteration-details]",
+    "timestamp": "2026-07-24T20:44:21.977010Z"
+  },
+  {
+    "insertId": "6a63cea5000ee86fda155b5d",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-mfu-metrics | --no-enable-mfu-metrics]",
+    "timestamp": "2026-07-24T20:44:21.977007Z"
+  },
+  {
+    "insertId": "6a63cea5000ee86b1fd0b1e0",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-layerwise-nvtx-tracing | --no-enable-layerwise-nvtx-tracing]",
+    "timestamp": "2026-07-24T20:44:21.977003Z"
+  },
+  {
+    "insertId": "6a63cea5000ee86507223be5",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--cudagraph-metrics | --no-cudagraph-metrics]",
+    "timestamp": "2026-07-24T20:44:21.976997Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8620c4400c3",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--kv-cache-metrics-sample KV_CACHE_METRICS_SAMPLE]",
+    "timestamp": "2026-07-24T20:44:21.976994Z"
+  },
+  {
+    "insertId": "6a63cea5000ee85e207e5cc8",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--kv-cache-metrics | --no-kv-cache-metrics]",
+    "timestamp": "2026-07-24T20:44:21.976990Z"
+  },
+  {
+    "insertId": "6a63cea5000ee85b2a66d43e",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--collect-detailed-traces {all,model,worker,None} [{all,model,worker,None} ...]]",
+    "timestamp": "2026-07-24T20:44:21.976987Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8575036b4f3",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--otlp-traces-endpoint OTLP_TRACES_ENDPOINT]",
+    "timestamp": "2026-07-24T20:44:21.976983Z"
+  },
+  {
+    "insertId": "6a63cea5000ee854bc44f6b2",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--show-hidden-metrics-for-version SHOW_HIDDEN_METRICS_FOR_VERSION]",
+    "timestamp": "2026-07-24T20:44:21.976980Z"
+  },
+  {
+    "insertId": "6a63cea5000ee851cb801811",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-mixed-moe-lora-format | --no-enable-mixed-moe-lora-format]",
+    "timestamp": "2026-07-24T20:44:21.976977Z"
+  },
+  {
+    "insertId": "6a63cea5000ee84d7c393d5a",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--specialize-active-lora | --no-specialize-active-lora]",
+    "timestamp": "2026-07-24T20:44:21.976973Z"
+  },
+  {
+    "insertId": "6a63cea5000ee849d2a898e7",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--default-mm-loras DEFAULT_MM_LORAS]",
+    "timestamp": "2026-07-24T20:44:21.976969Z"
+  },
+  {
+    "insertId": "6a63cea5000ee846c699f903",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--lora-target-modules LORA_TARGET_MODULES [LORA_TARGET_MODULES ...]]",
+    "timestamp": "2026-07-24T20:44:21.976966Z"
+  },
+  {
+    "insertId": "6a63cea5000ee84351aa2e9b",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--fully-sharded-loras | --no-fully-sharded-loras]",
+    "timestamp": "2026-07-24T20:44:21.976963Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8408f9a9525",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--max-cpu-loras MAX_CPU_LORAS]",
+    "timestamp": "2026-07-24T20:44:21.976960Z"
+  },
+  {
+    "insertId": "6a63cea5000ee83dd8a3d82d",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-tower-connector-lora | --no-enable-tower-connector-lora]",
+    "timestamp": "2026-07-24T20:44:21.976957Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8395fcd59a5",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--lora-dtype {auto,bfloat16,float16}]",
+    "timestamp": "2026-07-24T20:44:21.976953Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8363bdc3bd2",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--max-lora-rank {1,8,16,32,64,128,256,320,512}]",
+    "timestamp": "2026-07-24T20:44:21.976950Z"
+  },
+  {
+    "insertId": "6a63cea5000ee83386b5a25a",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--max-loras MAX_LORAS]",
+    "timestamp": "2026-07-24T20:44:21.976947Z"
+  },
+  {
+    "insertId": "6a63cea5000ee82f4ec669c1",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-lora | --no-enable-lora]",
+    "timestamp": "2026-07-24T20:44:21.976943Z"
+  },
+  {
+    "insertId": "6a63cea5000ee82c2f3a3672",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-ipc-gpu-memory-gb MM_IPC_GPU_MEMORY_GB]",
+    "timestamp": "2026-07-24T20:44:21.976940Z"
+  },
+  {
+    "insertId": "6a63cea5000ee829b1e9bfff",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-tensor-ipc {direct_rpc,torch_shm}]",
+    "timestamp": "2026-07-24T20:44:21.976937Z"
+  },
+  {
+    "insertId": "6a63cea5000ee825e120de73",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--video-pruning-rate VIDEO_PRUNING_RATE]",
+    "timestamp": "2026-07-24T20:44:21.976933Z"
+  },
+  {
+    "insertId": "6a63cea5000ee82298fb39b2",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--skip-mm-profiling | --no-skip-mm-profiling]",
+    "timestamp": "2026-07-24T20:44:21.976930Z"
+  },
+  {
+    "insertId": "6a63cea5000ee81f3abd47f4",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--interleave-mm-strings | --no-interleave-mm-strings]",
+    "timestamp": "2026-07-24T20:44:21.976927Z"
+  },
+  {
+    "insertId": "6a63cea5000ee81a95d16a21",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-encoder-fp8-scale-save-margin MM_ENCODER_FP8_SCALE_SAVE_MARGIN]",
+    "timestamp": "2026-07-24T20:44:21.976922Z"
+  },
+  {
+    "insertId": "6a63cea5000ee817a72d1a73",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-encoder-fp8-scale-save-path MM_ENCODER_FP8_SCALE_SAVE_PATH]",
+    "timestamp": "2026-07-24T20:44:21.976919Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8135c17665b",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-encoder-fp8-scale-path MM_ENCODER_FP8_SCALE_PATH]",
+    "timestamp": "2026-07-24T20:44:21.976915Z"
+  },
+  {
+    "insertId": "6a63cea5000ee810785d164a",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-encoder-attn-dtype {fp8,None}]",
+    "timestamp": "2026-07-24T20:44:21.976912Z"
+  },
+  {
+    "insertId": "6a63cea5000ee80c656524bf",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-encoder-attn-backend MM_ENCODER_ATTN_BACKEND]",
+    "timestamp": "2026-07-24T20:44:21.976908Z"
+  },
+  {
+    "insertId": "6a63cea5000ee80961a28c47",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-encoder-tp-mode {data,weights}]",
+    "timestamp": "2026-07-24T20:44:21.976905Z"
+  },
+  {
+    "insertId": "6a63cea5000ee8060260d08d",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-encoder-only | --no-mm-encoder-only]",
+    "timestamp": "2026-07-24T20:44:21.976902Z"
+  },
+  {
+    "insertId": "6a63cea5000ee803b182bf9b",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-shm-cache-max-object-size-mb MM_SHM_CACHE_MAX_OBJECT_SIZE_MB]",
+    "timestamp": "2026-07-24T20:44:21.976899Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7fdf316e601",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-processor-cache-type {lru,shm}]",
+    "timestamp": "2026-07-24T20:44:21.976893Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7fa6bb912ad",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-processor-cache-gb MM_PROCESSOR_CACHE_GB]",
+    "timestamp": "2026-07-24T20:44:21.976890Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7f87cd8e6c5",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--mm-processor-kwargs MM_PROCESSOR_KWARGS]",
+    "timestamp": "2026-07-24T20:44:21.976888Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7f5a6c5d8a8",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--media-io-kwargs MEDIA_IO_KWARGS]",
+    "timestamp": "2026-07-24T20:44:21.976885Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7f26d32a01d",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--enable-mm-embeds | --no-enable-mm-embeds]",
+    "timestamp": "2026-07-24T20:44:21.976882Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7ee951c1e96",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--limit-mm-per-prompt LIMIT_MM_PER_PROMPT]",
+    "timestamp": "2026-07-24T20:44:21.976878Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7eb2be39f4d",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--language-model-only | --no-language-model-only]",
+    "timestamp": "2026-07-24T20:44:21.976875Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7e806e7df5a",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--offload-params OFFLOAD_PARAMS [OFFLOAD_PARAMS ...]]",
+    "timestamp": "2026-07-24T20:44:21.976872Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7e52ae80476",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--offload-prefetch-step OFFLOAD_PREFETCH_STEP]",
+    "timestamp": "2026-07-24T20:44:21.976869Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7e1500706e4",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--offload-num-in-group OFFLOAD_NUM_IN_GROUP]",
+    "timestamp": "2026-07-24T20:44:21.976865Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7ded9a00af4",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--offload-group-size OFFLOAD_GROUP_SIZE]",
+    "timestamp": "2026-07-24T20:44:21.976862Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7db8c4aceb2",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--cpu-offload-params CPU_OFFLOAD_PARAMS [CPU_OFFLOAD_PARAMS ...]]",
+    "timestamp": "2026-07-24T20:44:21.976859Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7d87def0533",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--cpu-offload-gb CPU_OFFLOAD_GB]",
+    "timestamp": "2026-07-24T20:44:21.976856Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7d5ecfb1039",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--offload-backend {auto,prefetch,uva}]",
+    "timestamp": "2026-07-24T20:44:21.976853Z"
+  },
+  {
+    "insertId": "6a63cea5000ee7d2ae7abda6",
+    "labels": {
+      "instanceId": "001548f72942be2a5e64bd7c552de6108b1cb76b7d9b690bed1b83c451ac355329046cfc1f3f5d0c75d6bd807d8445fde48fc069639edcf2c3d7abc7cea718e349de2fd05fafd0d2cbe5a70ed857782b9bc092a0649aaa658c"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T20:44:22.321595179Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "treatment-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "treatment-serving-00002-ch4",
+        "service_name": "treatment-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "                     [--kv-offloading-backend {lmcache,native}]",
+    "timestamp": "2026-07-24T20:44:21.976850Z"
+  }
+]

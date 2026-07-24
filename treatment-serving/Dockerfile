@@ -9,4 +9,4 @@ ENTRYPOINT ["python3", "-m", "vllm.entrypoints.openai.api_server"]
 CMD ["--model", "google/medgemma-4b-it", \
      "--max-model-len", "8192", \
      "--port", "8000", \
-     "--gpu-memory-utilization", "0.85"]# trigger rebuild
+     "--gpu-memory-utilization", "0.85"]
