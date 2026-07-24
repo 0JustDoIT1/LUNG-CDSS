@@ -41,4 +41,5 @@ jobs:
             --image=us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/treatment:latest \
             --region=us-central1 --gpu=1 --gpu-type=nvidia-l4 --no-gpu-zonal-redundancy \
             --memory=16Gi --cpu=4 --no-cpu-throttling --port=8000 --timeout=300 \
-            --min-instances=0 --max-instances=1 --no-allow-unauthenticated
+            --min-instances=0 --max-instances=1 --no-allow-unauthenticated \
+            --startup-probe=tcpSocket.port=8000,initialDelaySeconds=0,timeoutSeconds=240,periodSeconds=240,failureThreshold=5
