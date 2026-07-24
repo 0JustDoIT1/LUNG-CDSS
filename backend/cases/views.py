@@ -9,6 +9,7 @@ from accounts.permissions import IsDoctor, IsPathologist
 from .models import Case, NucleiPatch, GenePrediction
 from .serializers import CaseListSerializer, CaseDetailSerializer
 from .services import call_mosec_predict
+from .gcs_signed_url import gcs_path_to_signed_url, delete_case_reports, delete_slide_file
 
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 
@@ -64,6 +65,8 @@ def case_detail(request, case_id):
         return Response(serializer.data)
 
     elif request.method == "DELETE":
+        delete_case_reports(str(case.id))
+        delete_slide_file(case.slide_gcs_path)
         case.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -134,8 +137,30 @@ def retry_case(request, case_id):
     except Case.DoesNotExist:
         return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
 
+    delete_case_reports(str(case.id))
+
     case.status = "uploaded"
+    case.current_step = None
+    case.prediction_label = None
+    case.luad_probability = None
+    case.lusc_probability = None
+    case.heatmap_gcs_path = None
+    case.slide_thumbnail_gcs_path = None
+    case.nuclei_density_score = None
+    case.nuclei_density_level = None
+    case.nuclei_irregularity_score = None
+    case.nuclei_irregularity_level = None
+    case.analyzed_at = None
+    case.completed_at = None
+    case.review_status = "pending"
+    case.reviewed_by = None
+    case.reviewer_note = None
+    case.reviewed_at = None
     case.save()
+
+    NucleiPatch.objects.filter(case=case).delete()
+    GenePrediction.objects.filter(case=case).delete()
+
     return Response({"status": "reset", "case_id": str(case.id)})
 
 
@@ -164,7 +189,7 @@ def review_case(request, case_id):
     except Case.DoesNotExist:
         return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
 
-    action = request.data.get("action")  # "confirm" | "reject"
+    action = request.data.get("action")
     reviewer_note = request.data.get("reviewer_note", "")
 
     if action not in ["confirm", "reject"]:

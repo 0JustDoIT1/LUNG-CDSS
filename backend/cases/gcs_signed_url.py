@@ -27,3 +27,20 @@ def gcs_path_to_signed_url(gcs_path: str, expiration_minutes: int = 60) -> str |
         method="GET",
     )
     return url
+
+def delete_case_reports(case_id: str):
+    """reports/{case_id}/ 폴더 전체 삭제 (재분석 시 이전 결과 이미지 정리)"""
+    prefix = f"reports/{case_id}/"
+    blobs = _bucket.list_blobs(prefix=prefix)
+    for blob in blobs:
+        blob.delete()
+
+
+def delete_slide_file(gcs_path: str):
+    """원본 슬라이드 파일 삭제 (케이스 자체 삭제 시에만 사용)"""
+    if not gcs_path:
+        return
+    blob_name = gcs_path.replace(f"gs://{GCS_BUCKET}/", "")
+    blob = _bucket.blob(blob_name)
+    if blob.exists():
+        blob.delete()
