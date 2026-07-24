@@ -1,8 +1,7 @@
 FROM vllm/vllm-openai:latest
 
 RUN --mount=type=secret,id=hf_token \
-    HF_TOKEN=$(cat /run/secrets/hf_token) \
-    hf auth login --token $HF_TOKEN
+    python3 -c "from huggingface_hub import login; login(token=open('/run/secrets/hf_token').read().strip())"
 
 ENV HF_HOME=/root/.cache/huggingface
 
