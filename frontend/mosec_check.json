@@ -1,0 +1,3340 @@
+[
+  {
+    "insertId": "6a63812f000083c3f0484cf2",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:51.126570954Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[f7bc20a9-5767-42c0-9542-f1d1448f8d12] 결과 이미지 업로드 완료",
+    "timestamp": "2026-07-24T15:13:51.033731Z"
+  },
+  {
+    "insertId": "6a63812b000913f309c7902a",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:47.794292473Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[f7bc20a9-5767-42c0-9542-f1d1448f8d12] 핵 형태 분석 완료",
+    "timestamp": "2026-07-24T15:13:47.594931Z"
+  },
+  {
+    "insertId": "6a63812b00030e50523796db",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:47.418210076Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:47.200272Z"
+  },
+  {
+    "insertId": "6a63812b00030e48d48b8445",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:47.418210076Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:47.200264Z"
+  },
+  {
+    "insertId": "6a63812b0003067a6054958c",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:47.418210076Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:47.198266Z"
+  },
+  {
+    "insertId": "6a63812b00030669dbbbe140",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:47.418210076Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:47.198249Z"
+  },
+  {
+    "insertId": "6a63812b0000bf3dc31e4fbc",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:47.086223467Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:47.048957Z"
+  },
+  {
+    "insertId": "6a63812b0000bf38abfdfd66",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:47.086223467Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:47.048952Z"
+  },
+  {
+    "insertId": "6a63812b0000b6c773feeaba",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:47.086223467Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:47.046791Z"
+  },
+  {
+    "insertId": "6a63812b0000b6b55e795ba9",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:47.086223467Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:47.046773Z"
+  },
+  {
+    "insertId": "6a63812a000a17eb91cef5ad",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.754175627Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:46.661483Z"
+  },
+  {
+    "insertId": "6a63812a000a17e2fd22d099",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.754175627Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:46.661474Z"
+  },
+  {
+    "insertId": "6a63812a000a10304d678253",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.754175627Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:46.659504Z"
+  },
+  {
+    "insertId": "6a63812a000a101f3c3c46ea",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.754175627Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:46.659487Z"
+  },
+  {
+    "insertId": "6a63812a0007d4487fc8c59a",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.754175627Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:46.513096Z"
+  },
+  {
+    "insertId": "6a63812a0007d4431cac1064",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.754175627Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:46.513091Z"
+  },
+  {
+    "insertId": "6a63812a0007cc20e439aa91",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.754175627Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:46.511008Z"
+  },
+  {
+    "insertId": "6a63812a0007cc0d42d405d7",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.754175627Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:46.510989Z"
+  },
+  {
+    "insertId": "6a63812a0001f074ba0bd449",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.419205215Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:46.127092Z"
+  },
+  {
+    "insertId": "6a63812a0001f0666a012482",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.419205215Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:46.127078Z"
+  },
+  {
+    "insertId": "6a63812a0001e851b223f14c",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.419205215Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:46.125009Z"
+  },
+  {
+    "insertId": "6a63812a0001e840cc53f87d",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.419205215Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:46.124992Z"
+  },
+  {
+    "insertId": "6a638129000efd52d276765b",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.086183791Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:45.982354Z"
+  },
+  {
+    "insertId": "6a638129000efd4dc87807c3",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.086183791Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:45.982349Z"
+  },
+  {
+    "insertId": "6a638129000ef52aabe5a748",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.086183791Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:45.980266Z"
+  },
+  {
+    "insertId": "6a638129000ef51ad4ba6151",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:46.086183791Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:45.980250Z"
+  },
+  {
+    "insertId": "6a6381290007bf0142ebd775",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.751787201Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:45.507649Z"
+  },
+  {
+    "insertId": "6a6381290007bef941f20538",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.751787201Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:45.507641Z"
+  },
+  {
+    "insertId": "6a6381290007b6ddfd720898",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.751787201Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:45.505565Z"
+  },
+  {
+    "insertId": "6a6381290007b6d19923327d",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.751787201Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:45.505553Z"
+  },
+  {
+    "insertId": "6a6381290006a53a5b6ea252",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.751787201Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:45.435514Z"
+  },
+  {
+    "insertId": "6a6381290006a52f7f8a21ef",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.751787201Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:45.435503Z"
+  },
+  {
+    "insertId": "6a63812900069ccf7adb7966",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.751787201Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:45.433359Z"
+  },
+  {
+    "insertId": "6a63812900069cbc4ecaa55b",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.751787201Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:45.433340Z"
+  },
+  {
+    "insertId": "6a638128000da006ac14ec67",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.087385004Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:44.892934Z"
+  },
+  {
+    "insertId": "6a638128000d9fffce5345f8",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.087385004Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:44.892927Z"
+  },
+  {
+    "insertId": "6a638128000d97c29d2cf0d9",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.087385004Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:44.890818Z"
+  },
+  {
+    "insertId": "6a638128000d97b3b91b7087",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.087385004Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:44.890803Z"
+  },
+  {
+    "insertId": "6a638128000b74fe2c4cdae7",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.087385004Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = remove_small_objects(binary, min_size=min_nucleus_size)",
+    "timestamp": "2026-07-24T15:13:44.750846Z"
+  },
+  {
+    "insertId": "6a638128000b74f99c93338c",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:45.087385004Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:27: FutureWarning: Parameter `min_size` is deprecated since version 0.26.0 and will be removed in 2.0.0 (or later). To avoid this warning, please use the parameter `max_size` instead. For more details, see the documentation of `remove_small_objects`. Note that the new threshold removes objects smaller than **or equal to** its value, while the previous parameter only removed smaller ones.",
+    "timestamp": "2026-07-24T15:13:44.750841Z"
+  },
+  {
+    "insertId": "6a638128000b6b78f6d748db",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:44.756174478Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "  binary = binary_opening(binary, disk(1))",
+    "timestamp": "2026-07-24T15:13:44.748408Z"
+  },
+  {
+    "insertId": "6a638128000b6b66b1b40cc5",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:13:44.756174478Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "/app/nuclei_analysis.py:26: FutureWarning: `binary_opening` is deprecated since version 0.26 and will be removed in version 0.28. Use `skimage.morphology.opening` instead.",
+    "timestamp": "2026-07-24T15:13:44.748390Z"
+  },
+  {
+    "insertId": "6a638128000b56f97d512eb6",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:44.799404411Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[f7bc20a9-5767-42c0-9542-f1d1448f8d12] 상위 패치 5개 추출 완료",
+    "timestamp": "2026-07-24T15:13:44.743161Z"
+  },
+  {
+    "insertId": "6a638128000a26da154954a2",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:44.799404411Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[f7bc20a9-5767-42c0-9542-f1d1448f8d12] 히트맵 생성 완료",
+    "timestamp": "2026-07-24T15:13:44.665306Z"
+  },
+  {
+    "insertId": "6a638122000c20ceb5b80d23",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:38.804207193Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[f7bc20a9-5767-42c0-9542-f1d1448f8d12] AMD-MIL 분류 완료",
+    "timestamp": "2026-07-24T15:13:38.794830Z"
+  },
+  {
+    "insertId": "6a638121000926e337274683",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:37.805628483Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[f7bc20a9-5767-42c0-9542-f1d1448f8d12] UNI2-h 특징추출 완료: torch.Size([31309, 1536])",
+    "timestamp": "2026-07-24T15:13:37.599779Z"
+  },
+  {
+    "insertId": "6a6381210007ccdfa5799c7d",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:37.805628483Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] 총합 I/O=37.1s GPU=315.8s",
+    "timestamp": "2026-07-24T15:13:37.511199Z"
+  },
+  {
+    "insertId": "6a638121000793819e26233c",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:37.805628483Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 61: I/O=0.08s GPU=0.77s",
+    "timestamp": "2026-07-24T15:13:37.496513Z"
+  },
+  {
+    "insertId": "6a6381200009e5a56150b690",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:36.807734302Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 60: I/O=0.57s GPU=5.13s",
+    "timestamp": "2026-07-24T15:13:36.648613Z"
+  },
+  {
+    "insertId": "6a63811a000e74718a374cba",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:31.152272834Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 59: I/O=0.57s GPU=5.23s",
+    "timestamp": "2026-07-24T15:13:30.947313Z"
+  },
+  {
+    "insertId": "6a63811500021d03f8188887",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:25.151738847Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 58: I/O=0.59s GPU=5.15s",
+    "timestamp": "2026-07-24T15:13:25.138499Z"
+  },
+  {
+    "insertId": "6a63810f00060e4f8ed03b04",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:19.491545982Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 57: I/O=0.58s GPU=5.13s",
+    "timestamp": "2026-07-24T15:13:19.396879Z"
+  },
+  {
+    "insertId": "6a638109000a835e61173e7f",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:13.829538104Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 56: I/O=0.57s GPU=5.13s",
+    "timestamp": "2026-07-24T15:13:13.688990Z"
+  },
+  {
+    "insertId": "6a638103000eec55890c9b7a",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:08.168235561Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 55: I/O=0.58s GPU=5.13s",
+    "timestamp": "2026-07-24T15:13:07.978005Z"
+  },
+  {
+    "insertId": "6a6380fe000409dfbb59ec57",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:13:02.508036608Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 54: I/O=0.58s GPU=5.13s",
+    "timestamp": "2026-07-24T15:13:02.264671Z"
+  },
+  {
+    "insertId": "6a6380f8000880e23e77ef14",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:56.847191739Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 53: I/O=0.59s GPU=5.13s",
+    "timestamp": "2026-07-24T15:12:56.557282Z"
+  },
+  {
+    "insertId": "6a6380f2000cd70e0a82586b",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:50.853991665Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 52: I/O=0.58s GPU=5.12s",
+    "timestamp": "2026-07-24T15:12:50.841486Z"
+  },
+  {
+    "insertId": "6a6380ed00021b9eae6a4928",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:45.194667518Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 51: I/O=0.60s GPU=5.12s",
+    "timestamp": "2026-07-24T15:12:45.138142Z"
+  },
+  {
+    "insertId": "6a6380e70006689a49b31637",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:39.532878075Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 50: I/O=0.60s GPU=5.12s",
+    "timestamp": "2026-07-24T15:12:39.419994Z"
+  },
+  {
+    "insertId": "6a6380e1000ab340101097f1",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:33.869194669Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 49: I/O=0.73s GPU=5.12s",
+    "timestamp": "2026-07-24T15:12:33.701248Z"
+  },
+  {
+    "insertId": "6a6380db000ce1d917f12311",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:27.874169393Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 48: I/O=0.62s GPU=5.12s",
+    "timestamp": "2026-07-24T15:12:27.844249Z"
+  },
+  {
+    "insertId": "6a6380d600017468bf432773",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:22.214433488Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 47: I/O=0.62s GPU=5.14s",
+    "timestamp": "2026-07-24T15:12:22.095336Z"
+  },
+  {
+    "insertId": "6a6380d0000512b4885b2aa6",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:16.551611249Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 46: I/O=0.61s GPU=5.16s",
+    "timestamp": "2026-07-24T15:12:16.332468Z"
+  },
+  {
+    "insertId": "6a6380ca00088307a0d06d4f",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:10.891798249Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 45: I/O=0.58s GPU=5.16s",
+    "timestamp": "2026-07-24T15:12:10.557831Z"
+  },
+  {
+    "insertId": "6a6380c4000c63581d48b32f",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:12:04.899614322Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 44: I/O=0.58s GPU=5.14s",
+    "timestamp": "2026-07-24T15:12:04.811864Z"
+  },
+  {
+    "insertId": "6a6380bf00018950b1667d7c",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:59.234421974Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 43: I/O=0.57s GPU=5.13s",
+    "timestamp": "2026-07-24T15:11:59.100688Z"
+  },
+  {
+    "insertId": "6a6380b9000619e9976dfb96",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:53.572858987Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 42: I/O=0.59s GPU=5.13s",
+    "timestamp": "2026-07-24T15:11:53.399849Z"
+  },
+  {
+    "insertId": "6a6380b3000a6b0105c1a9a8",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:47.912520564Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 41: I/O=0.59s GPU=5.13s",
+    "timestamp": "2026-07-24T15:11:47.682753Z"
+  },
+  {
+    "insertId": "6a6380ad000eb7e20fcf09d9",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:42.250506788Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 40: I/O=0.59s GPU=5.13s",
+    "timestamp": "2026-07-24T15:11:41.964578Z"
+  },
+  {
+    "insertId": "6a6380a80003b9ebd610e817",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:36.261563086Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 39: I/O=0.58s GPU=5.12s",
+    "timestamp": "2026-07-24T15:11:36.244203Z"
+  },
+  {
+    "insertId": "6a6380a200083631275e29cd",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:30.598071064Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 38: I/O=0.59s GPU=5.12s",
+    "timestamp": "2026-07-24T15:11:30.538161Z"
+  },
+  {
+    "insertId": "6a63809c000c98f680498814",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:24.938580732Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 37: I/O=0.59s GPU=5.12s",
+    "timestamp": "2026-07-24T15:11:24.825590Z"
+  },
+  {
+    "insertId": "6a6380970001d2f9712f660b",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:19.274000828Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 36: I/O=0.60s GPU=5.13s",
+    "timestamp": "2026-07-24T15:11:19.119545Z"
+  },
+  {
+    "insertId": "6a6380910006093ad2413814",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:13.611397991Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 35: I/O=0.60s GPU=5.12s",
+    "timestamp": "2026-07-24T15:11:13.395578Z"
+  },
+  {
+    "insertId": "6a63808b000a4926dfa6a707",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:07.952145120Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 34: I/O=0.59s GPU=5.13s",
+    "timestamp": "2026-07-24T15:11:07.674086Z"
+  },
+  {
+    "insertId": "6a638085000ea9f11b7457f1",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:11:02.293868485Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 33: I/O=0.60s GPU=5.12s",
+    "timestamp": "2026-07-24T15:11:01.961009Z"
+  },
+  {
+    "insertId": "6a6380800003aafdcbbe5983",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:56.295214027Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 32: I/O=0.59s GPU=5.14s",
+    "timestamp": "2026-07-24T15:10:56.240381Z"
+  },
+  {
+    "insertId": "6a63807a0007cb6cd7bd2267",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:50.635970794Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 31: I/O=0.59s GPU=5.13s",
+    "timestamp": "2026-07-24T15:10:50.510828Z"
+  },
+  {
+    "insertId": "6a638074000c0767b81a0097",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:44.973697686Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 30: I/O=0.59s GPU=5.14s",
+    "timestamp": "2026-07-24T15:10:44.788327Z"
+  },
+  {
+    "insertId": "6a63806f0000e77f0e7e0046",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:39.311095104Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 29: I/O=0.59s GPU=5.14s",
+    "timestamp": "2026-07-24T15:10:39.059263Z"
+  },
+  {
+    "insertId": "6a6380690004eb63f650d49c",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:33.650830769Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 28: I/O=0.60s GPU=5.15s",
+    "timestamp": "2026-07-24T15:10:33.322403Z"
+  },
+  {
+    "insertId": "6a6380630008c0537182d10e",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:27.657602981Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 27: I/O=0.60s GPU=5.16s",
+    "timestamp": "2026-07-24T15:10:27.573523Z"
+  },
+  {
+    "insertId": "6a63805d000c62e7404a0c3f",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:22.007724957Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 26: I/O=0.59s GPU=5.15s",
+    "timestamp": "2026-07-24T15:10:21.811751Z"
+  },
+  {
+    "insertId": "6a63805800010a46faccbe3f",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:16.337906438Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 25: I/O=0.69s GPU=5.15s",
+    "timestamp": "2026-07-24T15:10:16.068166Z"
+  },
+  {
+    "insertId": "6a63805200037dbd062fe8e2",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:10.343874997Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 24: I/O=0.58s GPU=5.14s",
+    "timestamp": "2026-07-24T15:10:10.228797Z"
+  },
+  {
+    "insertId": "6a63804c0007c71610051c79",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:10:04.684522005Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 23: I/O=0.60s GPU=5.13s",
+    "timestamp": "2026-07-24T15:10:04.509718Z"
+  },
+  {
+    "insertId": "6a638046000befd28a39d2fa",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:59.022473218Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 22: I/O=0.61s GPU=5.15s",
+    "timestamp": "2026-07-24T15:09:58.782290Z"
+  },
+  {
+    "insertId": "6a63804100003e5291d51609",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:53.023539085Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 21: I/O=0.58s GPU=5.11s",
+    "timestamp": "2026-07-24T15:09:53.015954Z"
+  },
+  {
+    "insertId": "6a63803b0004d37b0da4cd6d",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:47.363388460Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 20: I/O=0.60s GPU=5.10s",
+    "timestamp": "2026-07-24T15:09:47.316283Z"
+  },
+  {
+    "insertId": "6a63803500097ad74d5a7cb3",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:41.704589740Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 19: I/O=0.59s GPU=5.09s",
+    "timestamp": "2026-07-24T15:09:41.621271Z"
+  },
+  {
+    "insertId": "6a63802f000e64f7e2edd9c3",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:36.041142184Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 18: I/O=0.61s GPU=5.09s",
+    "timestamp": "2026-07-24T15:09:35.943351Z"
+  },
+  {
+    "insertId": "6a63802a0003c246c8806b08",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:30.380443466Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 17: I/O=0.58s GPU=5.08s",
+    "timestamp": "2026-07-24T15:09:30.246342Z"
+  },
+  {
+    "insertId": "6a6380240008d4e0c4673d02",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:24.721179852Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 16: I/O=0.59s GPU=5.09s",
+    "timestamp": "2026-07-24T15:09:24.578784Z"
+  },
+  {
+    "insertId": "6a63801e000dcc5232c66295",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:19.059202177Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 15: I/O=0.58s GPU=5.10s",
+    "timestamp": "2026-07-24T15:09:18.904274Z"
+  },
+  {
+    "insertId": "6a63801900035347a3722094",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:13.394431976Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 14: I/O=0.58s GPU=5.16s",
+    "timestamp": "2026-07-24T15:09:13.217927Z"
+  },
+  {
+    "insertId": "6a63801300073eed4ac37a00",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:07.733956422Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 13: I/O=0.58s GPU=5.14s",
+    "timestamp": "2026-07-24T15:09:07.474861Z"
+  },
+  {
+    "insertId": "6a63800d000b9284f9e55f24",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:09:02.076811838Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 12: I/O=0.57s GPU=5.16s",
+    "timestamp": "2026-07-24T15:09:01.758404Z"
+  },
+  {
+    "insertId": "6a638008000069df17f47fe7",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:56.081884744Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 11: I/O=0.58s GPU=5.18s",
+    "timestamp": "2026-07-24T15:08:56.027103Z"
+  },
+  {
+    "insertId": "6a63800200040e922d1aa2c0",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:50.417846653Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 10: I/O=0.57s GPU=5.21s",
+    "timestamp": "2026-07-24T15:08:50.265874Z"
+  },
+  {
+    "insertId": "6a637ffc000763cf1a729e14",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:44.756761594Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 9: I/O=0.60s GPU=5.32s",
+    "timestamp": "2026-07-24T15:08:44.484303Z"
+  },
+  {
+    "insertId": "6a637ff600089419cc805256",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:38.762184542Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 8: I/O=0.62s GPU=5.23s",
+    "timestamp": "2026-07-24T15:08:38.562201Z"
+  },
+  {
+    "insertId": "6a637ff0000ae877cdc4b552",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:32.769651631Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 7: I/O=0.64s GPU=5.25s",
+    "timestamp": "2026-07-24T15:08:32.714871Z"
+  },
+  {
+    "insertId": "6a637fea000c70db818c9687",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:27.106333947Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 6: I/O=0.66s GPU=5.19s",
+    "timestamp": "2026-07-24T15:08:26.815323Z"
+  },
+  {
+    "insertId": "6a637fe4000ecde5bb04f111",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:21.111531119Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 5: I/O=0.62s GPU=5.15s",
+    "timestamp": "2026-07-24T15:08:20.970213Z"
+  },
+  {
+    "insertId": "6a637fdf0003256dae4a5c5c",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:15.451818126Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 4: I/O=0.67s GPU=5.11s",
+    "timestamp": "2026-07-24T15:08:15.206189Z"
+  },
+  {
+    "insertId": "6a637fd900065b66b2bf92ea",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:09.458100798Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 3: I/O=0.87s GPU=5.10s",
+    "timestamp": "2026-07-24T15:08:09.416614Z"
+  },
+  {
+    "insertId": "6a637fd30006d8fd70b15789",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:08:03.463885647Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 2: I/O=0.64s GPU=5.05s",
+    "timestamp": "2026-07-24T15:08:03.448765Z"
+  },
+  {
+    "insertId": "6a637fcd000b95e83af4d69c",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:07:57.799843282Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 1: I/O=0.65s GPU=5.04s",
+    "timestamp": "2026-07-24T15:07:57.759272Z"
+  },
+  {
+    "insertId": "6a637fc8000109978614475f",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:07:52.139755950Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[extract_embeddings] batch 0: I/O=0.77s GPU=6.81s",
+    "timestamp": "2026-07-24T15:07:52.067991Z"
+  },
+  {
+    "insertId": "6a637fc0000281365b155608",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:07:44.480340124Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[f7bc20a9-5767-42c0-9542-f1d1448f8d12] 패치 좌표 생성 완료: 31309개",
+    "timestamp": "2026-07-24T15:07:44.164150Z"
+  },
+  {
+    "insertId": "6a637fbf0004a027d7644989",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:07:43.484350478Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[f7bc20a9-5767-42c0-9542-f1d1448f8d12] GCS 다운로드 완료",
+    "timestamp": "2026-07-24T15:07:43.303143Z"
+  },
+  {
+    "insertId": "6a637fb900075894a637d0b4",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:07:37.485751527Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[f7bc20a9-5767-42c0-9542-f1d1448f8d12] 시작",
+    "timestamp": "2026-07-24T15:07:37.481428Z"
+  },
+  {
+    "httpRequest": {
+      "latency": "373.537229501s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "34.170.97.4",
+      "requestMethod": "POST",
+      "requestSize": "1634",
+      "requestUrl": "https://mosec-serving-369117807590.us-central1.run.app/inference",
+      "responseSize": "2606",
+      "serverIp": "34.143.76.2",
+      "status": 200,
+      "userAgent": "python-requests/2.34.2"
+    },
+    "insertId": "6a63812f0000cb09d6c2c90f",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2026-07-24T15:13:51.059551805Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "spanId": "95a77f0f27437001",
+    "timestamp": "2026-07-24T15:07:37.452356Z",
+    "trace": "projects/shining-lamp-492601-f9/traces/63c92cc0f96ec6c6a32800a5461d2f27",
+    "traceSampled": true
+  },
+  {
+    "insertId": "6a637f7900001c0d5e19b814",
+    "jsonPayload": {
+      "fields": {
+        "message": "mosec exited normally"
+      },
+      "level": "INFO",
+      "target": "mosec::server.py:_halt",
+      "timestamp": "2026-07-24T15:06:33.005817Z "
+    },
+    "labels": {
+      "instanceId": "001548f72962d537a326af8b3f181618dde9235d1c88f1f6fe1016be6e30f4e6ace5759493ca72715267e2445aa3f79aec0ba0b667c3a3f7cee3e25223bbbf31eb02acf053312b51d614479e98f30c4a803562b8137be1192b90"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:33.197083608Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00020-trs",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:33.007181Z"
+  },
+  {
+    "insertId": "6a637f7900001ab6c33264cd",
+    "jsonPayload": {
+      "fields": {
+        "message": "mosec service halted normally [0]"
+      },
+      "level": "INFO",
+      "target": "mosec::runtime.py:halt",
+      "timestamp": "2026-07-24T15:06:33.005317Z "
+    },
+    "labels": {
+      "instanceId": "001548f72962d537a326af8b3f181618dde9235d1c88f1f6fe1016be6e30f4e6ace5759493ca72715267e2445aa3f79aec0ba0b667c3a3f7cee3e25223bbbf31eb02acf053312b51d614479e98f30c4a803562b8137be1192b90"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:33.197083608Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00020-trs",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:33.006838Z"
+  },
+  {
+    "insertId": "6a637f78000ddcf36173840f",
+    "jsonPayload": {
+      "fields": {
+        "message": "<LungCDSSWorker_1|1> socket closed"
+      },
+      "level": "INFO",
+      "target": "mosec::protocol.py:close",
+      "timestamp": "2026-07-24T15:06:32.906806Z "
+    },
+    "labels": {
+      "instanceId": "001548f72962d537a326af8b3f181618dde9235d1c88f1f6fe1016be6e30f4e6ace5759493ca72715267e2445aa3f79aec0ba0b667c3a3f7cee3e25223bbbf31eb02acf053312b51d614479e98f30c4a803562b8137be1192b90"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:33.197083608Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00020-trs",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:32.908531Z"
+  },
+  {
+    "insertId": "6a637f78000dd8b058c01f1f",
+    "jsonPayload": {
+      "fields": {
+        "message": "service shutdown complete"
+      },
+      "level": "INFO",
+      "target": "mosec:63",
+      "timestamp": "2026-07-24T15:06:32.906110Z"
+    },
+    "labels": {
+      "instanceId": "001548f72962d537a326af8b3f181618dde9235d1c88f1f6fe1016be6e30f4e6ace5759493ca72715267e2445aa3f79aec0ba0b667c3a3f7cee3e25223bbbf31eb02acf053312b51d614479e98f30c4a803562b8137be1192b90"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:33.197083608Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00020-trs",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:32.907440Z"
+  },
+  {
+    "insertId": "6a637f78000dd4b9ee4f5fc6",
+    "jsonPayload": {
+      "fields": {
+        "message": "service received terminate signal"
+      },
+      "level": "INFO",
+      "target": "mosec:60",
+      "timestamp": "2026-07-24T15:06:32.904973Z"
+    },
+    "labels": {
+      "instanceId": "001548f72962d537a326af8b3f181618dde9235d1c88f1f6fe1016be6e30f4e6ace5759493ca72715267e2445aa3f79aec0ba0b667c3a3f7cee3e25223bbbf31eb02acf053312b51d614479e98f30c4a803562b8137be1192b90"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:33.197083608Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00020-trs",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:32.906425Z"
+  },
+  {
+    "insertId": "6a637f78000d1a28fb3ad721",
+    "jsonPayload": {
+      "fields": {
+        "message": "received signum[15], terminating server [<frame at 0x7fb9308bdf20, file '/usr/local/lib/python3.11/site-packages/mosec/server.py', line 161, code _manage_py_runtime>]"
+      },
+      "level": "INFO",
+      "target": "mosec::server.py:_terminate",
+      "timestamp": "2026-07-24T15:06:32.856982Z "
+    },
+    "labels": {
+      "instanceId": "001548f72962d537a326af8b3f181618dde9235d1c88f1f6fe1016be6e30f4e6ace5759493ca72715267e2445aa3f79aec0ba0b667c3a3f7cee3e25223bbbf31eb02acf053312b51d614479e98f30c4a803562b8137be1192b90"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:32.865141836Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00020-trs",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:32.858664Z"
+  },
+  {
+    "insertId": "6a637f78000d1351f23cc826",
+    "labels": {
+      "instanceId": "001548f72962d537a326af8b3f181618dde9235d1c88f1f6fe1016be6e30f4e6ace5759493ca72715267e2445aa3f79aec0ba0b667c3a3f7cee3e25223bbbf31eb02acf053312b51d614479e98f30c4a803562b8137be1192b90"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-07-24T15:06:32.864709625Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00020-trs",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "textPayload": "Shutting down user disabled instance",
+    "timestamp": "2026-07-24T15:06:32.856913Z"
+  },
+  {
+    "insertId": "-5ixkjce168rm",
+    "logName": "projects/shining-lamp-492601-f9/logs/cloudaudit.googleapis.com%2Fsystem_event",
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "methodName": "/Services.ReplaceService",
+      "resourceName": "namespaces/shining-lamp-492601-f9/revisions/mosec-serving-00021-bmr",
+      "response": {
+        "@type": "type.googleapis.com/google.cloud.run.v1.Revision",
+        "apiVersion": "serving.knative.dev/v1",
+        "kind": "Revision",
+        "metadata": {
+          "annotations": {
+            "autoscaling.knative.dev/maxScale": "2",
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "568.0.0",
+            "run.googleapis.com/cpu-throttling": "false",
+            "run.googleapis.com/execution-environment": "gen2",
+            "run.googleapis.com/gpu-zonal-redundancy-disabled": "true",
+            "run.googleapis.com/operation-id": "f5b04057-1484-45f9-84e7-d3379d4fa699",
+            "run.googleapis.com/startup-cpu-boost": "true",
+            "serving.knative.dev/creator": "github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com"
+          },
+          "creationTimestamp": "2026-07-24T15:05:32.433011Z",
+          "generation": 1,
+          "labels": {
+            "client.knative.dev/nonce": "cyrmavseko",
+            "cloud.googleapis.com/location": "us-central1",
+            "run.googleapis.com/startupProbeType": "Default",
+            "serving.knative.dev/configuration": "mosec-serving",
+            "serving.knative.dev/configurationGeneration": "21",
+            "serving.knative.dev/route": "mosec-serving",
+            "serving.knative.dev/service": "mosec-serving",
+            "serving.knative.dev/serviceUid": "11caa072-5904-4d92-8733-eb63f525a738"
+          },
+          "name": "mosec-serving-00021-bmr",
+          "namespace": "369117807590",
+          "ownerReferences": [
+            {
+              "apiVersion": "serving.knative.dev/v1",
+              "blockOwnerDeletion": true,
+              "controller": true,
+              "kind": "Configuration",
+              "name": "mosec-serving",
+              "uid": "7db18cba-2b40-4194-b943-9ed5b1d86a3a"
+            }
+          ],
+          "resourceVersion": "AAZXXLeVZ5k",
+          "selfLink": "/apis/serving.knative.dev/v1/namespaces/369117807590/revisions/mosec-serving-00021-bmr",
+          "uid": "188f99dc-f10f-449e-b557-4495706a7d3c"
+        },
+        "spec": {
+          "containerConcurrency": 80,
+          "containers": [
+            {
+              "env": [
+                {
+                  "name": "INTERNAL_CALLBACK_TOKEN",
+                  "value": "zqYEEKroWWD2u1ZaMAnOzg1y54lNa2kH"
+                },
+                {
+                  "name": "DJANGO_CALLBACK_URL",
+                  "value": "https://lung-cdss.kro.kr/api"
+                }
+              ],
+              "image": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec@sha256:902bbb1cd399a40bca0c4a5816fe22a2a766dc6c27280989d7c627a019812ce1",
+              "name": "mosec-1",
+              "ports": [
+                {
+                  "containerPort": 8000,
+                  "name": "http1"
+                }
+              ],
+              "resources": {
+                "limits": {
+                  "cpu": "8",
+                  "memory": "16Gi",
+                  "nvidia.com/gpu": "1"
+                }
+              },
+              "startupProbe": {
+                "failureThreshold": 1,
+                "periodSeconds": 240,
+                "tcpSocket": {
+                  "port": 8000
+                },
+                "timeoutSeconds": 240
+              }
+            }
+          ],
+          "nodeSelector": {
+            "run.googleapis.com/accelerator": "nvidia-l4"
+          },
+          "serviceAccountName": "369117807590-compute@developer.gserviceaccount.com",
+          "timeoutSeconds": 900
+        },
+        "status": {
+          "conditions": [
+            {
+              "lastTransitionTime": "2026-07-24T15:06:28.893593Z",
+              "message": "Deploying revision succeeded in 56.46s.",
+              "status": "True",
+              "type": "Ready"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T15:06:26.767918Z",
+              "severity": "Info",
+              "status": "True",
+              "type": "Active"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T15:06:24.350852Z",
+              "message": "Containers became healthy in 49.4s.",
+              "status": "True",
+              "type": "ContainerHealthy"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T15:05:34.286972Z",
+              "message": "Container image import completed in 1.3s.",
+              "status": "True",
+              "type": "ContainerReady"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T15:05:35.800848Z",
+              "message": "Provisioning imported containers completed in 1.54s. Checking container health. This will wait for up to 4m for the configured startup probe, including an initial delay of 0s.",
+              "status": "True",
+              "type": "ResourcesAvailable"
+            }
+          ],
+          "containerStatuses": [
+            {
+              "imageDigest": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec@sha256:902bbb1cd399a40bca0c4a5816fe22a2a766dc6c27280989d7c627a019812ce1",
+              "name": "mosec-1"
+            }
+          ],
+          "imageDigest": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec@sha256:902bbb1cd399a40bca0c4a5816fe22a2a766dc6c27280989d7c627a019812ce1",
+          "logUrl": "https://console.cloud.google.com/logs/viewer?project=shining-lamp-492601-f9&resource=cloud_run_revision/service_name/mosec-serving/revision_name/mosec-serving-00021-bmr&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22mosec-serving%22%0Aresource.labels.revision_name%3D%22mosec-serving-00021-bmr%22",
+          "observedGeneration": 1
+        }
+      },
+      "serviceName": "run.googleapis.com",
+      "status": {
+        "message": "Ready condition status changed to True for Revision mosec-serving-00021-bmr with message: Deploying revision succeeded in 56.46s."
+      }
+    },
+    "receiveTimestamp": "2026-07-24T15:06:29.047028437Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2026-07-24T15:06:28.901379Z"
+  },
+  {
+    "insertId": "6fbkwcdkt48",
+    "logName": "projects/shining-lamp-492601-f9/logs/cloudaudit.googleapis.com%2Fsystem_event",
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "methodName": "/Services.ReplaceService",
+      "resourceName": "namespaces/shining-lamp-492601-f9/services/mosec-serving",
+      "response": {
+        "@type": "type.googleapis.com/google.cloud.run.v1.Service",
+        "apiVersion": "serving.knative.dev/v1",
+        "kind": "Service",
+        "metadata": {
+          "annotations": {
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "568.0.0",
+            "run.googleapis.com/ingress": "all",
+            "run.googleapis.com/ingress-status": "all",
+            "run.googleapis.com/maxScale": "3",
+            "run.googleapis.com/operation-id": "f5b04057-1484-45f9-84e7-d3379d4fa699",
+            "run.googleapis.com/urls": "[\"https://mosec-serving-369117807590.us-central1.run.app\",\"https://mosec-serving-mrjbkwgdiq-uc.a.run.app\"]",
+            "serving.knative.dev/creator": "hbc3869@gmail.com",
+            "serving.knative.dev/lastModifier": "github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com"
+          },
+          "creationTimestamp": "2026-07-22T16:01:44.006636Z",
+          "generation": 21,
+          "labels": {
+            "cloud.googleapis.com/location": "us-central1"
+          },
+          "name": "mosec-serving",
+          "namespace": "369117807590",
+          "resourceVersion": "AAZXXLeH07I",
+          "selfLink": "/apis/serving.knative.dev/v1/namespaces/369117807590/services/mosec-serving",
+          "uid": "11caa072-5904-4d92-8733-eb63f525a738"
+        },
+        "spec": {
+          "template": {
+            "metadata": {
+              "annotations": {
+                "autoscaling.knative.dev/maxScale": "2",
+                "run.googleapis.com/client-name": "gcloud",
+                "run.googleapis.com/client-version": "568.0.0",
+                "run.googleapis.com/cpu-throttling": "false",
+                "run.googleapis.com/gpu-zonal-redundancy-disabled": "true",
+                "run.googleapis.com/startup-cpu-boost": "true"
+              },
+              "labels": {
+                "client.knative.dev/nonce": "cyrmavseko",
+                "run.googleapis.com/startupProbeType": "Default"
+              }
+            },
+            "spec": {
+              "containerConcurrency": 80,
+              "containers": [
+                {
+                  "env": [
+                    {
+                      "name": "INTERNAL_CALLBACK_TOKEN",
+                      "value": "zqYEEKroWWD2u1ZaMAnOzg1y54lNa2kH"
+                    },
+                    {
+                      "name": "DJANGO_CALLBACK_URL",
+                      "value": "https://lung-cdss.kro.kr/api"
+                    }
+                  ],
+                  "image": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest",
+                  "ports": [
+                    {
+                      "containerPort": 8000,
+                      "name": "http1"
+                    }
+                  ],
+                  "resources": {
+                    "limits": {
+                      "cpu": "8",
+                      "memory": "16Gi",
+                      "nvidia.com/gpu": "1"
+                    }
+                  },
+                  "startupProbe": {
+                    "failureThreshold": 1,
+                    "periodSeconds": 240,
+                    "tcpSocket": {
+                      "port": 8000
+                    },
+                    "timeoutSeconds": 240
+                  }
+                }
+              ],
+              "nodeSelector": {
+                "run.googleapis.com/accelerator": "nvidia-l4"
+              },
+              "serviceAccountName": "369117807590-compute@developer.gserviceaccount.com",
+              "timeoutSeconds": 900
+            }
+          },
+          "traffic": [
+            {
+              "latestRevision": true,
+              "percent": 100
+            }
+          ]
+        },
+        "status": {
+          "address": {
+            "url": "https://mosec-serving-mrjbkwgdiq-uc.a.run.app"
+          },
+          "conditions": [
+            {
+              "lastTransitionTime": "2026-07-24T15:06:28.003762Z",
+              "status": "True",
+              "type": "Ready"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T15:05:34.359419Z",
+              "status": "True",
+              "type": "ConfigurationsReady"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T15:06:27.959473Z",
+              "status": "True",
+              "type": "RoutesReady"
+            }
+          ],
+          "latestCreatedRevisionName": "mosec-serving-00021-bmr",
+          "latestReadyRevisionName": "mosec-serving-00021-bmr",
+          "observedGeneration": 21,
+          "traffic": [
+            {
+              "latestRevision": true,
+              "percent": 100,
+              "revisionName": "mosec-serving-00021-bmr"
+            }
+          ],
+          "url": "https://mosec-serving-mrjbkwgdiq-uc.a.run.app"
+        }
+      },
+      "serviceName": "run.googleapis.com",
+      "status": {
+        "message": "Ready condition status changed to True for Service mosec-serving."
+      }
+    },
+    "receiveTimestamp": "2026-07-24T15:06:28.116130066Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2026-07-24T15:06:28.021533Z"
+  },
+  {
+    "insertId": "jzr5a3dspwo",
+    "logName": "projects/shining-lamp-492601-f9/logs/cloudaudit.googleapis.com%2Fsystem_event",
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "methodName": "/Services.ReplaceService",
+      "resourceName": "namespaces/shining-lamp-492601-f9/revisions/mosec-serving-00021-bmr",
+      "response": {
+        "@type": "type.googleapis.com/google.cloud.run.v1.Revision",
+        "apiVersion": "serving.knative.dev/v1",
+        "kind": "Revision",
+        "metadata": {
+          "annotations": {
+            "autoscaling.knative.dev/maxScale": "2",
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "568.0.0",
+            "run.googleapis.com/cpu-throttling": "false",
+            "run.googleapis.com/execution-environment": "gen2",
+            "run.googleapis.com/gpu-zonal-redundancy-disabled": "true",
+            "run.googleapis.com/operation-id": "f5b04057-1484-45f9-84e7-d3379d4fa699",
+            "run.googleapis.com/startup-cpu-boost": "true",
+            "serving.knative.dev/creator": "github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com"
+          },
+          "creationTimestamp": "2026-07-24T15:05:32.433011Z",
+          "generation": 1,
+          "labels": {
+            "client.knative.dev/nonce": "cyrmavseko",
+            "cloud.googleapis.com/location": "us-central1",
+            "run.googleapis.com/startupProbeType": "Default",
+            "serving.knative.dev/configuration": "mosec-serving",
+            "serving.knative.dev/configurationGeneration": "21",
+            "serving.knative.dev/route": "mosec-serving",
+            "serving.knative.dev/service": "mosec-serving",
+            "serving.knative.dev/serviceUid": "11caa072-5904-4d92-8733-eb63f525a738"
+          },
+          "name": "mosec-serving-00021-bmr",
+          "namespace": "369117807590",
+          "ownerReferences": [
+            {
+              "apiVersion": "serving.knative.dev/v1",
+              "blockOwnerDeletion": true,
+              "controller": true,
+              "kind": "Configuration",
+              "name": "mosec-serving",
+              "uid": "7db18cba-2b40-4194-b943-9ed5b1d86a3a"
+            }
+          ],
+          "resourceVersion": "AAZXXLd0Fk0",
+          "selfLink": "/apis/serving.knative.dev/v1/namespaces/369117807590/revisions/mosec-serving-00021-bmr",
+          "uid": "188f99dc-f10f-449e-b557-4495706a7d3c"
+        },
+        "spec": {
+          "containerConcurrency": 80,
+          "containers": [
+            {
+              "env": [
+                {
+                  "name": "INTERNAL_CALLBACK_TOKEN",
+                  "value": "zqYEEKroWWD2u1ZaMAnOzg1y54lNa2kH"
+                },
+                {
+                  "name": "DJANGO_CALLBACK_URL",
+                  "value": "https://lung-cdss.kro.kr/api"
+                }
+              ],
+              "image": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec@sha256:902bbb1cd399a40bca0c4a5816fe22a2a766dc6c27280989d7c627a019812ce1",
+              "name": "mosec-1",
+              "ports": [
+                {
+                  "containerPort": 8000,
+                  "name": "http1"
+                }
+              ],
+              "resources": {
+                "limits": {
+                  "cpu": "8",
+                  "memory": "16Gi",
+                  "nvidia.com/gpu": "1"
+                }
+              },
+              "startupProbe": {
+                "failureThreshold": 1,
+                "periodSeconds": 240,
+                "tcpSocket": {
+                  "port": 8000
+                },
+                "timeoutSeconds": 240
+              }
+            }
+          ],
+          "nodeSelector": {
+            "run.googleapis.com/accelerator": "nvidia-l4"
+          },
+          "serviceAccountName": "369117807590-compute@developer.gserviceaccount.com",
+          "timeoutSeconds": 900
+        },
+        "status": {
+          "conditions": [
+            {
+              "lastTransitionTime": "2026-07-24T15:06:26.710093Z",
+              "message": "Deploying revision succeeded in 54.27s.",
+              "status": "True",
+              "type": "Ready"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T15:06:24.350852Z",
+              "message": "Containers became healthy in 49.4s.",
+              "status": "True",
+              "type": "ContainerHealthy"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T15:05:34.286972Z",
+              "message": "Container image import completed in 1.3s.",
+              "status": "True",
+              "type": "ContainerReady"
+            },
+            {
+              "lastTransitionTime": "2026-07-24T15:05:35.800848Z",
+              "message": "Provisioning imported containers completed in 1.54s. Checking container health. This will wait for up to 4m for the configured startup probe, including an initial delay of 0s.",
+              "status": "True",
+              "type": "ResourcesAvailable"
+            }
+          ],
+          "containerStatuses": [
+            {
+              "imageDigest": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec@sha256:902bbb1cd399a40bca0c4a5816fe22a2a766dc6c27280989d7c627a019812ce1",
+              "name": "mosec-1"
+            }
+          ],
+          "imageDigest": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec@sha256:902bbb1cd399a40bca0c4a5816fe22a2a766dc6c27280989d7c627a019812ce1",
+          "logUrl": "https://console.cloud.google.com/logs/viewer?project=shining-lamp-492601-f9&resource=cloud_run_revision/service_name/mosec-serving/revision_name/mosec-serving-00021-bmr&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22mosec-serving%22%0Aresource.labels.revision_name%3D%22mosec-serving-00021-bmr%22",
+          "observedGeneration": 1
+        }
+      },
+      "serviceName": "run.googleapis.com",
+      "status": {
+        "message": "Ready condition status changed to True for Revision mosec-serving-00021-bmr with message: Deploying revision succeeded in 54.27s."
+      }
+    },
+    "receiveTimestamp": "2026-07-24T15:06:27.951412456Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "timestamp": "2026-07-24T15:06:26.718559Z"
+  },
+  {
+    "insertId": "6a637f700005457c10e696c2",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-07-24T15:06:24.351873394Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "textPayload": "Default STARTUP TCP probe succeeded after 1 attempt for container \"mosec-1\" on port 8000.",
+    "timestamp": "2026-07-24T15:06:24.345468Z"
+  },
+  {
+    "insertId": "6a637f70000542eaaa1a839b",
+    "jsonPayload": {
+      "fields": {
+        "addr": "0.0.0.0:8000",
+        "message": "http service is running"
+      },
+      "level": "INFO",
+      "target": "mosec:116",
+      "timestamp": "2026-07-24T15:06:24.344184Z"
+    },
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:24.688062436Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:24.344810Z"
+  },
+  {
+    "insertId": "6a637f70000542b87a6ef6ae",
+    "jsonPayload": {
+      "fields": {
+        "message": "<LungCDSSWorker_1|1> socket connected to /tmp/mosec_6c9b0c74/ipc_LungCDSSWorker_1.socket"
+      },
+      "level": "INFO",
+      "target": "mosec::protocol.py:open",
+      "timestamp": "2026-07-24T15:06:24.344049Z "
+    },
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:24.351593753Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:24.344760Z"
+  },
+  {
+    "insertId": "6a637f70000542b2f2e26b7c",
+    "jsonPayload": {
+      "fields": {
+        "message": "begin listening to socket",
+        "path": "\"/tmp/mosec_6c9b0c74/ipc_LungCDSSWorker_1.socket\""
+      },
+      "level": "INFO",
+      "target": "mosec::protocol:58",
+      "timestamp": "2026-07-24T15:06:24.344081Z"
+    },
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:24.351593753Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:24.344754Z"
+  },
+  {
+    "insertId": "6a637f700005429ffb0db89f",
+    "jsonPayload": {
+      "fields": {
+        "addr": "(unnamed)",
+        "message": "socket accepted connection from"
+      },
+      "level": "INFO",
+      "target": "mosec::protocol:61",
+      "timestamp": "2026-07-24T15:06:24.344020Z"
+    },
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:24.351593753Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:24.344735Z"
+  },
+  {
+    "insertId": "6a637f70000537fb330c702d",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:06:24.349451874Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[feature_extraction] model cast to fp16",
+    "timestamp": "2026-07-24T15:06:24.342011Z"
+  },
+  {
+    "insertId": "6a637f5e0003f8bea13f095c",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:06:06.478544777Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[feature_extraction] device: cuda",
+    "timestamp": "2026-07-24T15:06:06.260286Z"
+  },
+  {
+    "insertId": "6a637f5b0005c3262bc87beb",
+    "jsonPayload": {
+      "fields": {
+        "message": "begin listening to socket",
+        "path": "\"/tmp/mosec_6c9b0c74/ipc_LungCDSSWorker_1.socket\""
+      },
+      "level": "INFO",
+      "target": "mosec::protocol:58",
+      "timestamp": "2026-07-24T15:06:03.376433Z"
+    },
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstderr",
+    "receiveTimestamp": "2026-07-24T15:06:03.384940036Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "timestamp": "2026-07-24T15:06:03.377638Z"
+  },
+  {
+    "insertId": "6a637f58000235ee5700ea4f",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-07-24T15:06:00.256771328Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "textPayload": "[feature_extraction] device: cuda",
+    "timestamp": "2026-07-24T15:06:00.144878Z"
+  },
+  {
+    "insertId": "6a637f3e000df3de5313daa2",
+    "labels": {
+      "instanceId": "001548f72984efa3aa85cee7dd69bbc4964fc5a3e2b9e687020a21e0bf981d264a7e6df24fafddf14a1da21f1d4c133a873893294eed033bc5ac2292b75862843520d4ac46fba11094604d466d4f8241e04bb4da8e63e7c8c171",
+      "scaling_reason": "DEPLOYMENT_ROLLOUT"
+    },
+    "logName": "projects/shining-lamp-492601-f9/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-07-24T15:05:34.919734833Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "mosec-serving",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "mosec-serving-00021-bmr",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "textPayload": "Starting new instance. Reason: DEPLOYMENT_ROLLOUT - Instance started due to traffic shifting between revisions due to deployment, traffic split adjustment, or deployment health check.",
+    "timestamp": "2026-07-24T15:05:34.914398Z"
+  },
+  {
+    "insertId": "bo2ltodj46w",
+    "logName": "projects/shining-lamp-492601-f9/logs/cloudaudit.googleapis.com%2Factivity",
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "authenticationInfo": {
+        "oauthInfo": {
+          "oauthClientId": "109701198213446796927"
+        },
+        "principalEmail": "github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com",
+        "principalSubject": "serviceAccount:github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com",
+        "serviceAccountKeyName": "//iam.googleapis.com/projects/shining-lamp-492601-f9/serviceAccounts/github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com/keys/5ba57a1582183745b853036cd816755045cf126c"
+      },
+      "authorizationInfo": [
+        {
+          "granted": true,
+          "permission": "run.services.update",
+          "permissionType": "ADMIN_WRITE",
+          "resource": "namespaces/shining-lamp-492601-f9/services/mosec-serving",
+          "resourceAttributes": {}
+        },
+        {
+          "granted": true,
+          "permission": "run.services.update",
+          "permissionType": "ADMIN_WRITE",
+          "resource": "namespaces/shining-lamp-492601-f9/services/mosec-serving",
+          "resourceAttributes": {
+            "name": "namespaces/shining-lamp-492601-f9/services/mosec-serving",
+            "service": "run.googleapis.com/",
+            "type": "run.googleapis.com/Service"
+          }
+        }
+      ],
+      "methodName": "google.cloud.run.v1.Services.ReplaceService",
+      "request": {
+        "@type": "type.googleapis.com/google.cloud.run.v1.ReplaceServiceRequest",
+        "name": "namespaces/shining-lamp-492601-f9/services/mosec-serving",
+        "service": {
+          "apiVersion": "serving.knative.dev/v1",
+          "kind": "Service",
+          "metadata": {
+            "annotations": {
+              "run.googleapis.com/client-name": "gcloud",
+              "run.googleapis.com/client-version": "568.0.0",
+              "run.googleapis.com/ingress": "all",
+              "run.googleapis.com/ingress-status": "all",
+              "run.googleapis.com/maxScale": "3",
+              "run.googleapis.com/operation-id": "8c024555-f4d7-499d-9c62-01e15dd29196",
+              "run.googleapis.com/urls": "[\"https://mosec-serving-369117807590.us-central1.run.app\",\"https://mosec-serving-mrjbkwgdiq-uc.a.run.app\"]",
+              "serving.knative.dev/creator": "hbc3869@gmail.com",
+              "serving.knative.dev/lastModifier": "github-actions-deployer@shining-lamp-492601-f9.iam.gserviceaccount.com"
+            },
+            "creationTimestamp": "2026-07-22T16:01:44.006636Z",
+            "generation": 20,
+            "labels": {
+              "cloud.googleapis.com/location": "us-central1"
+            },
+            "name": "mosec-serving",
+            "namespace": "369117807590",
+            "resourceVersion": "AAZXW5koXA4",
+            "selfLink": "/apis/serving.knative.dev/v1/namespaces/369117807590/services/mosec-serving",
+            "uid": "11caa072-5904-4d92-8733-eb63f525a738"
+          },
+          "spec": {
+            "template": {
+              "metadata": {
+                "annotations": {
+                  "autoscaling.knative.dev/maxScale": "2",
+                  "run.googleapis.com/client-name": "gcloud",
+                  "run.googleapis.com/client-version": "568.0.0",
+                  "run.googleapis.com/cpu-throttling": "False",
+                  "run.googleapis.com/gpu-zonal-redundancy-disabled": "True",
+                  "run.googleapis.com/startup-cpu-boost": "true"
+                },
+                "labels": {
+                  "client.knative.dev/nonce": "cyrmavseko",
+                  "run.googleapis.com/startupProbeType": "Default"
+                }
+              },
+              "spec": {
+                "containerConcurrency": 80,
+                "containers": [
+                  {
+                    "image": "us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/mosec:latest",
+                    "resources": {
+                      "limits": {
+                        "cpu": "8",
+                        "memory": "16Gi",
+                        "nvidia.com/gpu": "1"
+                      }
+                    }
+                  }
+                ],
+                "nodeSelector": {
+                  "run.googleapis.com/accelerator": "nvidia-l4"
+                },
+                "serviceAccountName": "369117807590-compute@developer.gserviceaccount.com",
+                "timeoutSeconds": 900
+              }
+            },
+            "traffic": [
+              {
+                "latestRevision": true,
+                "percent": 100
+              }
+            ]
+          },
+          "status": {
+            "conditions": [
+              {
+                "lastTransitionTime": "2026-07-24T13:46:23.463438Z",
+                "status": "True",
+                "type": "Ready"
+              },
+              {
+                "lastTransitionTime": "2026-07-24T13:45:00.882988Z",
+                "status": "True",
+                "type": "ConfigurationsReady"
+              },
+              {
+                "lastTransitionTime": "2026-07-24T13:46:23.418277Z",
+                "status": "True",
+                "type": "RoutesReady"
+              }
+            ],
+            "latestCreatedRevisionName": "mosec-serving-00020-trs",
+            "latestReadyRevisionName": "mosec-serving-00020-trs",
+            "observedGeneration": 20,
+            "traffic": [
+              {
+                "latestRevision": true,
+                "percent": 100,
+                "revisionName": "mosec-serving-00020-trs"
+              }
+            ],
+            "url": "https://mosec-serving-mrjbkwgdiq-uc.a.run.app"
+          }
+        }
+      },
+      "requestMetadata": {
+        "callerIp": "40.76.191.166",
+        "callerSuppliedUserAgent": "google-cloud-sdk gcloud/568.0.0 command/gcloud.run.deploy invocation-id/1228d998736147d1b790bb67c0d56245 environment/github-actions-setup-gcloud environment-version/2.2.1 client-os/LINUX client-os-ver/6.17.0 client-pltf-arch/x86_64 interactive/False from-script/False python/3.14.4 term/  (Linux 6.17.0-1020-azure),gzip(gfe)",
+        "destinationAttributes": {},
+        "requestAttributes": {
+          "auth": {},
+          "time": "2026-07-24T15:05:32.358761Z"
+        }
+      },
+      "resourceLocation": {
+        "currentLocations": [
+          "us-central1"
+        ]
+      },
+      "resourceName": "namespaces/shining-lamp-492601-f9/services/mosec-serving",
+      "serviceName": "run.googleapis.com",
+      "status": {}
+    },
+    "receiveTimestamp": "2026-07-24T15:05:33.310017586Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "",
+        "location": "us-central1",
+        "project_id": "shining-lamp-492601-f9",
+        "revision_name": "",
+        "service_name": "mosec-serving"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "NOTICE",
+    "timestamp": "2026-07-24T15:05:32.132030Z"
+  }
+]

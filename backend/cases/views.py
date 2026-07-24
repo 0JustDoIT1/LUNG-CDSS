@@ -84,13 +84,13 @@ def predict_case(request, case_id):
 
     case.status = "processing"
     case.analyzed_at = timezone.now()
-    case.save()
+    case.save(update_fields=["status", "analyzed_at"])
 
     try:
         result = call_mosec_predict(str(case.id), case.slide_gcs_path)
     except Exception as e:
         case.status = "failed"
-        case.save()
+        case.save(update_fields=["status"])
         return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
     case.prediction_label = result["prediction_label"]
@@ -106,7 +106,13 @@ def predict_case(request, case_id):
 
     case.status = "completed"
     case.completed_at = timezone.now()
-    case.save()
+    case.save(update_fields=[
+        "prediction_label", "luad_probability", "lusc_probability",
+        "heatmap_gcs_path", "slide_thumbnail_gcs_path",
+        "nuclei_density_score", "nuclei_density_level",
+        "nuclei_irregularity_score", "nuclei_irregularity_level",
+        "status", "completed_at",
+    ])
 
     NucleiPatch.objects.filter(case=case).delete()
     for patch in result.get("nuclei_patches", []):
