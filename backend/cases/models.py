@@ -11,9 +11,9 @@ class Case(models.Model):
         ("failed", "Failed"),            # 분석 중 오류 발생
     ]
     REVIEW_STATUS_CHOICES = [
-        ("ai_suggested", "AI Suggested"),  # 의사 검토 전 (기본값)
-        ("confirmed", "Confirmed"),        # 의사가 AI 결과에 동의
-        ("overridden", "Overridden"),      # 의사가 수정하여 확정
+        ("pending", "대기"),             # 의사 검토 전 (기본값)
+        ("confirmed", "승인"),            # 의사가 AI 결과에 동의
+        ("rejected", "미승인"),           # 의사가 수정하여 확정
     ]
     LABEL_CHOICES = [
         ("LUAD", "LUAD"),
@@ -56,7 +56,7 @@ class Case(models.Model):
     treatment_note = models.TextField(blank=True, null=True)
 
     # 의사 검토 상태 (AI 처리 상태와는 별도 축)
-    review_status = models.CharField(max_length=20, choices=REVIEW_STATUS_CHOICES, default="ai_suggested")
+    review_status = models.CharField(max_length=20, choices=REVIEW_STATUS_CHOICES, default="pending")
     reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviewed_cases")
     reviewer_note = models.TextField(blank=True, null=True)
     reviewed_at = models.DateTimeField(blank=True, null=True)
