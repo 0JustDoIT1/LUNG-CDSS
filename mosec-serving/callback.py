@@ -15,7 +15,7 @@ def update_step(case_id: str, step: str):
             f"{DJANGO_CALLBACK_URL}/cases/{case_id}/step/",
             json={"step": step},
             headers={"X-Internal-Token": INTERNAL_CALLBACK_TOKEN},
-            timeout=5,
+            timeout=15,
         )
     except Exception as e:
         print(f"[callback] step 업데이트 실패 ({step}): {e}", flush=True)
