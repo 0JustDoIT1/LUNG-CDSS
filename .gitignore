@@ -6,7 +6,6 @@ __pycache__/
 *.pyc
 *.pyo
 .env
-!.env.local
 db.sqlite3
 *.egg-info/
 .pytest_cache/
@@ -19,6 +18,12 @@ node_modules/
 dist/
 dist-ssr/
 *.local
+
+# .env.local 은 값 없는 템플릿이라 예외적으로 커밋 허용
+!.env.local
+!backend/.env.local
+!frontend/.env.local
+!mosec-serving/.env.local
 
 # ============================================================
 # 민감 파일 / 대용량 파일

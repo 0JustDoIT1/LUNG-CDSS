@@ -2,13 +2,16 @@
 UNI2-h 특징추출.
 """
 
+import time
+import threading
 import torch
 import timm
-from timm.layers import SwiGLUPacked
-from torch.utils.data import Dataset, DataLoader
 import openslide
+from timm.layers import SwiGLUPacked
+from concurrent.futures import ThreadPoolExecutor
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"[feature_extraction] device: {DEVICE}", flush=True)
 
 TIMM_KWARGS = {
     "img_size": 224,
@@ -28,45 +31,70 @@ TIMM_KWARGS = {
 
 
 def load_uni2h():
-    """서버 시작 시 1회만 호출."""
     model = timm.create_model("hf-hub:MahmoodLab/UNI2-h", pretrained=True, **TIMM_KWARGS)
     model.eval().to(DEVICE)
+
+    if DEVICE == "cuda":
+        model = model.half()
+        print("[feature_extraction] model cast to fp16", flush=True)
+
     transform = timm.data.create_transform(
         **timm.data.resolve_data_config(model.pretrained_cfg, model=model)
     )
     return model, transform
 
 
-class PatchDataset(Dataset):
-    def __init__(self, svs_path, coords, patch_size, transform):
-        self.svs_path = svs_path
-        self.coords = coords
-        self.patch_size = patch_size
-        self.transform = transform
-        self.slide = None
+def extract_embeddings(model, transform, svs_path, coords, patch_size, batch_size=512, max_io_workers=16):
+    """
+    반환: [N_patches, 1536] float16 텐서
 
-    def __len__(self):
-        return len(self.coords)
+    최적화 사항:
+    - 스레드별 독립 OpenSlide 인스턴스 (openslide C 바인딩의 스레드 락 회피)
+    - ThreadPoolExecutor를 루프 밖에서 1회만 생성
+    - inference_mode() 사용 (no_grad보다 추가 최적화)
+    - I/O 시간 vs GPU 시간을 배치마다 로그로 측정
+    """
+    thread_local = threading.local()
 
-    def __getitem__(self, idx):
-        if self.slide is None:
-            self.slide = openslide.OpenSlide(self.svs_path)
-        x0, y0, level = self.coords[idx]
-        patch = self.slide.read_region((x0, y0), level, (self.patch_size, self.patch_size)).convert("RGB")
-        return self.transform(patch)
+    def get_thread_slide():
+        if not hasattr(thread_local, "slide"):
+            thread_local.slide = openslide.OpenSlide(svs_path)
+        return thread_local.slide
 
-
-def extract_embeddings(model, transform, svs_path, coords, patch_size, batch_size=64, num_workers=0):
-    dataset = PatchDataset(svs_path, coords, patch_size, transform)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
+    def read_and_transform(coord):
+        x0, y0, level = coord
+        slide = get_thread_slide()
+        patch = slide.read_region((int(x0), int(y0)), level, (patch_size, patch_size)).convert("RGB")
+        return transform(patch)
 
     embeddings = []
-    with torch.no_grad():
-        for batch in loader:
-            batch = batch.to(DEVICE, non_blocking=True)
-            with torch.autocast(device_type="cuda" if DEVICE == "cuda" else "cpu", dtype=torch.float16):
+    total_io_time = 0.0
+    total_gpu_time = 0.0
+
+    with torch.inference_mode():
+        with ThreadPoolExecutor(max_workers=max_io_workers) as executor:
+            for i in range(0, len(coords), batch_size):
+                batch_coords = coords[i:i + batch_size]
+
+                t0 = time.perf_counter()
+                batch_tensors = list(executor.map(read_and_transform, batch_coords))
+                t1 = time.perf_counter()
+
+                batch = torch.stack(batch_tensors).to(DEVICE)
+                if DEVICE == "cuda":
+                    batch = batch.half()
                 feats = model(batch)
-            embeddings.append(feats.cpu().to(torch.float16))
+                if DEVICE == "cuda":
+                    torch.cuda.synchronize()
+                t2 = time.perf_counter()
+
+                total_io_time += (t1 - t0)
+                total_gpu_time += (t2 - t1)
+                print(f"[extract_embeddings] batch {i//batch_size}: I/O={t1-t0:.2f}s GPU={t2-t1:.2f}s", flush=True)
+
+                embeddings.append(feats.cpu().to(torch.float16))
+
+    print(f"[extract_embeddings] 총합 I/O={total_io_time:.1f}s GPU={total_gpu_time:.1f}s", flush=True)
 
     if embeddings:
         return torch.cat(embeddings, dim=0)

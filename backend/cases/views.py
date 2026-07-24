@@ -7,6 +7,25 @@ from .models import Case, NucleiPatch, GenePrediction
 from .serializers import CaseListSerializer, CaseDetailSerializer
 from .services import call_mosec_predict
 
+import os
+
+INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
+
+
+@api_view(["POST"])
+def update_case_step(request, case_id):
+    if request.headers.get("X-Internal-Token") != INTERNAL_CALLBACK_TOKEN:
+        return Response({"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        case = Case.objects.get(id=case_id)
+    except Case.DoesNotExist:
+        return Response({"error": "not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    step = request.data.get("step")
+    case.current_step = step
+    case.save(update_fields=["current_step"])
+    return Response({"status": "ok"})
 
 @api_view(["GET", "POST"])
 def case_list_create(request):
@@ -89,12 +108,13 @@ def predict_case(request, case_id):
     try:
         case = Case.objects.get(id=case_id)
     except Case.DoesNotExist:
-        return Response(
-            {"error": "케이스를 찾을 수 없습니다"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
+        return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+
+    if case.status == "processing":
+        return Response({"error": "이미 분석이 진행 중입니다"}, status=status.HTTP_409_CONFLICT)
 
     case.status = "processing"
+    case.analyzed_at = timezone.now()
     case.save()
 
     try:
@@ -102,17 +122,14 @@ def predict_case(request, case_id):
     except Exception as e:
         case.status = "failed"
         case.save()
-
-        return Response(
-            {"error": str(e)},
-            status=status.HTTP_502_BAD_GATEWAY,
-        )
+        return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
     # Case 업데이트
     case.prediction_label = result["prediction_label"]
     case.luad_probability = result["luad_probability"]
     case.lusc_probability = result["lusc_probability"]
     case.heatmap_gcs_path = result["heatmap_gcs_path"]
+    case.slide_thumbnail_gcs_path = result.get("slide_thumbnail_gcs_path")
 
     case.nuclei_density_score = result.get("nuclei_density_score")
     case.nuclei_density_level = result.get("nuclei_density_level")

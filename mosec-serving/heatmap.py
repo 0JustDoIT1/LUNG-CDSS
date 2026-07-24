@@ -4,7 +4,7 @@
 
 import numpy as np
 from PIL import Image
-import matplotlib.cm as cm
+import matplotlib as mpl
 
 
 def generate_heatmap(thumbnail: Image.Image, coords: list, attention: np.ndarray,
@@ -31,7 +31,7 @@ def generate_heatmap(thumbnail: Image.Image, coords: list, attention: np.ndarray
     count_map[count_map == 0] = 1
     heatmap = heatmap / count_map
 
-    colormap = cm.get_cmap("jet")
+    colormap = mpl.colormaps["jet"]
     heatmap_rgb = (colormap(heatmap)[:, :, :3] * 255).astype(np.uint8)
 
     overlay = (thumb_np.astype(np.float32) * 0.5 + heatmap_rgb.astype(np.float32) * 0.5).astype(np.uint8)
