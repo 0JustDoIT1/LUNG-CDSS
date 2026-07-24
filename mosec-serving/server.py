@@ -8,6 +8,7 @@ from PIL import Image
 from mosec import Server, Worker
 
 from model import AMDMIL
+from gene_model import MultiLabelAMDMIL
 from preprocessing import get_tissue_patch_coords, get_slide_thumbnail, PATCH_SIZE
 from feature_extraction import load_uni2h, extract_embeddings
 from nuclei_analysis import extract_top_attention_patches, segment_nuclei, get_nuclei_overlay, summarize_nuclei_metrics
@@ -18,12 +19,16 @@ from callback import update_step
 MODEL_WEIGHTS_PATH = f"gs://{GCS_BUCKET}/models/amd_mil_100test_best.pt"
 MODEL_CONFIG_PATH = f"gs://{GCS_BUCKET}/models/amd_mil_100test_config.json"
 
+GENE_MODEL_WEIGHTS_PATH = f"gs://{GCS_BUCKET}/models/multilabel_amd_mil_weights.pt"
+GENE_MODEL_CONFIG_PATH = f"gs://{GCS_BUCKET}/models/multilabel_amd_mil_config.json"
+
 
 class LungCDSSWorker(Worker):
     def __init__(self):
         super().__init__()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+        # 기존 AMD-MIL 분류 모델 로드
         download_model_file_from_gcs(MODEL_CONFIG_PATH, "/tmp/config.json")
         download_model_file_from_gcs(MODEL_WEIGHTS_PATH, "/tmp/weights.pt")
 
@@ -40,6 +45,27 @@ class LungCDSSWorker(Worker):
         state_dict = torch.load("/tmp/weights.pt", map_location=self.device)
         self.model.load_state_dict(state_dict)
         self.model.eval()
+
+        # 유전자 예측 모델 로드
+        download_model_file_from_gcs(GENE_MODEL_CONFIG_PATH, "/tmp/gene_config.json")
+        download_model_file_from_gcs(GENE_MODEL_WEIGHTS_PATH, "/tmp/gene_weights.pt")
+
+        with open("/tmp/gene_config.json") as f:
+            gene_config = json.load(f)
+
+        self.gene_labels = gene_config["label_columns"]
+        self.gene_model = MultiLabelAMDMIL(
+            input_dim=gene_config.get("input_dim", 1536),
+            embed_dim=gene_config["architecture"]["embed_dim"],
+            agent_num=gene_config["architecture"]["agent_num"],
+            num_heads=gene_config["architecture"]["num_heads"],
+            num_labels=gene_config["num_labels"],
+            dropout=gene_config["architecture"]["dropout"],
+        ).to(self.device)
+
+        gene_state_dict = torch.load("/tmp/gene_weights.pt", map_location=self.device)
+        self.gene_model.load_state_dict(gene_state_dict)
+        self.gene_model.eval()
 
         self.uni2h_model, self.uni2h_transform = load_uni2h()
 
@@ -65,9 +91,20 @@ class LungCDSSWorker(Worker):
 
         with torch.no_grad():
             x = bag_features.to(self.device).float()
+
             output = self.model(x, return_attention=True)
             probs = F.softmax(output["logits"], dim=1)[0]
             attention = output["attention"][0].cpu().numpy()
+
+            # 유전자 예측 — 같은 UNI2-h 임베딩(x) 재사용, 재추출 없음
+            gene_output = self.gene_model(x)
+            gene_probs = torch.sigmoid(gene_output["logits"])[0]
+
+        gene_predictions_result = [
+            {"gene_name": gene_name, "likelihood": gene_probs[i].item()}
+            for i, gene_name in enumerate(self.gene_labels)
+        ]
+
         print(f"[{case_id}] AMD-MIL 분류 완료", flush=True)
         update_step(case_id, "nuclei_detection")
 
@@ -116,7 +153,7 @@ class LungCDSSWorker(Worker):
             "heatmap_gcs_path": heatmap_path,
             "nuclei_patches": nuclei_patches_result,
             **nuclei_summary,
-            "gene_predictions": [],
+            "gene_predictions": gene_predictions_result,
         }
 
 
