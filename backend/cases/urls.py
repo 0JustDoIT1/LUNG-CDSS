@@ -8,4 +8,5 @@ urlpatterns = [
     path("cases/<uuid:case_id>/retry/", views.retry_case, name="retry-case"),
     path("cases/<uuid:case_id>/step/", views.update_case_step, name="update-case-step"),
     path("cases/<uuid:case_id>/review/", views.review_case, name="review-case"),
+    path("cases/upload-url/", views.get_upload_url, name="get-upload-url"),
 ]

@@ -9,7 +9,7 @@ from accounts.permissions import IsDoctor, IsPathologist
 from .models import Case, NucleiPatch, GenePrediction
 from .serializers import CaseListSerializer, CaseDetailSerializer
 from .services import call_mosec_predict
-from .gcs_signed_url import gcs_path_to_signed_url, delete_case_reports, delete_slide_file
+from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upload_url
 
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 
@@ -209,3 +209,13 @@ def review_case(request, case_id):
 
     serializer = CaseDetailSerializer(case)
     return Response(serializer.data)
+
+@api_view(["POST"])
+@permission_classes([IsPathologist])
+def get_upload_url(request):
+    filename = request.data.get("filename")
+    if not filename:
+        return Response({"error": "filename은 필수입니다"}, status=status.HTTP_400_BAD_REQUEST)
+
+    result = generate_upload_url(filename)
+    return Response(result)

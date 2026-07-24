@@ -2,6 +2,7 @@
 GCS signed URL 생성.
 """
 
+import uuid
 from google.cloud import storage
 from datetime import timedelta
 
@@ -28,6 +29,7 @@ def gcs_path_to_signed_url(gcs_path: str, expiration_minutes: int = 60) -> str |
     )
     return url
 
+
 def delete_case_reports(case_id: str):
     """reports/{case_id}/ 폴더 전체 삭제 (재분석 시 이전 결과 이미지 정리)"""
     prefix = f"reports/{case_id}/"
@@ -44,3 +46,20 @@ def delete_slide_file(gcs_path: str):
     blob = _bucket.blob(blob_name)
     if blob.exists():
         blob.delete()
+
+
+def generate_upload_url(filename: str, expiration_minutes: int = 15) -> dict:
+    """PUT용 signed URL 발급 (원본 슬라이드 업로드용)"""
+    blob_name = f"uploads/{uuid.uuid4()}_{filename}"
+    blob = _bucket.blob(blob_name)
+
+    url = blob.generate_signed_url(
+        version="v4",
+        expiration=timedelta(minutes=expiration_minutes),
+        method="PUT",
+        content_type="application/octet-stream",
+    )
+    return {
+        "upload_url": url,
+        "gcs_path": f"gs://{GCS_BUCKET}/{blob_name}",
+    }
