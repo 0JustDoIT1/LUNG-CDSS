@@ -50,19 +50,26 @@ export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalP
               <span className="text-gray-500">진단 분류</span>
               <span className="font-semibold text-gray-900">{detail.prediction_label ?? "—"}</span>
             </div>
+
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-500">정확도(확률)</span>
               <span className="font-semibold text-gray-900">
                 {conf != null ? `${(conf * 100).toFixed(1)}%` : "—"}
               </span>
             </div>
+
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-500">LUAD 확률</span>
-              <span className="text-gray-700">{luad != null ? `${(luad * 100).toFixed(1)}%` : "—"}</span>
+              <span className="text-gray-700">
+                {luad != null ? `${(luad * 100).toFixed(1)}%` : "—"}
+              </span>
             </div>
+
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-500">LUSC 확률</span>
-              <span className="text-gray-700">{lusc != null ? `${(lusc * 100).toFixed(1)}%` : "—"}</span>
+              <span className="text-gray-700">
+                {lusc != null ? `${(lusc * 100).toFixed(1)}%` : "—"}
+              </span>
             </div>
 
             {/* 유전자 예측 */}
@@ -93,3 +100,9 @@ export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalP
                 </p>
               )}
             </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
