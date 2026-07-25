@@ -16,27 +16,28 @@ const API_BASE =
   "https://lung-cdss.kro.kr/api";
 
 // localStorage 토큰 키 — 로그인 페이지에서 같은 키로 저장해두기
-const TOKEN_KEY = "lung_cdss_access";
+const TOKEN_KEY = "access_token";
 
 // ----------------------------- 타입 정의 -----------------------------
 type CaseStatus = "uploaded" | "processing" | "completed" | "failed";
-type ReviewStatus = "ai_suggested" | "confirmed" | "overridden";
+type ReviewStatus = "pending" | "confirmed" | "rejected";
 type PredictionLabel = "LUAD" | "LUSC" | null;
+type GeneName = "TP53" | "KEAP1" | "KRAS";
 
 interface NucleusPatch {
   id: string;
-  original_gcs_path: string;
-  overlay_gcs_path: string;
+  original_url: string;
+  overlay_url: string;
   nuclei_count: number;
   attention_rank: number;
 }
 
 interface GenePrediction {
-  // 백엔드 스키마에 맞춰 확장 필요 — 명세에는 []로만 표기됨
-  [key: string]: unknown;
+  gene_name: GeneName;
+  likelihood: number;
 }
 
-/** GET /cases/ 목록에 포함된 최소 필드 (상세 응답의 부분집합) */
+/** GET /cases/ 목록 응답 (CaseListSerializer 기준) */
 interface CaseListItem {
   id: string;
   specimen_id: string;
@@ -46,24 +47,24 @@ interface CaseListItem {
   luad_probability: number | null;
   lusc_probability: number | null;
   uploaded_at: string;
+  completed_at: string | null;
   // 그 외 필드는 optional
   [key: string]: unknown;
 }
 
-/** GET /cases/:id/ 상세 응답 */
+/** GET /cases/:id/ 상세 응답 (CaseDetailSerializer 기준) */
 interface CaseDetail extends CaseListItem {
   current_step: string | null;
   nuclei_density_score: number | null;
   nuclei_density_level: string | null;
   nuclei_irregularity_score: number | null;
   nuclei_irregularity_level: string | null;
-  heatmap_gcs_path: string | null;
-  slide_thumbnail_gcs_path: string | null;
+  heatmap_url: string | null;
+  slide_thumbnail_url: string | null;
   nuclei_patches: NucleusPatch[];
   gene_predictions: GenePrediction[];
   treatment_note: string | null;
   analyzed_at: string | null;
-  completed_at: string | null;
 }
 
 type ModalType = "heatmap" | "summary" | "nucleus";
@@ -91,15 +92,15 @@ const STATUS_CLS: Record<CaseStatus, string> = {
 };
 
 const REVIEW_LABELS: Record<ReviewStatus, string> = {
-  ai_suggested: "AI 제안",
-  confirmed: "확정",
-  overridden: "수정됨",
+  pending: "대기",
+  confirmed: "승인",
+  rejected: "미승인",
 };
 
 const REVIEW_CLS: Record<ReviewStatus, string> = {
-  ai_suggested: "bg-amber-100 text-amber-700",
+  pending: "bg-amber-100 text-amber-700",
   confirmed: "bg-teal-100 text-teal-700",
-  overridden: "bg-purple-100 text-purple-700",
+  rejected: "bg-rose-100 text-rose-700",
 };
 
 // ----------------------------- API -----------------------------
@@ -111,6 +112,9 @@ async function apiGet<T>(path: string): Promise<T> {
   if (res.status === 401) {
     throw new Error("인증 만료 — 다시 로그인하세요");
   }
+  if (res.status === 403) {
+    throw new Error("이 화면에 접근할 권한이 없습니다");
+  }
   if (!res.ok) throw new Error(`API 에러 (${res.status})`);
   return (await res.json()) as T;
 }
@@ -118,7 +122,7 @@ async function apiGet<T>(path: string): Promise<T> {
 /** 케이스 목록 응답이 배열일 수도, { results: [...] } 일 수도 있어 정규화 */
 function normalizeCases(data: unknown): CaseListItem[] {
   if (Array.isArray(data)) return data as CaseListItem[];
-  if (data && typeof data === "object" && Array.isArray((data as any).results)) {
+  if (data && typeof data === "object" && Array.isArray((data as { results?: unknown }).results)) {
     return (data as { results: CaseListItem[] }).results;
   }
   return [];
@@ -159,11 +163,11 @@ export default function Dashboard(): React.JSX.Element {
   const metrics: Metrics = useMemo(() => {
     const completed = cases.filter((c) => c.status === "completed").length;
     const failed = cases.filter((c) => c.status === "failed").length;
-    const review = cases.filter((c) => c.review_status === "ai_suggested").length;
+    const review = cases.filter((c) => c.review_status === "pending").length;
     return { total: cases.length, completed, failed, review };
   }, [cases]);
 
-  // 3) 신뢰도 낮은 케이스 (긴급 배너용)
+  // 3) 정확도 낮은 케이스 (긴급 배너용)
   const urgent = useMemo(
     () =>
       cases.filter((c) => {
@@ -186,7 +190,7 @@ export default function Dashboard(): React.JSX.Element {
     );
   }, [cases, statusFilter, search]);
 
-  // 5) 상세 모달 열기 (목록에는 상세 필드가 없을 수 있어 한 번 더 fetch)
+  // 5) 상세 모달 열기 (signed URL은 60분만 유효하므로 열 때마다 새로 fetch)
   const openModal = useCallback(async (c: CaseListItem, type: ModalType): Promise<void> => {
     setModalType(type);
     setModalCase(c); // 일단 목록 데이터 먼저 보여주고
@@ -254,7 +258,7 @@ export default function Dashboard(): React.JSX.Element {
         <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200">
           <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
           <span className="text-sm text-amber-800">
-            ⚠ 신뢰도 낮은 케이스 {urgent.length}건:{" "}
+            ⚠ 정확도 낮은 케이스 {urgent.length}건:{" "}
             {urgent
               .slice(0, 3)
               .map((c) => c.specimen_id)
@@ -299,7 +303,7 @@ export default function Dashboard(): React.JSX.Element {
               <Th>상태</Th>
               <Th>진단</Th>
               <Th>리뷰</Th>
-              <Th>신뢰도</Th>
+              <Th>정확도</Th>
               <Th>업로드</Th>
               <Th>액션</Th>
             </tr>
@@ -508,19 +512,16 @@ function DetailModal({
 }
 
 function HeatmapBody({ caseData }: { caseData: CaseDetail }): React.JSX.Element {
-  if (!caseData.heatmap_gcs_path) {
+  if (!caseData.heatmap_url) {
     return <EmptyNote text="히트맵이 아직 생성되지 않았습니다." />;
   }
-  // 백엔드에서 signed URL 을 따로 내려주는 엔드포인트가 있으면 그걸 사용.
-  // 지금은 GCS path 자체를 표시만 해둠.
   return (
     <div className="space-y-3">
-      <div className="aspect-square rounded-xl bg-teal-50 flex items-center justify-center text-teal-700 text-sm">
-        [히트맵 이미지 자리 — heatmap_gcs_path]
-      </div>
-      <p className="text-xs text-gray-500 break-all">
-        path: {caseData.heatmap_gcs_path}
-      </p>
+      <img
+        src={caseData.heatmap_url}
+        alt="히트맵"
+        className="aspect-square w-full rounded-xl object-cover bg-teal-50"
+      />
     </div>
   );
 }
@@ -545,9 +546,23 @@ function SummaryBody({ caseData }: { caseData: CaseDetail }): React.JSX.Element 
           ? `${(caseData.lusc_probability * 100).toFixed(1)}%`
           : "—"}
       </Row>
-      <Row label="최고 신뢰도">
+      <Row label="최고 정확도">
         {conf != null ? `${(conf * 100).toFixed(1)}%` : "—"}
       </Row>
+
+      {caseData.gene_predictions && caseData.gene_predictions.length > 0 && (
+        <div className="mt-3">
+          <p className="text-xs text-gray-500 mb-2">유전자 변이 예측</p>
+          <div className="space-y-1.5">
+            {caseData.gene_predictions.map((g) => (
+              <Row key={g.gene_name} label={g.gene_name}>
+                {(g.likelihood * 100).toFixed(1)}%
+              </Row>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mt-3 p-3 rounded-lg bg-gray-50">
         <p className="text-xs text-gray-500 mb-1">표적치료 노트</p>
         <p className="text-gray-700 leading-relaxed">
@@ -585,10 +600,16 @@ function NucleusBody({ caseData }: { caseData: CaseDetail }): React.JSX.Element 
           {patches.slice(0, 8).map((p) => (
             <div
               key={p.id}
-              className="aspect-square rounded-lg bg-teal-50 flex flex-col items-center justify-center text-xs text-teal-700 p-1"
+              className="aspect-square rounded-lg overflow-hidden bg-teal-50 relative"
             >
-              <span className="font-medium">#{p.attention_rank ?? "—"}</span>
-              <span className="text-[10px] text-gray-500">{p.nuclei_count}개</span>
+              <img
+                src={p.overlay_url}
+                alt={`패치 #${p.attention_rank}`}
+                className="w-full h-full object-cover"
+              />
+              <span className="absolute bottom-0.5 right-0.5 text-[10px] bg-black/60 text-white px-1 rounded">
+                #{p.attention_rank ?? "—"} · {p.nuclei_count}개
+              </span>
             </div>
           ))}
         </div>
