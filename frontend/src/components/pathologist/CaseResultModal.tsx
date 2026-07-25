@@ -79,9 +79,17 @@ export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalP
                 </div>
               </div>
             )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+
+            {/* AI 소견 (RAG) */}
+            <div className="pt-2 border-t border-gray-100">
+              <p className="text-xs text-gray-500 mb-2 mt-2">AI 기반 검토 소견</p>
+              {detail.treatment_note ? (
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  {detail.treatment_note}
+                </p>
+              ) : (
+                <p className="text-sm text-gray-400 italic">
+                  AI 소견 생성에 실패했거나 아직 생성되지 않았습니다.
+                </p>
+              )}
+            </div>

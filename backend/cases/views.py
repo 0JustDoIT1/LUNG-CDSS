@@ -11,6 +11,9 @@ from .serializers import CaseListSerializer, CaseDetailSerializer
 from .services import call_mosec_predict
 from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upload_url
 
+from rag.rag_service import generate_treatment_note
+from rag.exceptions import RAGServiceError
+
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 
 
@@ -136,6 +139,20 @@ def predict_case(request, case_id):
             gene_name=gene["gene_name"],
             likelihood=gene["likelihood"],
         )
+
+    gene_predictions_dict = {
+        gene["gene_name"]: gene["likelihood"]
+        for gene in result.get("gene_predictions", [])
+    }
+
+    try:
+        rag_result = generate_treatment_note(predictions=gene_predictions_dict)
+        case.treatment_note = rag_result["treatment_note"]
+    except RAGServiceError as e:
+        case.treatment_note = None
+        print(f"RAG 소견 생성 실패 (case_id={case.id}): {e}")
+
+    case.save(update_fields=["treatment_note"])
 
     return Response({"status": "completed", "case_id": str(case.id)})
 
