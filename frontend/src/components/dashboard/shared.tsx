@@ -19,7 +19,11 @@ export function EmptyNote({ text }: { text: string }): React.JSX.Element {
 }
 
 export function Th({ children }: { children: React.ReactNode }): React.JSX.Element {
-  return <th className="text-left px-4 py-2.5 font-semibold text-xs">{children}</th>;
+  return (
+    <th className="text-left px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-gray-500">
+      {children}
+    </th>
+  );
 }
 
 type MetricTone = "default" | "teal" | "rose" | "amber";
@@ -28,16 +32,18 @@ export function MetricCard({
   label,
   value,
   tone = "default",
+  icon: Icon,
 }: {
   label: string;
   value: number;
   tone?: MetricTone;
+  icon?: LucideIcon;
 }): React.JSX.Element {
-  const toneCls: Record<MetricTone, string> = {
-    default: "border-gray-100 bg-white",
-    teal: "border-teal-200 bg-teal-50",
-    rose: "border-rose-200 bg-rose-50",
-    amber: "border-amber-200 bg-amber-50",
+  const iconWrapCls: Record<MetricTone, string> = {
+    default: "bg-gray-100 text-gray-500",
+    teal: "bg-teal-50 text-teal-600",
+    rose: "bg-rose-50 text-rose-600",
+    amber: "bg-amber-50 text-amber-600",
   };
   const valueCls: Record<MetricTone, string> = {
     default: "text-gray-900",
@@ -46,9 +52,16 @@ export function MetricCard({
     amber: "text-amber-700",
   };
   return (
-    <div className={`rounded-xl p-4 border ${toneCls[tone]}`}>
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className={`text-2xl font-bold mt-1 ${valueCls[tone]}`}>{value}</p>
+    <div className="rounded-xl border border-gray-200 bg-white px-4 py-3.5">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium text-gray-500">{label}</p>
+        {Icon && (
+          <div className={`flex h-6 w-6 items-center justify-center rounded-md ${iconWrapCls[tone]}`}>
+            <Icon className="h-3.5 w-3.5" />
+          </div>
+        )}
+      </div>
+      <p className={`text-2xl font-semibold mt-1.5 tabular-nums ${valueCls[tone]}`}>{value}</p>
     </div>
   );
 }
@@ -65,9 +78,9 @@ export function ActionBtn({
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-teal-50 text-teal-700 hover:bg-teal-100"
+      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-gray-600 border border-gray-200 bg-white hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50/50 transition-colors"
     >
-      <Icon className="w-3 h-3" />
+      <Icon className="w-3.5 h-3.5" />
       {label}
     </button>
   );

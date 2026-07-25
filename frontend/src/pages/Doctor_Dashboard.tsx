@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Search, Grid3x3, ClipboardList, ScanSearch, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  Search,
+  Grid3x3,
+  ClipboardList,
+  ScanSearch,
+  AlertTriangle,
+  Loader2,
+  Users,
+  CheckCircle2,
+  XCircle,
+  ClipboardCheck,
+} from "lucide-react";
 import type {
   CaseStatus,
   CaseListItem,
@@ -7,7 +18,7 @@ import type {
   ModalType,
   Metrics,
 } from "../types/case";
-import { STATUS_LABELS, STATUS_CLS, REVIEW_LABELS, REVIEW_CLS } from "../types/case";
+import { STATUS_LABELS, REVIEW_LABELS, REVIEW_CLS } from "../types/case";
 import { Th, MetricCard, ActionBtn } from "../components/dashboard/shared";
 import { DetailModal } from "../components/dashboard/DetailModal";
 
@@ -17,6 +28,14 @@ const API_BASE =
   "https://lung-cdss.kro.kr/api";
 
 const TOKEN_KEY = "access_token";
+
+// 상태별 점(dot) 색상 — 대시보드 전용 시각 표기
+const STATUS_DOT: Record<CaseStatus, string> = {
+  uploaded: "bg-gray-400",
+  processing: "bg-blue-500",
+  completed: "bg-green-500",
+  failed: "bg-rose-500",
+};
 
 // ----------------------------- API -----------------------------
 async function apiGet<T>(path: string): Promise<T> {
@@ -120,11 +139,14 @@ export default function Dashboard(): React.JSX.Element {
 
   if (loading)
     return (
-      <div className="p-8 flex items-center gap-2 text-gray-500">
+      <div className="p-8 flex items-center gap-2 text-gray-500 text-sm">
         <Loader2 className="w-4 h-4 animate-spin" /> 불러오는 중...
       </div>
     );
-  if (error) return <div className="p-8 text-rose-600">에러: {error}</div>;
+  if (error)
+    return (
+      <div className="p-8 text-sm text-rose-600">에러: {error}</div>
+    );
 
   const statusFilters: { v: CaseStatus | ""; l: string }[] = [
     { v: "", l: "전체" },
@@ -135,93 +157,122 @@ export default function Dashboard(): React.JSX.Element {
   ];
 
   return (
-    <main className="flex-1 p-3 lg:p-4 space-y-4 min-w-0 max-w-[1380px] mx-auto w-full">
+    <main className="flex-1 bg-[#F7F8FA] min-h-screen p-4 lg:p-6 space-y-5 min-w-0 max-w-[1380px] mx-auto w-full">
       <div>
-        <p className="text-xs text-gray-500">진단 워크플로우</p>
-        <h1 className="font-bold text-2xl text-gray-900">의사 대시보드</h1>
+        <p className="text-xs font-medium text-gray-400">진단 워크플로우</p>
+        <h1 className="font-semibold text-2xl text-gray-900 tracking-tight">의사 대시보드</h1>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-        <MetricCard label="총 케이스" value={metrics.total} />
-        <MetricCard label="분석 완료" value={metrics.completed} tone="teal" />
-        <MetricCard label="실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} />
-        <MetricCard label="검토 필요" value={metrics.review} tone={metrics.review > 0 ? "amber" : "default"} />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <MetricCard label="총 케이스" value={metrics.total} icon={Users} />
+        <MetricCard label="분석 완료" value={metrics.completed} tone="teal" icon={CheckCircle2} />
+        <MetricCard label="실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
+        <MetricCard label="검토 필요" value={metrics.review} tone={metrics.review > 0 ? "amber" : "default"} icon={ClipboardCheck} />
       </div>
 
       {urgent.length > 0 && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200">
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-          <span className="text-sm text-amber-800">
-            ⚠ 신뢰도 낮은 케이스 {urgent.length}건:{" "}
-            {urgent.slice(0, 3).map((c) => c.specimen_id).join(", ")}
-            {urgent.length > 3 ? " 외" : ""} — 확인 필요
-          </span>
+        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3">
+          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100">
+            <AlertTriangle className="h-3 w-3 text-amber-700" />
+          </div>
+          <p className="text-sm text-amber-900">
+            <span className="font-medium">신뢰도 낮은 케이스 {urgent.length}건</span>
+            <span className="text-amber-700">
+              {" "}
+              — {urgent.slice(0, 3).map((c) => c.specimen_id).join(", ")}
+              {urgent.length > 3 ? " 외" : ""} 확인이 필요합니다
+            </span>
+          </p>
         </div>
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        {statusFilters.map((s) => (
-          <button
-            key={s.v || "all"}
-            onClick={() => setStatusFilter(s.v)}
-            className={`border rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              statusFilter === s.v
-                ? "border-teal-600 bg-teal-50 text-teal-700"
-                : "border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            {s.l}
-          </button>
-        ))}
-        <div className="relative flex-1 min-w-[160px] ml-auto">
+        <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5">
+          {statusFilters.map((s) => (
+            <button
+              key={s.v || "all"}
+              onClick={() => setStatusFilter(s.v)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                statusFilter === s.v
+                  ? "bg-gray-900 text-white"
+                  : "text-gray-500 hover:text-gray-900"
+              }`}
+            >
+              {s.l}
+            </button>
+          ))}
+        </div>
+        <div className="relative flex-1 min-w-[160px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="specimen_id / 진단 검색..."
-            className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-200"
+            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-teal-400"
           />
         </div>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-700">
+          <thead className="bg-gray-50/80 sticky top-0">
             <tr>
               <Th>Specimen ID</Th>
               <Th>상태</Th>
-              <Th>진단</Th>
-              <Th>리뷰</Th>
-              <Th>신뢰도</Th>
+              <Th>진단 / 확률</Th>
+              <Th>진행상황</Th>
               <Th>업로드</Th>
               <Th>액션</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {filtered.map((c) => {
-              const conf = c.luad_probability != null ? Math.max(c.luad_probability, c.lusc_probability ?? 0) : null;
+              const luad = c.luad_probability ?? 0;
+              const lusc = c.lusc_probability ?? 0;
+              const conf = c.luad_probability != null ? Math.max(luad, lusc) : null;
               return (
-                <tr key={c.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-mono text-xs text-gray-700">{c.specimen_id}</td>
-                  <td className="px-4 py-2.5">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_CLS[c.status] ?? ""}`}>
+                <tr key={c.id} className="hover:bg-gray-50/60 transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-gray-700">{c.specimen_id}</td>
+                  <td className="px-4 py-3">
+                    <span className="inline-flex items-center gap-1.5 text-xs text-gray-600">
+                      <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[c.status]}`} />
                       {STATUS_LABELS[c.status] ?? c.status}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 text-gray-700">{c.prediction_label ?? "—"}</td>
-                  <td className="px-4 py-2.5">
+                  <td className="px-4 py-3">
+                    {conf != null ? (
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-xs font-semibold w-11 ${
+                            c.prediction_label === "LUAD" ? "text-indigo-600" : "text-teal-600"
+                          }`}
+                        >
+                          {c.prediction_label ?? "—"}
+                        </span>
+                        <div className="flex h-1.5 w-20 overflow-hidden rounded-full bg-gray-100">
+                          <div className="h-full bg-indigo-500" style={{ width: `${luad * 100}%` }} />
+                          <div className="h-full bg-teal-500" style={{ width: `${lusc * 100}%` }} />
+                        </div>
+                        <span className="text-xs tabular-nums text-gray-400 w-9 text-right">
+                          {(conf * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
                     {c.review_status ? (
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${REVIEW_CLS[c.review_status] ?? ""}`}>
                         {REVIEW_LABELS[c.review_status] ?? c.review_status}
                       </span>
                     ) : (
-                      "—"
+                      <span className="text-xs text-gray-400">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-2.5 text-gray-600">{conf != null ? `${(conf * 100).toFixed(0)}%` : "—"}</td>
-                  <td className="px-4 py-2.5 text-gray-500 text-xs">{c.uploaded_at?.slice(0, 10)}</td>
-                  <td className="px-4 py-2.5">
-                    <div className="flex gap-1 flex-wrap">
+                  <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">{c.uploaded_at?.slice(0, 10)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1.5 flex-wrap">
                       <ActionBtn icon={Grid3x3} label="히트맵" onClick={() => openModal(c, "heatmap")} />
                       <ActionBtn icon={ClipboardList} label="요약" onClick={() => openModal(c, "summary")} />
                       <ActionBtn icon={ScanSearch} label="핵형태" onClick={() => openModal(c, "nucleus")} />
@@ -232,8 +283,8 @@ export default function Dashboard(): React.JSX.Element {
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
-                  결과 없음
+                <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-400">
+                  조건에 맞는 케이스가 없습니다
                 </td>
               </tr>
             )}
