@@ -1,5 +1,7 @@
 FROM vllm/vllm-openai:v0.8.3
 
+RUN pip uninstall -y hf_xet || true
+
 RUN --mount=type=secret,id=hf_token \
     python3 -c "from huggingface_hub import login; login(token=open('/run/secrets/hf_token').read().strip())"
 
