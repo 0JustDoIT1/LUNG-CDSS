@@ -16,8 +16,12 @@ class SignupSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate_hospital_code(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("이미 등록된 병원코드입니다.")
+
         if HospitalProfile.objects.filter(hospital_code=value).exists():
             raise serializers.ValidationError("이미 등록된 병원코드입니다.")
+
         return value
 
     def validate_password(self, value):
