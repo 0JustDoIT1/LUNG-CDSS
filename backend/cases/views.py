@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
+from django.db import IntegrityError
 import os
 
 from accounts.permissions import IsDoctor, IsPathologist
@@ -50,12 +51,27 @@ def case_list_create(request):
         if not specimen_id:
             return Response({"error": "specimen_id는 필수입니다"}, status=status.HTTP_400_BAD_REQUEST)
 
-        case = Case.objects.create(
-            user=request.user,
-            specimen_id=specimen_id,
-            slide_gcs_path=slide_gcs_path,
-            status="uploaded",
-        )
+        # 사전 체크: 일반적인 경우 빠르게 친절한 에러 반환
+        if Case.objects.filter(specimen_id=specimen_id).exists():
+            return Response(
+                {"error": f"이미 등록된 검체 ID입니다: {specimen_id}"},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        try:
+            case = Case.objects.create(
+                user=request.user,
+                specimen_id=specimen_id,
+                slide_gcs_path=slide_gcs_path,
+                status="uploaded",
+            )
+        except IntegrityError:
+            # 동시 요청으로 사전 체크를 통과했지만 DB unique 제약에 걸린 경우
+            return Response(
+                {"error": f"이미 등록된 검체 ID입니다: {specimen_id}"},
+                status=status.HTTP_409_CONFLICT,
+            )
+
         serializer = CaseDetailSerializer(case)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -231,6 +247,7 @@ def review_case(request, case_id):
 
     serializer = CaseDetailSerializer(case)
     return Response(serializer.data)
+
 
 @api_view(["POST"])
 @permission_classes([IsPathologist])

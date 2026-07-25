@@ -30,7 +30,7 @@ class Case(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    specimen_id = models.CharField(max_length=100)
+    specimen_id = models.CharField(max_length=100, unique=True)
 
     # AI 처리 상태 (업로드 → 분석 요청 → 완료/실패)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="uploaded")
