@@ -67,10 +67,25 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
     redrawCanvas();
   }, [redrawCanvas]);
 
+  // ↓ 여기에 추가 (if 문보다 반드시 위)
+  useEffect(() => {
+    function handleZoomKey(e: KeyboardEvent) {
+      if ((e.target as HTMLElement)?.tagName === "INPUT") return;
+      if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        setZoom((z) => Math.min(Math.max(z + 0.25, 1), 6));
+      } else if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        setZoom((z) => Math.min(Math.max(z - 0.25, 1), 6));
+      }
+    }
+    window.addEventListener("keydown", handleZoomKey);
+    return () => window.removeEventListener("keydown", handleZoomKey);
+  }, []);
+
   if (!hasHeatmap) {
     return <EmptyNote text="히트맵이 아직 생성되지 않았습니다." />;
   }
-
   // ---------------- 줌/팬/드로잉 ----------------
   function clamp(z: number): number {
     return Math.min(Math.max(z, 1), 8);
