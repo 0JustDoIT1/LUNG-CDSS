@@ -18,3 +18,9 @@ export interface TokenPair {
   access: string;
   refresh: string;
 }
+
+export interface LoginResponse extends TokenPair {
+  name: string;
+  department: DepartmentCode;
+  role: UserRole;
+}
