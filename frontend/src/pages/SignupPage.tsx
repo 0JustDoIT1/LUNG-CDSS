@@ -24,6 +24,7 @@ interface SignupFormValues extends SignupPayload {
 export default function SignupPage() {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -40,12 +41,16 @@ export default function SignupPage() {
 
   const password = watch("password");
 
-  async function onSubmit(data: SignupFormValues) {
+async function onSubmit(data: SignupFormValues) {
     setServerError(null);
+    setSuccessMessage(null);
     const { password_confirm: _passwordConfirm, ...payload } = data;
     try {
-      await signup(payload); // hospital_code가 그대로 signup payload에 포함됨
-      navigate("/login");
+      await signup(payload);
+      setSuccessMessage("회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.");
+      setTimeout(() => {
+        navigate("/login");
+      }, 3500);
     } catch (err) {
       const responseData = (err as any)?.response?.data;
       if (responseData && typeof responseData === "object") {
@@ -65,7 +70,6 @@ export default function SignupPage() {
       }
     }
   }
-
   return (
     <AuthLayout>
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4" noValidate>
@@ -205,7 +209,12 @@ export default function SignupPage() {
         </div>
 
         {serverError && <p className="text-xs text-red-500">{serverError}</p>}
-
+        {serverError && <p className="text-xs text-red-500">{serverError}</p>}
+        {successMessage && (
+          <p className="text-xs text-green-600 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+            {successMessage}
+          </p>
+        )}        
         <button
           type="submit"
           disabled={isSubmitting}

@@ -26,8 +26,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => navigate("/login")}
-              className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-                isLogin ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-400"
+              className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer hover:bg-gray-50 ${
+                isLogin ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-400 hover:text-gray-600"
               }`}
             >
               로그인
@@ -35,8 +35,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => navigate("/signup")}
-              className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors ${
-                !isLogin ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-400"
+              className={`flex-1 py-3 text-sm font-medium border-b-2 transition-colors cursor-pointer hover:bg-gray-50 ${
+                !isLogin ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-400 hover:text-gray-600"
               }`}
             >
               회원가입
