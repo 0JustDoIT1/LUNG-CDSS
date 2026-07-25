@@ -8,8 +8,8 @@ import type { DepartmentCode, SignupPayload, UserRole } from "../types/auth";
 
 const DEPARTMENT_OPTIONS: { value: DepartmentCode; label: string }[] = [
   { value: "respiratory", label: "호흡기내과" },
-  { value: "pathology", label: "병리과" },
   { value: "oncology", label: "종양내과" },
+  { value: "pathology", label: "병리과" },
 ];
 
 const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
@@ -43,7 +43,7 @@ export default function SignupPage() {
     setServerError(null);
     const { password_confirm: _passwordConfirm, ...payload } = data;
     try {
-      await signup(payload);
+      await signup(payload); // hospital_code가 그대로 signup payload에 포함됨
       navigate("/login");
     } catch {
       setServerError("회원가입에 실패했습니다. 입력값을 확인해주세요.");
@@ -55,7 +55,7 @@ export default function SignupPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4" noValidate>
         <div>
           <label htmlFor="signup-hospital-code" className="block text-xs font-medium mb-1.5 text-gray-700">
-            병원코드
+            병원 코드
           </label>
           <input
             id="signup-hospital-code"
@@ -76,23 +76,7 @@ export default function SignupPage() {
           {errors.hospital_code && <p className="text-[11px] text-red-500 mt-1.5">{errors.hospital_code.message}</p>}
         </div>
 
-        <div>
-          <label htmlFor="signup-username" className="block text-xs font-medium mb-1.5 text-gray-700">
-            아이디
-          </label>
-          <input
-            id="signup-username"
-            type="text"
-            {...register("username", { required: "아이디를 입력해주세요." })}
-            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none focus:ring-1 transition ${
-              errors.username
-                ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                : "border-gray-200 focus:border-indigo-400 focus:ring-indigo-100"
-            }`}
-            placeholder="로그인에 사용할 아이디"
-          />
-          {errors.username && <p className="text-[11px] text-red-500 mt-1.5">{errors.username.message}</p>}
-        </div>
+
 
         <div>
           <label htmlFor="signup-name" className="block text-xs font-medium mb-1.5 text-gray-700">
@@ -107,42 +91,55 @@ export default function SignupPage() {
                 ? "border-red-300 focus:border-red-400 focus:ring-red-100"
                 : "border-gray-200 focus:border-indigo-400 focus:ring-indigo-100"
             }`}
-            placeholder="홍길동"
+            placeholder="이름 입력"
           />
           {errors.name && <p className="text-[11px] text-red-500 mt-1.5">{errors.name.message}</p>}
         </div>
 
         <div>
           <label htmlFor="signup-department" className="block text-xs font-medium mb-1.5 text-gray-700">
-            진료과코드
+            진료과 코드
           </label>
-          <select
-            id="signup-department"
-            {...register("department", { required: true })}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition bg-white"
-          >
-            {DEPARTMENT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-
+          <div className="relative">
+            <select
+              id="signup-department"
+              {...register("department", { required: true })}
+              className="w-full appearance-none px-3.5 py-2.5 pr-9 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition bg-white"
+            >
+              {DEPARTMENT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <svg
+              className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>      
         <div>
           <label htmlFor="signup-role" className="block text-xs font-medium mb-1.5 text-gray-700">
             역할
           </label>
-          <select
-            id="signup-role"
-            {...register("role", { required: true })}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition bg-white"
-          >
-            {ROLE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
+          <div className="relative">
+            <select
+              id="signup-role"
+              {...register("role", { required: true })}
+              className="w-full appearance-none px-3.5 py-2.5 pr-9 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition bg-white"
+            >
+              {ROLE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <svg
+              className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>        <div>
           <label htmlFor="signup-pw" className="block text-xs font-medium mb-1.5 text-gray-700">
             비밀번호
           </label>
