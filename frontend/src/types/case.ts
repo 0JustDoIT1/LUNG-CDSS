@@ -9,22 +9,22 @@ export type CaseStep =
   | "generating_result"
   | null;
 
-export type ReviewStatus = "ai_suggested" | "confirmed" | "overridden";
+export type ReviewStatus = "pending" | "confirmed" | "rejected";
 export type PredictionLabel = "LUAD" | "LUSC" | null;
 export type DensityLevel = "낮음" | "보통" | "높음" | null;
 export type IrregularityLevel = "낮음" | "보통" | "뚜렷" | null;
+export type GeneName = "TP53" | "KEAP1" | "KRAS";
 
 export interface NucleiPatch {
   id: string;
-  original_gcs_path: string;
-  overlay_gcs_path: string;
+  original_url: string;
+  overlay_url: string;
   nuclei_count: number;
   attention_rank: number;
 }
 
 export interface GenePrediction {
-  id: string;
-  gene_name: string;
+  gene_name: GeneName;
   likelihood: number;
 }
 
@@ -32,8 +32,12 @@ export interface CaseListItem {
   id: string;
   specimen_id: string;
   status: CaseStatus;
+  review_status: ReviewStatus | null;
   prediction_label: PredictionLabel;
+  luad_probability: number | null;
+  lusc_probability: number | null;
   uploaded_at: string;
+  completed_at: string | null;
 }
 
 export interface CaseDetail {
@@ -49,8 +53,8 @@ export interface CaseDetail {
   nuclei_density_level: DensityLevel;
   nuclei_irregularity_score: number | null;
   nuclei_irregularity_level: IrregularityLevel;
-  heatmap_gcs_path: string | null;
-  slide_thumbnail_gcs_path: string | null;
+  heatmap_url: string | null;
+  slide_thumbnail_url: string | null;
   nuclei_patches: NucleiPatch[];
   gene_predictions: GenePrediction[];
   treatment_note: string | null;
@@ -70,7 +74,16 @@ export interface CreateCasePayload {
   slide_gcs_path: string;
 }
 
+export interface UploadUrlPayload {
+  filename: string;
+}
+
+export interface UploadUrlResponse {
+  upload_url: string;
+  gcs_path: string;
+}
+
 export interface ReviewPayload {
-  action: "confirm" | "override";
+  action: "confirm" | "reject";
   reviewer_note?: string;
 }

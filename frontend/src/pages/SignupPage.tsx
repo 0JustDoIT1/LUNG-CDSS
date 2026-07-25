@@ -7,7 +7,7 @@ import { PASSWORD_REGEX } from "../utils/validation";
 import type { DepartmentCode, SignupPayload, UserRole } from "../types/auth";
 
 const DEPARTMENT_OPTIONS: { value: DepartmentCode; label: string }[] = [
-  { value: "respiratory", label: "호흡기내과" },
+  { value: "pulmonology", label: "호흡기내과" },
   { value: "oncology", label: "종양내과" },
   { value: "pathology", label: "병리과" },
 ];

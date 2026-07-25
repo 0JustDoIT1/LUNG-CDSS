@@ -1,9 +1,8 @@
-export type DepartmentCode = "respiratory" | "pathology" | "oncology";
+export type DepartmentCode = "pathology" | "pulmonology" | "oncology";
 export type UserRole = "doctor" | "pathologist";
 
 export interface SignupPayload {
   hospital_code: string;
-  username: string;
   name: string;
   department: DepartmentCode;
   role: UserRole;
@@ -11,7 +10,7 @@ export interface SignupPayload {
 }
 
 export interface LoginPayload {
-  username: string;
+  hospital_code: string;
   password: string;
 }
 
