@@ -87,3 +87,45 @@ export interface ReviewPayload {
   action: "confirm" | "reject";
   reviewer_note?: string;
 }
+
+// ----------------------------- 대시보드 UI용 타입/상수 -----------------------------
+export type ModalType = "heatmap" | "summary" | "nucleus";
+
+export interface Metrics {
+  total: number;
+  completed: number;
+  failed: number;
+  review: number;
+}
+
+export interface Stroke {
+  color: string;
+  size: number;
+  points: { x: number; y: number }[];
+}
+
+export const STATUS_LABELS: Record<CaseStatus, string> = {
+  uploaded: "업로드됨",
+  processing: "분석 중",
+  completed: "분석 완료",
+  failed: "실패",
+};
+
+export const STATUS_CLS: Record<CaseStatus, string> = {
+  uploaded: "bg-gray-100 text-gray-600",
+  processing: "bg-blue-100 text-blue-700",
+  completed: "bg-green-100 text-green-700",
+  failed: "bg-rose-100 text-rose-700",
+};
+
+export const REVIEW_LABELS: Record<ReviewStatus, string> = {
+  pending: "대기",
+  confirmed: "승인",
+  rejected: "미승인",
+};
+
+export const REVIEW_CLS: Record<ReviewStatus, string> = {
+  pending: "bg-amber-100 text-amber-700",
+  confirmed: "bg-teal-100 text-teal-700",
+  rejected: "bg-rose-100 text-rose-700",
+};
