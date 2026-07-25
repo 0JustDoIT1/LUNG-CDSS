@@ -1,0 +1,67 @@
+[
+  {
+    "document_id": "nci_nsclc_pdq",
+    "file_name": "01_NCI_NSCLC_PDQ.pdf",
+    "title": "Non-Small Cell Lung Cancer Treatment (PDQ) - Health Professional Version",
+    "source": "National Cancer Institute",
+    "document_type": "official_treatment_summary",
+    "evidence_level": "official_summary",
+    "clinical_status": "clinical_reference",
+    "genes": ["KRAS"],
+    "topics": ["NSCLC", "KRAS G12C", "targeted therapy", "sotorasib", "adagrasib"],
+    "year": 2025,
+    "license_note": "Use text only. Exclude images and third-party tables."
+  },
+  {
+    "document_id": "kras_tp53_ici_luad_2024",
+    "file_name": "02_KRAS_TP53_ICI_LUAD_2024.pdf",
+    "title": "KRAS and TP53 co-mutation predicts benefit of immune checkpoint blockade in lung adenocarcinoma",
+    "source": "British Journal of Cancer",
+    "document_type": "original_research",
+    "evidence_level": "observational_clinical_study",
+    "clinical_status": "research_evidence",
+    "genes": ["KRAS", "TP53"],
+    "topics": ["lung adenocarcinoma", "co-mutation", "immunotherapy", "immune checkpoint inhibitor", "overall survival"],
+    "year": 2024,
+    "license_note": "Open access article. Preserve source attribution."
+  },
+  {
+    "document_id": "impower150_comutation_2022",
+    "file_name": "03_KRAS_STK11_KEAP1_TP53_IMpower150_2022.pdf",
+    "title": "Clinical efficacy of atezolizumab plus bevacizumab and chemotherapy in KRAS-mutated NSCLC with STK11, KEAP1, or TP53 comutations",
+    "source": "Journal for ImmunoTherapy of Cancer",
+    "document_type": "exploratory_subgroup_analysis",
+    "evidence_level": "phase_3_post_hoc_analysis",
+    "clinical_status": "research_evidence",
+    "genes": ["KRAS", "STK11", "KEAP1", "TP53"],
+    "topics": ["NSCLC", "co-mutation", "immunotherapy", "prognosis", "overall survival", "progression-free survival"],
+    "year": 2022,
+    "license_note": "CC BY-NC. Non-commercial use only."
+  },
+  {
+    "document_id": "lumakras_fda_label",
+    "file_name": "04_LUMAKRAS_sotorasib_FDA_label.pdf",
+    "title": "LUMAKRAS (sotorasib) Prescribing Information",
+    "source": "U.S. Food and Drug Administration",
+    "document_type": "fda_prescribing_information",
+    "evidence_level": "regulatory_label",
+    "clinical_status": "approved_drug_information",
+    "genes": ["KRAS"],
+    "topics": ["KRAS G12C", "sotorasib", "indication", "dosage", "warnings", "adverse reactions"],
+    "year": 2023,
+    "license_note": "Verify current FDA label before clinical use."
+  },
+  {
+    "document_id": "krazati_fda_label",
+    "file_name": "05_KRAZATI_adagrasib_FDA_label.pdf",
+    "title": "KRAZATI (adagrasib) Prescribing Information",
+    "source": "U.S. Food and Drug Administration",
+    "document_type": "fda_prescribing_information",
+    "evidence_level": "regulatory_label",
+    "clinical_status": "approved_drug_information",
+    "genes": ["KRAS"],
+    "topics": ["KRAS G12C", "adagrasib", "indication", "dosage", "warnings", "adverse reactions"],
+    "year": 2024,
+    "license_note": "Verify current FDA label before clinical use."
+  }
+]

@@ -29,3 +29,5 @@ requests==2.34.2
 sqlparse==0.5.5
 tzdata==2026.3
 urllib3==2.7.0
+pymupdf==1.28.0
+openai==2.48.0

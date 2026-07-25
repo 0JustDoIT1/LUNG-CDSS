@@ -29,6 +29,7 @@ export default function SignupPage() {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormValues>({
     defaultValues: {
@@ -45,8 +46,23 @@ export default function SignupPage() {
     try {
       await signup(payload); // hospital_code가 그대로 signup payload에 포함됨
       navigate("/login");
-    } catch {
-      setServerError("회원가입에 실패했습니다. 입력값을 확인해주세요.");
+    } catch (err) {
+      const responseData = (err as any)?.response?.data;
+      if (responseData && typeof responseData === "object") {
+        let hasFieldError = false;
+        Object.entries(responseData).forEach(([field, messages]) => {
+          if (field === "hospital_code" || field === "name" || field === "department" || field === "role" || field === "password") {
+            const message = Array.isArray(messages) ? messages[0] : String(messages);
+            setError(field as keyof SignupFormValues, { type: "server", message });
+            hasFieldError = true;
+          }
+        });
+        if (!hasFieldError) {
+          setServerError("회원가입에 실패했습니다. 입력값을 확인해주세요.");
+        }
+      } else {
+        setServerError("회원가입에 실패했습니다. 입력값을 확인해주세요.");
+      }
     }
   }
 
