@@ -47,6 +47,7 @@ export default function UploadPage() {
   const [valMsg, setValMsg] = useState<string | null>(null);
   const [globalProgress, setGlobalProgress] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [createdCaseId, setCreatedCaseId] = useState<string | null>(null);
 
   const hasReadyFile = files.some((f) => f.status === "ready");
 
@@ -105,7 +106,8 @@ export default function UploadPage() {
       setGlobalProgress(70);
       setFiles((prev) => prev.map((f) => (f === target ? { ...f, status: "done", progress: 100 } : f)));
 
-      await createCase({ specimen_id: specimenId, slide_gcs_path: gcs_path });
+      const created = await createCase({ specimen_id: specimenId, slide_gcs_path: gcs_path });
+      setCreatedCaseId(created.id);
       setGlobalProgress(100);
       setStepIndex(3);
       setStage("complete");
@@ -208,6 +210,7 @@ export default function UploadPage() {
           </label>
 
           {valMsg && <p className="text-[11px] text-red-700 mt-1">{valMsg}</p>}
+
           {/* 원본 미리보기 (선택된 첫 이미지) */}
           {(() => {
             const previewFile = files.find((f) => f.previewUrl);
@@ -229,6 +232,7 @@ export default function UploadPage() {
               </div>
             );
           })()}
+
           {/* File queue */}
           {files.length > 0 && (
             <div className="mt-4 space-y-2">
@@ -239,10 +243,10 @@ export default function UploadPage() {
                     f.status === "error" ? "border-red-300 bg-red-50" : "border-gray-200"
                   }`}
                 >
-                    <div className="w-9 h-9 rounded-md border border-gray-200 bg-gray-50 flex items-center justify-center flex-shrink-0">
-                      <span className="text-base text-gray-400">📄</span>
-                    </div>                  
-                    <div className="flex-1 min-w-0">
+                  <div className="w-9 h-9 rounded-md border border-gray-200 bg-gray-50 flex items-center justify-center flex-shrink-0">
+                    <span className="text-base text-gray-400">📄</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium text-gray-900 truncate">{f.file.name}</div>
                     <div className="text-[11px] text-gray-400">{fmtSize(f.file.size)}</div>
                     {(f.status === "uploading" || f.status === "done") && (
@@ -304,6 +308,14 @@ export default function UploadPage() {
             >
               결과리스트로 돌아가기
             </button>
+            {/* 임시: CORS 해결 전 분석 화면 미리보기용 */}
+            <button
+              type="button"
+              onClick={() => navigate("/analysis/preview")}
+              className="px-4.5 py-2.5 rounded-lg text-[13px] font-medium border border-dashed border-amber-400 text-amber-700 hover:bg-amber-50 transition"
+            >
+              (임시) 분석 화면 미리보기
+            </button>
           </div>
         </div>
       )}
@@ -325,13 +337,22 @@ export default function UploadPage() {
           <div className="text-4xl mb-3">✅</div>
           <p className="text-base font-semibold text-green-700 mb-1.5">업로드 완료 — 분석 준비됨</p>
           <p className="text-xs text-slate-500 mb-5">슬라이드가 성공적으로 등록되었습니다. 분석을 시작할 수 있습니다.</p>
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-green-700 text-white hover:bg-green-800 transition"
-          >
-            결과리스트로 이동 →
-          </button>
+          <div className="flex gap-2.5 justify-center flex-wrap">
+            <button
+              type="button"
+              onClick={() => createdCaseId && navigate(`/analysis/${createdCaseId}`)}
+              className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-[#185fa5] text-white hover:bg-[#144d8a] transition"
+            >
+              분석 시작
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="px-4.5 py-2.5 rounded-lg text-[13px] font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+            >
+              결과리스트로 이동
+            </button>
+          </div>
         </div>
       )}
     </div>

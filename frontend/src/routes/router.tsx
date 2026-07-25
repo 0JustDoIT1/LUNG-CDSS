@@ -6,6 +6,7 @@ import LoginPage from "../pages/LoginPage";
 import SignupPage from "../pages/SignupPage";
 import CaseListPage from "../pages/CaseListPage";
 import UploadPage from "../pages/UploadPage";
+import AnalysisPage from "../pages/AnalysisPage";
 import Dashboard from "../pages/Doctor_Dashboard"; // jgy
 
 export const router = createBrowserRouter([
@@ -19,6 +20,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "/", element: <CaseListPage /> },
           { path: "/upload", element: <UploadPage /> },
+          { path: "/analysis/:id", element: <AnalysisPage /> },
         ],
       },
       { path: "/doctor-dashboard", element: <Dashboard /> }, // jgy
