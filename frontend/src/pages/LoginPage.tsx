@@ -21,7 +21,7 @@ export default function LoginPage() {
       await login(data);
       navigate("/");
     } catch {
-      setServerError("아이디 또는 비밀번호가 올바르지 않습니다.");
+      setServerError("병원코드 또는 비밀번호가 올바르지 않습니다.");
     }
   }
 
@@ -29,21 +29,27 @@ export default function LoginPage() {
     <AuthLayout>
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4" noValidate>
         <div>
-          <label htmlFor="login-username" className="block text-xs font-medium mb-1.5 text-gray-700">
-            아이디
+          <label htmlFor="login-hospital-code" className="block text-xs font-medium mb-1.5 text-gray-700">
+            병원코드
           </label>
           <input
-            id="login-username"
+            id="login-hospital-code"
             type="text"
-            {...register("username", { required: "아이디를 입력해주세요." })}
+            inputMode="numeric"
+            maxLength={6}
+            //{...register("hospital_code", { required: "병원코드를 입력해주세요." })}
+            {...register("hospital_code", {
+              required: "병원코드를 입력해주세요.",
+              pattern: { value: /^\d{6}$/, message: "병원코드는 숫자 6자리입니다." },
+            })}            
             className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none focus:ring-1 transition ${
-              errors.username
+              errors.hospital_code
                 ? "border-red-300 focus:border-red-400 focus:ring-red-100"
                 : "border-gray-200 focus:border-indigo-400 focus:ring-indigo-100"
             }`}
-            placeholder="아이디 입력"
+            placeholder="숫자 6자리"
           />
-          {errors.username && <p className="text-[11px] text-red-500 mt-1.5">{errors.username.message}</p>}
+          {errors.hospital_code && <p className="text-[11px] text-red-500 mt-1.5">{errors.hospital_code.message}</p>}
         </div>
 
         <div>
@@ -61,10 +67,6 @@ export default function LoginPage() {
             }`}
             placeholder="••••••••"
           />
-          <p className="text-[11px] text-gray-400 mt-1.5">
-            8~16자, 영문자·숫자·특수문자를 모두 포함해야 합니다.
-          </p>
-          {errors.password && <p className="text-[11px] text-red-500 mt-1">{errors.password.message}</p>}
         </div>
 
         {serverError && <p className="text-xs text-red-500">{serverError}</p>}

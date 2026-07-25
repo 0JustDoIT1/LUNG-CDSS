@@ -5,7 +5,24 @@ import type {
   CaseListParams,
   CreateCasePayload,
   ReviewPayload,
+  UploadUrlPayload,
+  UploadUrlResponse,
 } from "../types/case";
+
+// 1. 업로드 URL 발급
+export async function getUploadUrl(payload: UploadUrlPayload) {
+  const { data } = await apiClient.post<UploadUrlResponse>("/cases/upload-url/", payload);
+  return data;
+}
+
+// 2. 발급받은 URL로 파일 직접 GCS 업로드 (Django 안 거침)
+export async function uploadFileToGcs(uploadUrl: string, file: File) {
+  await fetch(uploadUrl, {
+    method: "PUT",
+    body: file,
+    headers: { "Content-Type": "application/octet-stream" },
+  });
+}
 
 export async function getCases(params?: CaseListParams) {
   const { data } = await apiClient.get<CaseListItem[]>("/cases/", { params });

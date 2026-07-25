@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3" />
             </svg>
           </div>
-          <p className="font-semibold text-lg text-gray-900">PathoAI</p>
+          <p className="font-semibold text-lg text-gray-900">이름</p>
           <p className="text-sm mt-1 text-gray-500">병리 슬라이드 AI 진단 플랫폼</p>
         </div>
 
