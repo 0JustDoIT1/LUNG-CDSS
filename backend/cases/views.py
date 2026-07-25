@@ -15,9 +15,10 @@ INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 
 
 @api_view(["GET", "POST"])
-@permission_classes([IsPathologist])
+@permission_classes([IsAuthenticated])
 def case_list_create(request):
     if request.method == "GET":
+        # 조회는 의사/병리사 둘 다 가능
         queryset = Case.objects.all()
 
         status_param = request.query_params.get("status")
@@ -36,6 +37,10 @@ def case_list_create(request):
         return Response(serializer.data)
 
     elif request.method == "POST":
+        # 생성은 병리사만
+        if not IsPathologist().has_permission(request, None):
+            return Response({"error": "권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
+
         specimen_id = request.data.get("specimen_id")
         slide_gcs_path = request.data.get("slide_gcs_path")
 
