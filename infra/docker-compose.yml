@@ -23,6 +23,10 @@ services:
       context: ../backend
     env_file:
       - ../backend/.env
+    volumes:
+      - ./gcs-key.json:/app/gcs-key.json:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gcs-key.json
     expose:
       - "8000"
     restart: unless-stopped
