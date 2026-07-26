@@ -16,7 +16,9 @@ def generate_heatmap(thumbnail: Image.Image, coords: list, attention: np.ndarray
     scale_x = thumb_w / level0_w
     scale_y = thumb_h / level0_h
 
-    attn_norm = (attention - attention.min()) / (attention.max() - attention.min() + 1e-8)
+    clip_max = np.percentile(attention, 99)
+    attention_clipped = np.clip(attention, attention.min(), clip_max)
+    attn_norm = (attention_clipped - attention_clipped.min()) / (attention_clipped.max() - attention_clipped.min() + 1e-8)
 
     heatmap = np.zeros((thumb_h, thumb_w), dtype=np.float32)
     count_map = np.zeros((thumb_h, thumb_w), dtype=np.float32)
