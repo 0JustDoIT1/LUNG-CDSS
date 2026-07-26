@@ -96,6 +96,15 @@ class LungCDSSWorker(Worker):
             probs = F.softmax(output["logits"], dim=1)[0]
             attention = output["attention"][0].cpu().numpy()
 
+            import numpy as np
+            print(
+                f"[{case_id}] attn stats — min:{attention.min():.6f} max:{attention.max():.6f} "
+                f"mean:{attention.mean():.6f} p50:{np.percentile(attention,50):.6f} "
+                f"p90:{np.percentile(attention,90):.6f} p99:{np.percentile(attention,99):.6f} "
+                f"max/median비율:{attention.max()/(np.percentile(attention,50)+1e-8):.2f}",
+                flush=True,
+            )
+
             # 유전자 예측 — 같은 UNI2-h 임베딩(x) 재사용, 재추출 없음
             gene_output = self.gene_model(x)
             gene_probs = torch.sigmoid(gene_output["logits"])[0]
