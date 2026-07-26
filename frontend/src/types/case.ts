@@ -38,6 +38,7 @@ export interface CaseListItem {
   lusc_probability: number | null;
   uploaded_at: string;
   completed_at: string | null;
+  is_favorite: boolean;
 }
 
 export interface CaseDetail {
@@ -129,3 +130,4 @@ export const REVIEW_CLS: Record<ReviewStatus, string> = {
   confirmed: "bg-teal-100 text-teal-700",
   rejected: "bg-rose-100 text-rose-700",
 };
+

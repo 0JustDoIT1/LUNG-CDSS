@@ -5,7 +5,7 @@ import {
   ClipboardList,
   ScanSearch,
   AlertTriangle,
-  
+  Star,
   Users,
   CheckCircle2,
   XCircle,
@@ -46,6 +46,138 @@ function getConfidence(c: CaseListItem): number | null {
   return Math.max(c.luad_probability ?? 0, c.lusc_probability ?? 0);
 }
 
+// ----------------------------- 사이드 패널 (xl 이상에서만 노출) -----------------------------
+
+function SidebarSkeleton(): React.JSX.Element {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-3 space-y-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="h-6 rounded-md bg-gray-100 animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+interface LeftSidebarProps {
+  statusFilters: { v: CaseStatus | ""; l: string }[];
+  statusFilter: CaseStatus | "";
+  setStatusFilter: (v: CaseStatus | "") => void;
+  favoritesOnly: boolean;
+  setFavoritesOnly: (fn: (v: boolean) => boolean) => void;
+  cases: CaseListItem[];
+}
+
+function LeftSidebar({
+  statusFilters,
+  statusFilter,
+  setStatusFilter,
+  favoritesOnly,
+  setFavoritesOnly,
+  cases,
+}: LeftSidebarProps): React.JSX.Element {
+  const favoriteCount = cases.filter((c) => c.is_favorite).length;
+
+  return (
+    <aside className="hidden xl:flex xl:flex-col xl:sticky xl:top-6 gap-4 shrink-0">
+      <div className="rounded-xl border border-gray-200 bg-white p-3 space-y-1">
+        <p className="px-1.5 pb-1.5 text-[11px] font-medium text-gray-400 uppercase tracking-wide">상태</p>
+        {statusFilters.map((s) => {
+          const count = s.v === "" ? cases.length : cases.filter((c) => c.status === s.v).length;
+          const active = statusFilter === s.v;
+          return (
+            <button
+              key={s.v || "all"}
+              onClick={() => setStatusFilter(s.v)}
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                active ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              <span>{s.l}</span>
+              <span className={`tabular-nums ${active ? "text-white/70" : "text-gray-400"}`}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="rounded-xl border border-gray-200 bg-white p-3">
+        <button
+          onClick={() => setFavoritesOnly((v) => !v)}
+          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            favoritesOnly ? "bg-amber-50 text-amber-700" : "text-gray-600 hover:bg-gray-50"
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <Star className={`w-3.5 h-3.5 ${favoritesOnly ? "fill-amber-400 text-amber-400" : ""}`} />
+            즐겨찾기
+          </span>
+          <span className="tabular-nums text-gray-400">{favoriteCount}</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+interface RightSidebarProps {
+  urgent: CaseListItem[];
+  reviewPending: CaseListItem[];
+  onOpen: (c: CaseListItem, type: ModalType) => void;
+}
+
+function RightSidebar({ urgent, reviewPending, onOpen }: RightSidebarProps): React.JSX.Element {
+  return (
+    <aside className="hidden xl:flex xl:flex-col xl:sticky xl:top-6 gap-4 shrink-0">
+      <div className="rounded-xl border border-gray-200 bg-white p-3.5 space-y-2.5">
+        <p className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+          <AlertTriangle className="w-3 h-3 text-amber-500" /> 신뢰도 낮은 케이스
+        </p>
+        {urgent.length === 0 ? (
+          <p className="text-xs text-gray-400 py-1.5">해당 케이스가 없습니다</p>
+        ) : (
+          <div className="space-y-0.5">
+            {urgent.slice(0, 6).map((c) => {
+              const conf = getConfidence(c);
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => onOpen(c, "summary")}
+                  className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs hover:bg-amber-50/60 transition-colors"
+                >
+                  <span className="font-mono text-gray-700 truncate">{c.specimen_id}</span>
+                  <span className="text-amber-600 tabular-nums shrink-0 ml-2">
+                    {conf != null ? `${(conf * 100).toFixed(0)}%` : "—"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-gray-200 bg-white p-3.5 space-y-2.5">
+        <p className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+          <ClipboardCheck className="w-3 h-3 text-gray-400" /> 검토 대기
+        </p>
+        {reviewPending.length === 0 ? (
+          <p className="text-xs text-gray-400 py-1.5">검토 대기 케이스가 없습니다</p>
+        ) : (
+          <div className="space-y-0.5">
+            {reviewPending.slice(0, 6).map((c) => (
+              <button
+                key={c.id}
+                onClick={() => onOpen(c, "summary")}
+                className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs hover:bg-gray-50 transition-colors"
+              >
+                <span className="font-mono text-gray-700 truncate">{c.specimen_id}</span>
+                <span className="text-gray-400 shrink-0 ml-2">{c.prediction_label ?? "—"}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}
+
 // ----------------------------- 컴포넌트 -----------------------------
 export default function Dashboard(): React.JSX.Element {
   const [cases, setCases] = useState<CaseListItem[]>([]);
@@ -53,6 +185,7 @@ export default function Dashboard(): React.JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<CaseStatus | "">("");
   const [search, setSearch] = useState<string>("");
+  const [favoritesOnly, setFavoritesOnly] = useState<boolean>(false);
 
   const [modalCase, setModalCase] = useState<CaseDetail | CaseListItem | null>(null);
   const [modalType, setModalType] = useState<ModalType | null>(null);
@@ -64,14 +197,13 @@ export default function Dashboard(): React.JSX.Element {
 
   // 키보드 네비게이션용 선택 상태
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [now, setNow] = useState<Date>(new Date()); 
+  const [now, setNow] = useState<Date>(new Date());
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
   const modalTypeRef = useRef<ModalType | null>(null);
   const selectedIdRef = useRef<string | null>(null);
   modalTypeRef.current = modalType;
   selectedIdRef.current = selectedId;
-  
-  
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -89,7 +221,7 @@ export default function Dashboard(): React.JSX.Element {
     };
   }, []);
 
-  useEffect(() => {                                    // ← 추가
+  useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000 * 30);
     return () => clearInterval(timer);
   }, []);
@@ -111,16 +243,22 @@ export default function Dashboard(): React.JSX.Element {
     [cases]
   );
 
+  const reviewPending = useMemo(
+    () => cases.filter((c) => c.status === "completed" && c.review_status === "pending"),
+    [cases]
+  );
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return cases.filter(
       (c) =>
         (!statusFilter || c.status === statusFilter) &&
+        (!favoritesOnly || c.is_favorite) &&
         (!q ||
           (c.specimen_id ?? "").toLowerCase().includes(q) ||
           (c.prediction_label ?? "").toLowerCase().includes(q))
     );
-  }, [cases, statusFilter, search]);
+  }, [cases, statusFilter, search, favoritesOnly]);
 
   useEffect(() => {
     if (filtered.length === 0) {
@@ -157,6 +295,18 @@ export default function Dashboard(): React.JSX.Element {
       if (prev.length >= 2) return prev;
       return [...prev, id];
     });
+  }, []);
+
+  const toggleFavorite = useCallback(async (id: string) => {
+    // 낙관적 업데이트: 응답 기다리지 않고 먼저 화면 반영, 실패하면 되돌림
+    setCases((prev) => prev.map((c) => (c.id === id ? { ...c, is_favorite: !c.is_favorite } : c)));
+    try {
+      const res = await apiClient.post<{ is_favorite: boolean }>(`/cases/${id}/favorite/`);
+      setCases((prev) => prev.map((c) => (c.id === id ? { ...c, is_favorite: res.data.is_favorite } : c)));
+    } catch (e) {
+      console.error(e);
+      setCases((prev) => prev.map((c) => (c.id === id ? { ...c, is_favorite: !c.is_favorite } : c)));
+    }
   }, []);
 
   const moveSelection = useCallback(
@@ -252,51 +402,6 @@ export default function Dashboard(): React.JSX.Element {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [filtered, moveSelection, openModal]);
 
-  if (loading)
-    return (
-      <main className="flex-1 bg-[#F7F8FA] min-h-screen p-4 lg:p-6 space-y-5 min-w-0 max-w-[1380px] mx-auto w-full">
-        {/* 헤더 자리 */}
-        <div className="flex items-end justify-between flex-wrap gap-2">
-          <div className="space-y-2">
-            <div className="h-3 w-20 rounded-full bg-gray-200 animate-pulse" />
-            <div className="h-6 w-40 rounded-lg bg-gray-200 animate-pulse" />
-          </div>
-        </div>
-
-        {/* 요약 카드 자리 */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-gray-200 bg-white px-4 py-3.5 space-y-2.5">
-              <div className="h-2.5 w-16 rounded-full bg-gray-100 animate-pulse" />
-              <div className="h-6 w-12 rounded-md bg-gray-100 animate-pulse" />
-            </div>
-          ))}
-        </div>
-
-        {/* 중앙 로딩 인디케이터 */}
-        <div className="flex flex-col items-center justify-center gap-3 py-10 rounded-xl border border-gray-200 bg-white">
-          <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-teal-100" />
-            <div className="absolute inset-0 rounded-full border-4 border-teal-500 border-t-transparent animate-spin" />
-          </div>
-          <p className="text-xs font-medium text-gray-400 tracking-wide">케이스 목록을 불러오는 중...</p>
-        </div>
-
-        {/* 테이블 행 자리 */}
-        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 px-4 py-3.5 border-b border-gray-100 last:border-b-0">
-              <div className="h-3 w-24 rounded-full bg-gray-100 animate-pulse" />
-              <div className="h-3 w-16 rounded-full bg-gray-100 animate-pulse" />
-              <div className="h-3 w-20 rounded-full bg-gray-100 animate-pulse ml-auto" />
-              <div className="h-6 w-20 rounded-md bg-gray-100 animate-pulse" />
-            </div>
-          ))}
-        </div>
-      </main>
-    );
-  if (error) return <div className="p-8 text-sm text-rose-600">에러: {error}</div>;
-
   const statusFilters: { v: CaseStatus | ""; l: string }[] = [
     { v: "", l: "전체" },
     { v: "uploaded", l: STATUS_LABELS.uploaded },
@@ -305,179 +410,266 @@ export default function Dashboard(): React.JSX.Element {
     { v: "failed", l: STATUS_LABELS.failed },
   ];
 
-  return (
-    <main className="flex-1 bg-[#F7F8FA] min-h-screen p-4 lg:p-6 space-y-5 min-w-0 max-w-[1380px] mx-auto w-full">
-      <div className="flex items-end justify-between flex-wrap gap-2">
-        <div>
-          <p className="text-xs font-medium text-gray-400">진단 워크플로우</p>
-          <h1 className="font-semibold text-2xl text-gray-900 tracking-tight">의사 대시보드</h1>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <p className="text-sm font-semibold text-gray-700 tabular-nums">
-            {now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
-          </p>
-          <p className="text-[11px] text-gray-400">
-            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">J</kbd>/
-            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">K</kbd> 이동 ·{" "}
-            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Enter</kbd> 상세 ·{" "}
-            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">H/S/N</kbd> 탭 전환 ·{" "}
-            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Esc</kbd> 닫기
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard label="총 케이스" value={metrics.total} icon={Users} />
-        <MetricCard label="분석 완료" value={metrics.completed} tone="teal" icon={CheckCircle2} />
-        <MetricCard label="실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
-        <MetricCard label="검토 필요" value={metrics.review} tone={metrics.review > 0 ? "amber" : "default"} icon={ClipboardCheck} />
-      </div>
-
-      {urgent.length > 0 && (
-        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3">
-          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100">
-            <AlertTriangle className="h-3 w-3 text-amber-700" />
+  if (loading)
+    return (
+      <div className="min-h-screen bg-[#F7F8FA]">
+        <div className="mx-auto w-full max-w-[1760px] p-4 lg:p-6 xl:grid xl:grid-cols-[240px_minmax(0,1fr)_300px] xl:gap-5 xl:items-start">
+          <div className="hidden xl:flex xl:flex-col gap-4">
+            <SidebarSkeleton />
           </div>
-          <p className="text-sm text-amber-900">
-            <span className="font-medium">신뢰도 낮은 케이스 {urgent.length}건</span>
-            <span className="text-amber-700">
-              {" "}
-              — {urgent.slice(0, 3).map((c) => c.specimen_id).join(", ")}
-              {urgent.length > 3 ? " 외" : ""} 확인이 필요합니다 (재검 권장)
-            </span>
-          </p>
-        </div>
-      )}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5">
-          {statusFilters.map((s) => (
-            <button
-              key={s.v || "all"}
-              onClick={() => setStatusFilter(s.v)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                statusFilter === s.v ? "bg-gray-900 text-white" : "text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              {s.l}
-            </button>
-          ))}
-        </div>
-        <div className="relative flex-1 min-w-[160px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="specimen_id / 진단 검색..."
-            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-teal-400"
-          />
+          <main className="space-y-5 min-w-0">
+            {/* 헤더 자리 */}
+            <div className="flex items-end justify-between flex-wrap gap-2">
+              <div className="space-y-2">
+                <div className="h-3 w-20 rounded-full bg-gray-200 animate-pulse" />
+                <div className="h-6 w-40 rounded-lg bg-gray-200 animate-pulse" />
+              </div>
+            </div>
+
+            {/* 요약 카드 자리 */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-gray-200 bg-white px-4 py-3.5 space-y-2.5">
+                  <div className="h-2.5 w-16 rounded-full bg-gray-100 animate-pulse" />
+                  <div className="h-6 w-12 rounded-md bg-gray-100 animate-pulse" />
+                </div>
+              ))}
+            </div>
+
+            {/* 중앙 로딩 인디케이터 */}
+            <div className="flex flex-col items-center justify-center gap-3 py-10 rounded-xl border border-gray-200 bg-white">
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 rounded-full border-4 border-teal-100" />
+                <div className="absolute inset-0 rounded-full border-4 border-teal-500 border-t-transparent animate-spin" />
+              </div>
+              <p className="text-xs font-medium text-gray-400 tracking-wide">케이스 목록을 불러오는 중...</p>
+            </div>
+
+            {/* 테이블 행 자리 */}
+            <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 px-4 py-3.5 border-b border-gray-100 last:border-b-0">
+                  <div className="h-3 w-24 rounded-full bg-gray-100 animate-pulse" />
+                  <div className="h-3 w-16 rounded-full bg-gray-100 animate-pulse" />
+                  <div className="h-3 w-20 rounded-full bg-gray-100 animate-pulse ml-auto" />
+                  <div className="h-6 w-20 rounded-md bg-gray-100 animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </main>
+
+          <div className="hidden xl:flex xl:flex-col gap-4">
+            <SidebarSkeleton />
+          </div>
         </div>
       </div>
+    );
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50/80 sticky top-0">
-            <tr>
-              <Th>{null}</Th>
-              <Th>Specimen ID</Th>
-              <Th>상태</Th>
-              <Th>진단 / 신뢰도</Th>
-              <Th>진행상황</Th>
-              <Th>업로드</Th>
-              <Th>액션</Th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {filtered.map((c) => {
-              const conf = getConfidence(c);
-              const isSelected = c.id === selectedId;
-              const isCompareChecked = compareIds.includes(c.id);
-              return (
-                <tr
-                  key={c.id}
-                  ref={(el) => {
-                    if (el) rowRefs.current.set(c.id, el);
-                    else rowRefs.current.delete(c.id);
-                  }}
-                  onClick={() => setSelectedId(c.id)}
-                  className={`transition-colors cursor-pointer ${
-                    isSelected ? "bg-teal-50/70" : "hover:bg-gray-50/60"
+  if (error) return <div className="p-8 text-sm text-rose-600">에러: {error}</div>;
+
+  return (
+    <div className="min-h-screen bg-[#F7F8FA]">
+      <div className="mx-auto w-full max-w-[1760px] p-4 lg:p-6 xl:grid xl:grid-cols-[240px_minmax(0,1fr)_300px] xl:gap-5 xl:items-start">
+        <LeftSidebar
+          statusFilters={statusFilters}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          favoritesOnly={favoritesOnly}
+          setFavoritesOnly={setFavoritesOnly}
+          cases={cases}
+        />
+
+        <main className="space-y-5 min-w-0">
+          <div className="flex items-end justify-between flex-wrap gap-2">
+            <div>
+              <p className="text-xs font-medium text-gray-400">진단 워크플로우</p>
+              <h1 className="font-semibold text-2xl text-gray-900 tracking-tight">의사 대시보드</h1>
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <p className="text-sm font-semibold text-gray-700 tabular-nums">
+                {now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+              </p>
+              <p className="text-[11px] text-gray-400">
+                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">J</kbd>/
+                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">K</kbd> 이동 ·{" "}
+                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Enter</kbd> 상세 ·{" "}
+                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">H/S/N</kbd> 탭 전환 ·{" "}
+                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Esc</kbd> 닫기
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <MetricCard label="총 케이스" value={metrics.total} icon={Users} />
+            <MetricCard label="분석 완료" value={metrics.completed} tone="teal" icon={CheckCircle2} />
+            <MetricCard label="실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
+            <MetricCard label="검토 필요" value={metrics.review} tone={metrics.review > 0 ? "amber" : "default"} icon={ClipboardCheck} />
+          </div>
+
+          {urgent.length > 0 && (
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3">
+              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-100">
+                <AlertTriangle className="h-3 w-3 text-amber-700" />
+              </div>
+              <p className="text-sm text-amber-900">
+                <span className="font-medium">신뢰도 낮은 케이스 {urgent.length}건</span>
+                <span className="text-amber-700">
+                  {" "}
+                  — {urgent.slice(0, 3).map((c) => c.specimen_id).join(", ")}
+                  {urgent.length > 3 ? " 외" : ""} 확인이 필요합니다 (재검 권장)
+                </span>
+              </p>
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5 xl:hidden">
+              {statusFilters.map((s) => (
+                <button
+                  key={s.v || "all"}
+                  onClick={() => setStatusFilter(s.v)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    statusFilter === s.v ? "bg-gray-900 text-white" : "text-gray-500 hover:text-gray-900"
                   }`}
                 >
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={isCompareChecked}
-                      disabled={!isCompareChecked && compareIds.length >= 2}
-                      onChange={() => toggleCompare(c.id)}
-                      className="w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-400 disabled:opacity-30"
-                    />
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs text-gray-700">
-                    <span className={`inline-block w-1 h-4 rounded-full mr-2 align-middle ${isSelected ? "bg-teal-500" : "bg-transparent"}`} />
-                    {c.specimen_id}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1.5 text-xs text-gray-600">
-                      <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[c.status]}`} />
-                      {STATUS_LABELS[c.status] ?? c.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <ConfidenceCompact
-                      label={c.prediction_label}
-                      confidence={conf}
-                      luadProbability={c.luad_probability}
-                      luscProbability={c.lusc_probability}
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    {c.review_status ? (
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${REVIEW_CLS[c.review_status] ?? ""}`}>
-                        {REVIEW_LABELS[c.review_status] ?? c.review_status}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">
-  {c.uploaded_at ? `${c.uploaded_at.slice(0, 10)} ${c.uploaded_at.slice(11, 16)}` : "—"}
-</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-1.5 flex-wrap" onClick={(e) => e.stopPropagation()}>
-                      <ActionBtn icon={Grid3x3} label="히트맵" onClick={() => openModal(c, "heatmap")} />
-                      <ActionBtn icon={ClipboardList} label="요약" onClick={() => openModal(c, "summary")} />
-                      <ActionBtn icon={ScanSearch} label="핵형태" onClick={() => openModal(c, "nucleus")} />
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-            {filtered.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-gray-400">
-                  조건에 맞는 케이스가 없습니다
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                  {s.l}
+                </button>
+              ))}
+            </div>
+            <div className="relative flex-1 min-w-[160px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="specimen_id / 진단 검색..."
+                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-teal-400"
+              />
+            </div>
+          </div>
 
-      <div className="flex items-center gap-4 text-[11px] text-gray-500 px-1">
-        <span className="font-medium text-gray-600">신뢰도 구간:</span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-green-500" />
-          90%↑ 확정 권장
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-amber-500" />
-          70~90% 참고용
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-rose-500" />
-          &lt;70% 재검 권장
-        </span>
+          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50/80 sticky top-0">
+                <tr>
+                  <Th>{null}</Th>
+                  <Th>{null}</Th>
+                  <Th>Specimen ID</Th>
+                  <Th>상태</Th>
+                  <Th>진단 / 신뢰도</Th>
+                  <Th>진행상황</Th>
+                  <Th>업로드</Th>
+                  <Th>액션</Th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filtered.map((c) => {
+                  const conf = getConfidence(c);
+                  const isSelected = c.id === selectedId;
+                  const isCompareChecked = compareIds.includes(c.id);
+                  return (
+                    <tr
+                      key={c.id}
+                      ref={(el) => {
+                        if (el) rowRefs.current.set(c.id, el);
+                        else rowRefs.current.delete(c.id);
+                      }}
+                      onClick={() => setSelectedId(c.id)}
+                      className={`transition-colors cursor-pointer ${
+                        isSelected ? "bg-teal-50/70" : "hover:bg-gray-50/60"
+                      }`}
+                    >
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={isCompareChecked}
+                          disabled={!isCompareChecked && compareIds.length >= 2}
+                          onChange={() => toggleCompare(c.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-400 disabled:opacity-30"
+                        />
+                      </td>
+                      <td className="px-2 py-3" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => toggleFavorite(c.id)}
+                          aria-label={c.is_favorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
+                          className="p-1 rounded-md hover:bg-amber-50 transition-colors"
+                        >
+                          <Star
+                            className={`w-4 h-4 transition-colors ${
+                              c.is_favorite ? "fill-amber-400 text-amber-400" : "text-gray-300 hover:text-amber-300"
+                            }`}
+                          />
+                        </button>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-gray-700">
+                        <span className={`inline-block w-1 h-4 rounded-full mr-2 align-middle ${isSelected ? "bg-teal-500" : "bg-transparent"}`} />
+                        {c.specimen_id}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-gray-600">
+                          <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[c.status]}`} />
+                          {STATUS_LABELS[c.status] ?? c.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <ConfidenceCompact
+                          label={c.prediction_label}
+                          confidence={conf}
+                          luadProbability={c.luad_probability}
+                          luscProbability={c.lusc_probability}
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        {c.review_status ? (
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${REVIEW_CLS[c.review_status] ?? ""}`}>
+                            {REVIEW_LABELS[c.review_status] ?? c.review_status}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">
+                        {c.uploaded_at ? `${c.uploaded_at.slice(0, 10)} ${c.uploaded_at.slice(11, 16)}` : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1.5 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                          <ActionBtn icon={Grid3x3} label="히트맵" onClick={() => openModal(c, "heatmap")} />
+                          <ActionBtn icon={ClipboardList} label="요약" onClick={() => openModal(c, "summary")} />
+                          <ActionBtn icon={ScanSearch} label="핵형태" onClick={() => openModal(c, "nucleus")} />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-12 text-center text-sm text-gray-400">
+                      조건에 맞는 케이스가 없습니다
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex items-center gap-4 text-[11px] text-gray-500 px-1">
+            <span className="font-medium text-gray-600">신뢰도 구간:</span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-green-500" />
+              90%↑ 확정 권장
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-amber-500" />
+              70~90% 참고용
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-rose-500" />
+              &lt;70% 재검 권장
+            </span>
+          </div>
+        </main>
+
+        <RightSidebar urgent={urgent} reviewPending={reviewPending} onOpen={openModal} />
       </div>
 
       {modalCase && modalType && (
@@ -506,6 +698,6 @@ export default function Dashboard(): React.JSX.Element {
       {showCompare && compareIds.length === 2 && (
         <CompareModal caseIdA={compareIds[0]} caseIdB={compareIds[1]} onClose={() => setShowCompare(false)} />
       )}
-    </main>
+    </div>
   );
 }
