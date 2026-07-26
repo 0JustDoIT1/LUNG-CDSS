@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import AuthLayout from "../components/auth/AuthLayout";
 import { login } from "../api/auth";
 import type { LoginPayload } from "../types/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const signupSuccess = (location.state as { signupSuccess?: boolean } | null)?.signupSuccess;
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -18,8 +20,12 @@ export default function LoginPage() {
   async function onSubmit(data: LoginPayload) {
     setServerError(null);
     try {
-      await login(data);
-      navigate("/");
+      const result = await login(data);
+      if (result.role === "doctor") {
+        navigate("/doctor-dashboard");
+      } else {
+        navigate("/");
+      }
     } catch {
       setServerError("병원코드 또는 비밀번호가 올바르지 않습니다.");
     }
@@ -28,6 +34,11 @@ export default function LoginPage() {
   return (
     <AuthLayout>
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4" noValidate>
+        {signupSuccess && (
+          <p className="text-xs text-green-600 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+            회원가입이 완료되었습니다. 로그인해주세요.
+          </p>
+        )}
         <div>
           <label htmlFor="login-hospital-code" className="block text-xs font-medium mb-1.5 text-gray-700">
             병원코드

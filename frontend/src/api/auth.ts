@@ -9,9 +9,15 @@ export async function signup(payload: SignupPayload) {
 export async function login(payload: LoginPayload) {
   const { data } = await apiClient.post<LoginResponse>("/auth/login/", payload);
   setTokens(data.access, data.refresh);
-  return data; // name, department, role 포함 — 로그인 성공 후 화면에서 이 값 활용
+  localStorage.setItem("user_name", data.name);
+  localStorage.setItem("user_department", data.department);
+  localStorage.setItem("user_role", data.role);
+  return data;
 }
 
 export function logout() {
   clearTokens();
+  localStorage.removeItem("user_name");
+  localStorage.removeItem("user_department");
+  localStorage.removeItem("user_role");
 }

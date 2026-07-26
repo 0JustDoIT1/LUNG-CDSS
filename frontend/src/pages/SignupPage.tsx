@@ -24,7 +24,6 @@ interface SignupFormValues extends SignupPayload {
 export default function SignupPage() {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -34,8 +33,8 @@ export default function SignupPage() {
     formState: { errors, isSubmitting },
   } = useForm<SignupFormValues>({
     defaultValues: {
-      department: DEPARTMENT_OPTIONS[0].value,
-      role: ROLE_OPTIONS[0].value,
+      department: "" as DepartmentCode,
+      role: "" as UserRole,
     },
   });
 
@@ -43,14 +42,10 @@ export default function SignupPage() {
 
 async function onSubmit(data: SignupFormValues) {
     setServerError(null);
-    setSuccessMessage(null);
     const { password_confirm: _passwordConfirm, ...payload } = data;
     try {
       await signup(payload);
-      setSuccessMessage("회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.");
-      setTimeout(() => {
-        navigate("/login");
-      }, 3500);
+      navigate("/login", { state: { signupSuccess: true } });
     } catch (err) {
       const responseData = (err as any)?.response?.data;
       if (responseData && typeof responseData === "object") {
@@ -123,11 +118,18 @@ async function onSubmit(data: SignupFormValues) {
           <div className="relative">
             <select
               id="signup-department"
-              {...register("department", { required: true })}
-              className="w-full appearance-none px-3.5 py-2.5 pr-9 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition bg-white"
+              {...register("department", { required: "진료과코드를 선택해주세요." })}
+              className={`w-full appearance-none px-3.5 py-2.5 pr-9 rounded-xl border text-sm outline-none focus:ring-1 transition bg-white ${
+                watch("department") ? "text-gray-900" : "text-gray-400"
+              } ${
+                errors.department
+                  ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                  : "border-gray-200 focus:border-indigo-400 focus:ring-indigo-100"
+              }`}
             >
+              <option value="" disabled className="text-gray-400">진료과 코드 선택</option>
               {DEPARTMENT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value} value={opt.value} className="text-gray-900">{opt.label}</option>
               ))}
             </select>
             <svg
@@ -137,21 +139,30 @@ async function onSubmit(data: SignupFormValues) {
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </div>
+          {errors.department && <p className="text-[11px] text-red-500 mt-1.5">{errors.department.message}</p>}
         </div>      
         <div>
           <label htmlFor="signup-role" className="block text-xs font-medium mb-1.5 text-gray-700">
-            역할
+            직무
           </label>
           <div className="relative">
             <select
               id="signup-role"
-              {...register("role", { required: true })}
-              className="w-full appearance-none px-3.5 py-2.5 pr-9 rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-100 transition bg-white"
+              {...register("role", { required: "직무를 선택해주세요." })}
+              className={`w-full appearance-none px-3.5 py-2.5 pr-9 rounded-xl border text-sm outline-none focus:ring-1 transition bg-white ${
+                watch("role") ? "text-gray-900" : "text-gray-400"
+              } ${
+                errors.role
+                  ? "border-red-300 focus:border-red-400 focus:ring-red-100"
+                  : "border-gray-200 focus:border-indigo-400 focus:ring-indigo-100"
+              }`}
             >
+              <option value="" disabled className="text-gray-400">직무 선택</option>
               {ROLE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.value} value={opt.value} className="text-gray-900">{opt.label}</option>
               ))}
             </select>
+            {errors.role && <p className="text-[11px] text-red-500 mt-1.5">{errors.role.message}</p>}
             <svg
               className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
               viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -209,12 +220,7 @@ async function onSubmit(data: SignupFormValues) {
         </div>
 
         {serverError && <p className="text-xs text-red-500">{serverError}</p>}
-        {serverError && <p className="text-xs text-red-500">{serverError}</p>}
-        {successMessage && (
-          <p className="text-xs text-green-600 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-            {successMessage}
-          </p>
-        )}        
+       
         <button
           type="submit"
           disabled={isSubmitting}
