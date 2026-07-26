@@ -5,7 +5,7 @@ import {
   ClipboardList,
   ScanSearch,
   AlertTriangle,
-  Loader2,
+  
   Users,
   CheckCircle2,
   XCircle,
@@ -64,12 +64,14 @@ export default function Dashboard(): React.JSX.Element {
 
   // 키보드 네비게이션용 선택 상태
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [now, setNow] = useState<Date>(new Date()); 
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
   const modalTypeRef = useRef<ModalType | null>(null);
   const selectedIdRef = useRef<string | null>(null);
   modalTypeRef.current = modalType;
   selectedIdRef.current = selectedId;
-
+  
+  
   useEffect(() => {
     let active = true;
     (async () => {
@@ -85,6 +87,11 @@ export default function Dashboard(): React.JSX.Element {
     return () => {
       active = false;
     };
+  }, []);
+
+  useEffect(() => {                                    // ← 추가
+    const timer = setInterval(() => setNow(new Date()), 1000 * 30);
+    return () => clearInterval(timer);
   }, []);
 
   const metrics: Metrics = useMemo(() => {
@@ -247,9 +254,46 @@ export default function Dashboard(): React.JSX.Element {
 
   if (loading)
     return (
-      <div className="p-8 flex items-center gap-2 text-gray-500 text-sm">
-        <Loader2 className="w-4 h-4 animate-spin" /> 불러오는 중...
-      </div>
+      <main className="flex-1 bg-[#F7F8FA] min-h-screen p-4 lg:p-6 space-y-5 min-w-0 max-w-[1380px] mx-auto w-full">
+        {/* 헤더 자리 */}
+        <div className="flex items-end justify-between flex-wrap gap-2">
+          <div className="space-y-2">
+            <div className="h-3 w-20 rounded-full bg-gray-200 animate-pulse" />
+            <div className="h-6 w-40 rounded-lg bg-gray-200 animate-pulse" />
+          </div>
+        </div>
+
+        {/* 요약 카드 자리 */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-gray-200 bg-white px-4 py-3.5 space-y-2.5">
+              <div className="h-2.5 w-16 rounded-full bg-gray-100 animate-pulse" />
+              <div className="h-6 w-12 rounded-md bg-gray-100 animate-pulse" />
+            </div>
+          ))}
+        </div>
+
+        {/* 중앙 로딩 인디케이터 */}
+        <div className="flex flex-col items-center justify-center gap-3 py-10 rounded-xl border border-gray-200 bg-white">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-4 border-teal-100" />
+            <div className="absolute inset-0 rounded-full border-4 border-teal-500 border-t-transparent animate-spin" />
+          </div>
+          <p className="text-xs font-medium text-gray-400 tracking-wide">케이스 목록을 불러오는 중...</p>
+        </div>
+
+        {/* 테이블 행 자리 */}
+        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-4 py-3.5 border-b border-gray-100 last:border-b-0">
+              <div className="h-3 w-24 rounded-full bg-gray-100 animate-pulse" />
+              <div className="h-3 w-16 rounded-full bg-gray-100 animate-pulse" />
+              <div className="h-3 w-20 rounded-full bg-gray-100 animate-pulse ml-auto" />
+              <div className="h-6 w-20 rounded-md bg-gray-100 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </main>
     );
   if (error) return <div className="p-8 text-sm text-rose-600">에러: {error}</div>;
 
@@ -268,13 +312,18 @@ export default function Dashboard(): React.JSX.Element {
           <p className="text-xs font-medium text-gray-400">진단 워크플로우</p>
           <h1 className="font-semibold text-2xl text-gray-900 tracking-tight">의사 대시보드</h1>
         </div>
-        <p className="text-[11px] text-gray-400">
-          <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">J</kbd>/
-          <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">K</kbd> 이동 ·{" "}
-          <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Enter</kbd> 상세 ·{" "}
-          <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">H/S/N</kbd> 탭 전환 ·{" "}
-          <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Esc</kbd> 닫기
-        </p>
+        <div className="flex flex-col items-end gap-1">
+          <p className="text-sm font-semibold text-gray-700 tabular-nums">
+            {now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+          </p>
+          <p className="text-[11px] text-gray-400">
+            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">J</kbd>/
+            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">K</kbd> 이동 ·{" "}
+            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Enter</kbd> 상세 ·{" "}
+            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">H/S/N</kbd> 탭 전환 ·{" "}
+            <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Esc</kbd> 닫기
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -391,7 +440,9 @@ export default function Dashboard(): React.JSX.Element {
                       <span className="text-xs text-gray-400">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">{c.uploaded_at?.slice(0, 10)}</td>
+                  <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">
+  {c.uploaded_at ? `${c.uploaded_at.slice(0, 10)} ${c.uploaded_at.slice(11, 16)}` : "—"}
+</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5 flex-wrap" onClick={(e) => e.stopPropagation()}>
                       <ActionBtn icon={Grid3x3} label="히트맵" onClick={() => openModal(c, "heatmap")} />
