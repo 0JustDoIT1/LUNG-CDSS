@@ -1,10 +1,12 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUploadUrl, uploadFileToGcs, createCase } from "../api/cases";
+
 
 const ALLOWED_EXT = ["svs", "ndpi", "tiff", "tif", "png", "jpg", "jpeg"];
 const PREVIEWABLE_EXT = ["png", "jpg", "jpeg"];
 const MAX_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
+
 
 type FileStatus = "ready" | "error" | "uploading" | "done";
 
@@ -30,7 +32,6 @@ function fmtSize(bytes: number) {
 
 const STEPS = [
   { label: "파일 선택" },
-  { label: "검증" },
   { label: "업로드" },
   { label: "분석 준비" },
 ];
@@ -48,6 +49,7 @@ export default function UploadPage() {
   const [globalProgress, setGlobalProgress] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [createdCaseId, setCreatedCaseId] = useState<string | null>(null);
+  const [hourglassRotation, setHourglassRotation] = useState(0);
 
   const hasReadyFile = files.some((f) => f.status === "ready");
 
@@ -95,7 +97,7 @@ export default function UploadPage() {
 
     setSubmitError(null);
     setStage("processing");
-    setStepIndex(2);
+    setStepIndex(1);
 
     try {
       const { upload_url, gcs_path } = await getUploadUrl({ filename: target.file.name });
@@ -109,16 +111,29 @@ export default function UploadPage() {
       const created = await createCase({ specimen_id: specimenId, slide_gcs_path: gcs_path });
       setCreatedCaseId(created.id);
       setGlobalProgress(100);
-      setStepIndex(3);
+      setStepIndex(2);
       setStage("complete");
-    } catch {
-      setSubmitError("업로드 중 문제가 발생했습니다. 다시 시도해주세요.");
+    } catch (err: any) {
+      const responseData = err?.response?.data;
+      const message = responseData?.error;
+      if (message) {
+        setSubmitError(message);
+      } else {
+        setSubmitError("업로드 중 문제가 발생했습니다. 다시 시도해주세요.");
+      }
       setStage("select");
       setFiles((prev) =>
         prev.map((f) => (f === target ? { ...f, status: "error", error: "업로드 실패" } : f))
       );
     }
   }
+  useEffect(() => {
+    if (stage !== "processing") return;
+    const interval = setInterval(() => {
+      setHourglassRotation((prev) => prev + 180);
+    }, 1500); // 1.5초마다 180도씩 회전
+    return () => clearInterval(interval);
+  }, [stage]);  
 
   return (
     <div>
@@ -322,8 +337,13 @@ export default function UploadPage() {
 
       {stage === "processing" && (
         <div className="text-center p-10 border border-[#bfdbfe] rounded-2xl bg-[#f7fbff]">
-          <div className="text-4xl mb-3">⏳</div>
-          <p className="text-base font-semibold text-gray-900 mb-1.5">업로드 및 검증 진행 중…</p>
+          <div
+            className="text-4xl mb-3"
+            style={{ transform: `rotate(${hourglassRotation}deg)`, transition: "transform 0.6s ease-in-out" }}
+          >
+            ⏳
+          </div>
+          <p className="text-base font-semibold text-gray-900 mb-1.5">업로드 진행 중…</p>
           <p className="text-xs text-slate-500 mb-4">슬라이드를 분석 파이프라인에 등록하고 있습니다.</p>
           <div className="max-w-xs mx-auto h-1.5 bg-gray-200 rounded-full overflow-hidden">
             <div className="h-full bg-[#185fa5] rounded-full transition-all" style={{ width: `${globalProgress}%` }} />

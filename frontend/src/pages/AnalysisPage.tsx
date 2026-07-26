@@ -23,17 +23,25 @@ export default function AnalysisPage() {
   const [elapsedSec, setElapsedSec] = useState(0);
   const [status, setStatus] = useState<"running" | "completed" | "failed">("running");
   const [error, setError] = useState<string | null>(null);
+  const [analyzedAt, setAnalyzedAt] = useState<string | null>(null);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // 경과 시간 타이머 (공통)
+  // 경과 시간 타이머 — analyzed_at을 받으면 실제 시작 시각 기준으로 계산
   useEffect(() => {
-    timerRef.current = setInterval(() => setElapsedSec((s) => s + 1), 1000);
+    timerRef.current = setInterval(() => {
+      if (analyzedAt) {
+        const elapsed = Math.floor((Date.now() - new Date(analyzedAt).getTime()) / 1000);
+        setElapsedSec(elapsed >= 0 ? elapsed : 0);
+      } else {
+        setElapsedSec((s) => s + 1);
+      }
+    }, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [analyzedAt]);
 
   // 미리보기 모드: 가짜 진행
   useEffect(() => {
@@ -52,35 +60,37 @@ export default function AnalysisPage() {
   }, [isPreview]);
 
   // 실제 모드: predict 호출 후 폴링
-const startedRef = useRef(false);
+  const startedRef = useRef(false);
 
-useEffect(() => {
-  if (isPreview || !id) return;
-  if (startedRef.current) return; // 이미 시작했으면 재실행 방지
-  startedRef.current = true;
+  useEffect(() => {
+    if (isPreview || !id) return;
+    if (startedRef.current) return;
+    startedRef.current = true;
 
-  let cancelled = false;
+    let cancelled = false;
 
-  async function start() {
-    try {
-      await predictCase(id!);
-    } catch (e: any) {
-      // 409는 "이미 분석 중"이라는 뜻 — 에러가 아니라 정상 진행중 상태로 취급
-      if (e?.response?.status !== 409) {
-        if (!cancelled) {
-          setError("분석 요청에 실패했습니다.");
-          setStatus("failed");
+    async function start() {
+      try {
+        await predictCase(id!);
+      } catch (e: any) {
+        if (e?.response?.status !== 409) {
+          if (!cancelled) {
+            setError("분석 요청에 실패했습니다.");
+            setStatus("failed");
+          }
+          return;
         }
-        return;
       }
-    }
-    // ...
 
       pollRef.current = setInterval(async () => {
         try {
           const detail = await getCase(id!);
           const idx = ANALYSIS_STEPS.findIndex((s) => s.key === detail.current_step);
           if (idx >= 0) setStepIndex(idx);
+
+          if (detail.analyzed_at) {
+            setAnalyzedAt(detail.analyzed_at);
+          }
 
           if (detail.status === "completed") {
             setStatus("completed");

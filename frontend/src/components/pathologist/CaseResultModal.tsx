@@ -27,7 +27,7 @@ export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalP
           </button>
         </div>
 
-        {/* 본문 - 내용 길면 여기만 스크롤 */}
+      
         <div className="px-5 py-4 overflow-y-auto">
           {loading && (
             <div className="flex items-center gap-2 text-gray-500 text-sm py-8 justify-center">
@@ -37,7 +37,14 @@ export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalP
 
           {!loading && caseData.status === "uploaded" && (
             <div className="py-10 text-center">
-              <p className="text-sm text-gray-500">분석 준비중입니다.</p>
+              <p className="text-sm text-gray-500 mb-4">분석 준비중입니다.</p>
+              <button
+                type="button"
+                onClick={() => navigate(`/analysis/${caseData.id}`)}
+                className="px-4 py-2 rounded-lg text-[13px] font-semibold bg-[#185fa5] text-white hover:bg-[#144d8a] transition"
+              >
+                분석 시작 →
+              </button>
             </div>
           )}
 
