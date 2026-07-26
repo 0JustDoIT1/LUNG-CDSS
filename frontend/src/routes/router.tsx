@@ -1,4 +1,3 @@
-// jch
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import PathologistLayout from "../layouts/PathologistLayout";
@@ -7,24 +6,31 @@ import SignupPage from "../pages/SignupPage";
 import CaseListPage from "../pages/CaseListPage";
 import UploadPage from "../pages/UploadPage";
 import AnalysisPage from "../pages/AnalysisPage";
-import Dashboard from "../pages/Doctor_Dashboard"; // jgy
+import Dashboard from "../pages/Doctor_Dashboard";
+import NotFoundPage from "../pages/NotFoundPage";
+import ErrorPage from "../pages/ErrorPage";
 
 export const router = createBrowserRouter([
-  { path: "/login", element: <LoginPage /> },
-  { path: "/signup", element: <SignupPage /> },
   {
-    element: <ProtectedRoute />,
+    errorElement: <ErrorPage />,
     children: [
+      { path: "/login", element: <LoginPage /> },
+      { path: "/signup", element: <SignupPage /> },
       {
-        element: <PathologistLayout />,
+        element: <ProtectedRoute />,
         children: [
-          { path: "/", element: <CaseListPage /> },
-          { path: "/upload", element: <UploadPage /> },
-          { path: "/analysis/:id", element: <AnalysisPage /> },
+          {
+            element: <PathologistLayout />,
+            children: [
+              { path: "/", element: <CaseListPage /> },
+              { path: "/upload", element: <UploadPage /> },
+              { path: "/analysis/:id", element: <AnalysisPage /> },
+            ],
+          },
+          { path: "/doctor-dashboard", element: <Dashboard /> },
         ],
       },
-      { path: "/doctor-dashboard", element: <Dashboard /> }, // jgy
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);
-// 강연님
