@@ -1,5 +1,6 @@
 import React from "react";
 import { X, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { CaseDetail, CaseListItem } from "../../types/case";
 
 interface CaseResultModalProps {
@@ -9,6 +10,7 @@ interface CaseResultModalProps {
 }
 
 export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalProps): React.JSX.Element {
+  const navigate = useNavigate();
   const detail = caseData as CaseDetail;
   const luad = detail.luad_probability ?? null;
   const lusc = detail.lusc_probability ?? null;
@@ -33,7 +35,32 @@ export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalP
             </div>
           )}
 
-          {!loading && (
+          {!loading && caseData.status === "uploaded" && (
+            <div className="py-10 text-center">
+              <p className="text-sm text-gray-500">분석 준비중입니다.</p>
+            </div>
+          )}
+
+          {!loading && caseData.status === "processing" && (
+            <div className="py-10 text-center">
+              <p className="text-sm text-gray-500 mb-4">분석이 진행 중입니다.</p>
+              <button
+                type="button"
+                onClick={() => navigate(`/analysis/${caseData.id}`)}
+                className="px-4 py-2 rounded-lg text-[13px] font-semibold bg-[#185fa5] text-white hover:bg-[#144d8a] transition"
+              >
+                분석 진행 상황 보기 →
+              </button>
+            </div>
+          )}
+
+          {!loading && caseData.status === "failed" && (
+            <div className="py-10 text-center">
+              <p className="text-sm text-rose-600">분석 실패하였습니다.</p>
+            </div>
+          )}
+
+          {!loading && caseData.status === "completed" && (
             <div className="space-y-4">
               {/* 원본 이미지 */}
               <div className="w-full aspect-video rounded-xl overflow-hidden bg-gray-900 border border-gray-200 flex items-center justify-center">

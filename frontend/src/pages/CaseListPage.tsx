@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Search, Loader2 } from "lucide-react";
-import type { CaseListItem, CaseDetail } from "../types/case";
-import { Th } from "../components/dashboard/shared";
+import { Search, Loader2, Layers, UploadCloud, CheckCircle2, XCircle } from "lucide-react";
+import type { CaseStatus, CaseListItem, CaseDetail } from "../types/case";
+import { Th, MetricCard } from "../components/dashboard/shared";
 import { CaseResultModal } from "../components/pathologist/CaseResultModal";
 import { getCases, getCase } from "../api/cases";
 import { useNavigate } from "react-router-dom";
@@ -20,11 +20,23 @@ const STATUS_CLS_SIMPLE: Record<string, string> = {
   failed: "bg-rose-100 text-rose-700",
 };
 
+function formatDateNoSeconds(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function CaseListPage(): React.JSX.Element {
   const navigate = useNavigate();
   const [cases, setCases] = useState<CaseListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<CaseStatus | "">("");
   const [search, setSearch] = useState<string>("");
 
   const [modalCase, setModalCase] = useState<CaseDetail | CaseListItem | null>(null);
@@ -47,15 +59,23 @@ export default function CaseListPage(): React.JSX.Element {
     fetchCases();
   }, [fetchCases]);
 
+  const metrics = useMemo(() => {
+    const uploaded = cases.filter((c) => c.status === "uploaded").length;
+    const completed = cases.filter((c) => c.status === "completed").length;
+    const failed = cases.filter((c) => c.status === "failed").length;
+    return { total: cases.length, uploaded, completed, failed };
+  }, [cases]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return cases;
     return cases.filter(
       (c) =>
-        (c.specimen_id ?? "").toLowerCase().includes(q) ||
-        (c.prediction_label ?? "").toLowerCase().includes(q)
+        (!statusFilter || c.status === statusFilter) &&
+        (!q ||
+          (c.specimen_id ?? "").toLowerCase().includes(q) ||
+          (c.prediction_label ?? "").toLowerCase().includes(q))
     );
-  }, [cases, search]);
+  }, [cases, statusFilter, search]);
 
   const openModal = useCallback(async (c: CaseListItem): Promise<void> => {
     setModalCase(c);
@@ -74,11 +94,18 @@ export default function CaseListPage(): React.JSX.Element {
 
   if (loading)
     return (
-      <div className="p-8 flex items-center gap-2 text-gray-500 text-sm">
+      <div className="flex items-center justify-center gap-2 text-gray-500 text-sm min-h-[60vh]">
         <Loader2 className="w-4 h-4 animate-spin" /> 불러오는 중...
       </div>
     );
   if (error) return <div className="p-8 text-sm text-rose-600">에러: {error}</div>;
+
+  const statusFilters: { v: CaseStatus | ""; l: string }[] = [
+    { v: "", l: "전체" },
+    { v: "uploaded", l: "업로드됨" },
+    { v: "completed", l: "완료" },
+    { v: "failed", l: "실패" },
+  ];
 
   return (
     <div className="space-y-5">
@@ -96,14 +123,38 @@ export default function CaseListPage(): React.JSX.Element {
         </button>
       </div>
 
-      <div className="relative max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="검체 ID 검색..."
-          className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[#185fa5]"
-        />
+      {/* 지표 카드 4개 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <MetricCard label="총 케이스" value={metrics.total} icon={Layers} />
+        <MetricCard label="업로드됨" value={metrics.uploaded} tone="default" icon={UploadCloud} />
+        <MetricCard label="분석 완료" value={metrics.completed} tone="teal" icon={CheckCircle2} />
+        <MetricCard label="분석 실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
+      </div>
+
+      {/* 상태 필터 + 검색 */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5">
+          {statusFilters.map((s) => (
+            <button
+              key={s.v || "all"}
+              onClick={() => setStatusFilter(s.v)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                statusFilter === s.v ? "bg-gray-900 text-white" : "text-gray-500 hover:text-gray-900"
+              }`}
+            >
+              {s.l}
+            </button>
+          ))}
+        </div>
+        <div className="relative flex-1 min-w-[160px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="검체 ID / 진단 검색..."
+            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[#185fa5]"
+          />
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
@@ -130,7 +181,7 @@ export default function CaseListPage(): React.JSX.Element {
                 >
                   <td className="px-4 py-3 font-mono text-xs text-gray-700">{c.specimen_id}</td>
                   <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">
-                    {c.uploaded_at ? new Date(c.uploaded_at).toLocaleString("ko-KR") : "-"}
+                    {c.uploaded_at ? formatDateNoSeconds(c.uploaded_at) : "-"}
                   </td>
                   <td className="px-4 py-3">
                     {c.prediction_label ? (
@@ -165,6 +216,23 @@ export default function CaseListPage(): React.JSX.Element {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* 정확도 구간 범례 */}
+      <div className="flex items-center gap-4 text-[11px] text-gray-500 px-1">
+        <span className="font-medium text-gray-600">정확도 구간:</span>
+        <span className="flex items-center gap-1">
+          <span className="h-2 w-2 rounded-full bg-green-500" />
+          90%↑ 확정 권장
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="h-2 w-2 rounded-full bg-amber-500" />
+          70~90% 참고용
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="h-2 w-2 rounded-full bg-rose-500" />
+          70%↓ 재검 권장
+        </span>
       </div>
 
       {modalCase && (
