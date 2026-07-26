@@ -7,7 +7,7 @@ from django.db import IntegrityError
 import os
 
 from accounts.permissions import IsDoctor, IsPathologist
-from .models import Case, NucleiPatch, GenePrediction
+from .models import Case, NucleiPatch, GenePrediction, CaseFavorite
 from .serializers import CaseListSerializer, CaseDetailSerializer
 from .services import call_mosec_predict, call_mosec_thumbnail
 from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upload_url
@@ -37,7 +37,11 @@ def case_list_create(request):
         if search:
             queryset = queryset.filter(specimen_id__icontains=search)
 
-        serializer = CaseListSerializer(queryset, many=True)
+        favorite_param = request.query_params.get("favorite")
+        if favorite_param == "true":
+            queryset = queryset.filter(favorited_by__user=request.user)
+
+        serializer = CaseListSerializer(queryset, many=True, context={"request": request})
         return Response(serializer.data)
 
     elif request.method == "POST":
@@ -80,7 +84,7 @@ def case_list_create(request):
         except Exception as e:
             print(f"썸네일 생성 실패 (case_id={case.id}): {e}")
 
-        serializer = CaseDetailSerializer(case)
+        serializer = CaseDetailSerializer(case, context={"request": request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -93,7 +97,7 @@ def case_detail(request, case_id):
         return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "GET":
-        serializer = CaseDetailSerializer(case)
+        serializer = CaseDetailSerializer(case, context={"request": request})
         return Response(serializer.data)
 
     elif request.method == "DELETE":
@@ -260,8 +264,29 @@ def review_case(request, case_id):
     case.reviewed_at = timezone.now()
     case.save()
 
-    serializer = CaseDetailSerializer(case)
+    serializer = CaseDetailSerializer(case, context={"request": request})
     return Response(serializer.data)
+
+
+@api_view(["POST"])
+@permission_classes([IsDoctor])
+def toggle_favorite(request, case_id):
+    """
+    의사 전용 개인 즐겨찾기 토글.
+    이미 즐겨찾기 되어있으면 해제, 아니면 추가.
+    """
+    try:
+        case = Case.objects.get(id=case_id)
+    except Case.DoesNotExist:
+        return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+
+    favorite = CaseFavorite.objects.filter(user=request.user, case=case).first()
+    if favorite:
+        favorite.delete()
+        return Response({"is_favorite": False})
+    else:
+        CaseFavorite.objects.create(user=request.user, case=case)
+        return Response({"is_favorite": True})
 
 
 @api_view(["POST"])

@@ -27,13 +27,21 @@ class GenePredictionSerializer(serializers.ModelSerializer):
 
 class CaseListSerializer(serializers.ModelSerializer):
     """케이스 목록용 — 요약 정보만"""
+    is_favorite = serializers.SerializerMethodField()
+
     class Meta:
         model = Case
         fields = [
             "id", "specimen_id", "status", "review_status",
             "prediction_label", "luad_probability", "lusc_probability",
-            "uploaded_at", "completed_at",
+            "uploaded_at", "completed_at", "is_favorite",
         ]
+
+    def get_is_favorite(self, obj):
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            return obj.favorited_by.filter(user=request.user).exists()
+        return False
 
 
 class CaseDetailSerializer(serializers.ModelSerializer):
@@ -41,6 +49,7 @@ class CaseDetailSerializer(serializers.ModelSerializer):
     gene_predictions = GenePredictionSerializer(many=True, read_only=True)
     heatmap_url = serializers.SerializerMethodField()
     slide_thumbnail_url = serializers.SerializerMethodField()
+    is_favorite = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
@@ -51,3 +60,9 @@ class CaseDetailSerializer(serializers.ModelSerializer):
 
     def get_slide_thumbnail_url(self, obj):
         return gcs_path_to_signed_url(obj.slide_thumbnail_gcs_path)
+
+    def get_is_favorite(self, obj):
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            return obj.favorited_by.filter(user=request.user).exists()
+        return False

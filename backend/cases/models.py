@@ -109,3 +109,21 @@ class GenePrediction(models.Model):
 
     def __str__(self):
         return f"{self.case.specimen_id} - {self.gene_name}: {self.likelihood}"
+
+
+class CaseFavorite(models.Model):
+    """
+    의사별 개인 즐겨찾기.
+    Case에 직접 필드를 두지 않고 분리해서, 사용자마다 독립적으로
+    즐겨찾기 여부를 가질 수 있게 함(한 의사가 즐겨찾기해도 다른 의사에겐 안 보임).
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favorite_cases")
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="favorited_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "case")
+
+    def __str__(self):
+        return f"{self.user.username} ♥ {self.case.specimen_id}"

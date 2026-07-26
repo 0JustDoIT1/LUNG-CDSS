@@ -9,4 +9,5 @@ urlpatterns = [
     path("cases/<uuid:case_id>/step/", views.update_case_step, name="update-case-step"),
     path("cases/<uuid:case_id>/review/", views.review_case, name="review-case"),
     path("cases/upload-url/", views.get_upload_url, name="get-upload-url"),
+    path("cases/<uuid:case_id>/favorite/", views.toggle_favorite, name="toggle-favorite"),
 ]
