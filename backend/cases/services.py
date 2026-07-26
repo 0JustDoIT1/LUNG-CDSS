@@ -33,3 +33,22 @@ def call_mosec_predict(case_id: str, slide_gcs_path: str, timeout: int = 900) ->
     )
     response.raise_for_status()
     return response.json()
+
+
+def call_mosec_thumbnail(case_id: str, slide_gcs_path: str, timeout: int = 180) -> dict:
+    """
+    업로드 직후 썸네일만 빠르게 생성. 분석(predict)과 별개의 가벼운 mosec 라우트 호출.
+    반환: {"slide_thumbnail_gcs_path": "gs://..."}
+    """
+    token = _get_id_token(settings.MOSEC_URL)
+    headers = {"Authorization": f"Bearer {token}"}
+    payload = {"case_id": case_id, "slide_gcs_path": slide_gcs_path}
+
+    response = requests.post(
+        f"{settings.MOSEC_URL}/thumbnail",
+        json=payload,
+        headers=headers,
+        timeout=timeout,
+    )
+    response.raise_for_status()
+    return response.json()

@@ -9,7 +9,7 @@ import os
 from accounts.permissions import IsDoctor, IsPathologist
 from .models import Case, NucleiPatch, GenePrediction
 from .serializers import CaseListSerializer, CaseDetailSerializer
-from .services import call_mosec_predict
+from .services import call_mosec_predict, call_mosec_thumbnail
 from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upload_url
 
 from rag.rag_service import generate_treatment_note
@@ -72,6 +72,14 @@ def case_list_create(request):
                 status=status.HTTP_409_CONFLICT,
             )
 
+        # 썸네일 동기 생성 — 실패해도 case 생성 자체는 성공 처리 (재시도로 복구 가능)
+        try:
+            thumb_result = call_mosec_thumbnail(str(case.id), slide_gcs_path)
+            case.slide_thumbnail_gcs_path = thumb_result["slide_thumbnail_gcs_path"]
+            case.save(update_fields=["slide_thumbnail_gcs_path"])
+        except Exception as e:
+            print(f"썸네일 생성 실패 (case_id={case.id}): {e}")
+
         serializer = CaseDetailSerializer(case)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -121,7 +129,14 @@ def predict_case(request, case_id):
     case.luad_probability = result["luad_probability"]
     case.lusc_probability = result["lusc_probability"]
     case.heatmap_gcs_path = result["heatmap_gcs_path"]
-    case.slide_thumbnail_gcs_path = result.get("slide_thumbnail_gcs_path")
+
+    # 업로드 시점에 썸네일 생성이 실패했던 케이스에 대한 안전장치 — 없을 때만 재생성
+    if not case.slide_thumbnail_gcs_path:
+        try:
+            thumb_result = call_mosec_thumbnail(str(case.id), case.slide_gcs_path)
+            case.slide_thumbnail_gcs_path = thumb_result["slide_thumbnail_gcs_path"]
+        except Exception as e:
+            print(f"썸네일 폴백 생성 실패 (case_id={case.id}): {e}")
 
     case.nuclei_density_score = result.get("nuclei_density_score")
     case.nuclei_density_level = result.get("nuclei_density_level")
@@ -181,7 +196,7 @@ def retry_case(request, case_id):
     except Case.DoesNotExist:
         return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
 
-    delete_case_reports(str(case.id))
+    delete_case_reports(str(case.id))  # original.png(썸네일)는 제외하고 삭제됨
 
     case.status = "uploaded"
     case.current_step = None
@@ -189,7 +204,7 @@ def retry_case(request, case_id):
     case.luad_probability = None
     case.lusc_probability = None
     case.heatmap_gcs_path = None
-    case.slide_thumbnail_gcs_path = None
+    # slide_thumbnail_gcs_path는 초기화하지 않음 — 원본 슬라이드가 그대로면 썸네일도 재사용
     case.nuclei_density_score = None
     case.nuclei_density_level = None
     case.nuclei_irregularity_score = None

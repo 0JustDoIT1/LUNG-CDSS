@@ -31,10 +31,16 @@ def gcs_path_to_signed_url(gcs_path: str, expiration_minutes: int = 60) -> str |
 
 
 def delete_case_reports(case_id: str):
-    """reports/{case_id}/ 폴더 전체 삭제 (재분석 시 이전 결과 이미지 정리)"""
+    """
+    reports/{case_id}/ 폴더 정리 (재분석 시 이전 결과 이미지 삭제).
+    단, original.png(업로드 시점에 생성된 썸네일)는 원본 슬라이드가 그대로면
+    재사용해야 하므로 삭제 대상에서 제외.
+    """
     prefix = f"reports/{case_id}/"
     blobs = _bucket.list_blobs(prefix=prefix)
     for blob in blobs:
+        if blob.name == f"{prefix}original.png":
+            continue
         blob.delete()
 
 

@@ -120,7 +120,7 @@ class LungCDSSWorker(Worker):
         luad_prob = probs[1].item()
         lusc_prob = probs[0].item()
 
-        thumbnail = get_slide_thumbnail(slide, max_size=4096)
+        thumbnail = get_slide_thumbnail(slide, max_size=4096)  # 히트맵 합성용, GCS 재업로드는 생략
         heatmap_img = generate_heatmap(thumbnail, coords, attention, slide.level_dimensions[0], patch_size=PATCH_SIZE)
         print(f"[{case_id}] 히트맵 생성 완료", flush=True)
 
@@ -150,7 +150,6 @@ class LungCDSSWorker(Worker):
 
         nuclei_summary = summarize_nuclei_metrics(all_nuclei, n_patches=len(top_patches))
 
-        slide_thumb_path = upload_image_to_gcs(thumbnail, f"reports/{case_id}/original.png")
         heatmap_path = upload_image_to_gcs(heatmap_img, f"reports/{case_id}/heatmap.png")
         print(f"[{case_id}] 결과 이미지 업로드 완료", flush=True)
 
@@ -158,12 +157,35 @@ class LungCDSSWorker(Worker):
             "prediction_label": "LUAD" if luad_prob > lusc_prob else "LUSC",
             "luad_probability": luad_prob,
             "lusc_probability": lusc_prob,
-            "slide_thumbnail_gcs_path": slide_thumb_path,
             "heatmap_gcs_path": heatmap_path,
             "nuclei_patches": nuclei_patches_result,
             **nuclei_summary,
             "gene_predictions": gene_predictions_result,
         }
+
+
+class ThumbnailWorker(Worker):
+    """
+    업로드 직후 원본 뷰용 썸네일만 빠르게 생성하는 가벼운 워커.
+    UNI2-h/AMD-MIL 등 무거운 모델을 전혀 로드하지 않음 — 분석 파이프라인과 완전히 분리.
+    """
+
+    def forward(self, data: dict) -> dict:
+        case_id = data["case_id"]
+        print(f"[{case_id}] 썸네일 생성 시작", flush=True)
+
+        local_svs_path = f"/tmp/{uuid.uuid4()}.svs"
+        download_slide_from_gcs(data["slide_gcs_path"], local_svs_path)
+
+        slide = openslide.OpenSlide(local_svs_path)
+        thumbnail = get_slide_thumbnail(slide, max_size=4096)
+        slide.close()
+        os.remove(local_svs_path)
+
+        thumb_path = upload_image_to_gcs(thumbnail, f"reports/{case_id}/original.png")
+        print(f"[{case_id}] 썸네일 생성 완료 → {thumb_path}", flush=True)
+
+        return {"slide_thumbnail_gcs_path": thumb_path}
 
 
 if __name__ == "__main__":
@@ -174,5 +196,14 @@ if __name__ == "__main__":
         max_batch_size=1,
         max_wait_time=10,
         timeout=900,
+        route="/inference",
+    )
+    server.append_worker(
+        ThumbnailWorker,
+        num=1,
+        max_batch_size=1,
+        max_wait_time=5,
+        timeout=180,
+        route="/thumbnail",
     )
     server.run()
