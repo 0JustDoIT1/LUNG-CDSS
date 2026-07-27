@@ -252,23 +252,6 @@ export default function CaseListPage(): React.JSX.Element {
         </table>
       </div>
 
-      {/* 정확도 구간 범례 */}
-      <div className="flex items-center gap-4 text-[11px] text-gray-500 px-1">
-        <span className="font-medium text-gray-600">정확도 구간:</span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-green-500" />
-          90%↑ 확정 권장
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-amber-500" />
-          70~90% 참고용
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-rose-500" />
-          70%↓ 재검 권장
-        </span>
-      </div>
-
       {modalCase && (
         <CaseResultModal caseData={modalCase} loading={detailLoading} onClose={closeModal} />
       )}

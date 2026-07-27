@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Upload } from "lucide-react";
 import { getUploadUrl, uploadFileToGcs, createCase } from "../api/cases";
-
 
 const ALLOWED_EXT = ["svs", "ndpi", "tiff", "tif", "png", "jpg", "jpeg"];
 const PREVIEWABLE_EXT = ["png", "jpg", "jpeg"];
@@ -201,12 +201,12 @@ export default function UploadPage() {
             }}
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
-            className={`flex flex-col items-center justify-center min-h-[200px] p-8 border-2 border-dashed rounded-2xl text-center cursor-pointer transition-colors ${
-              dragOver ? "bg-teal-50 border-teal-500" : "bg-[#f0fdfa] border-teal-400/50"
+            className={`group flex flex-col items-center justify-center min-h-[200px] p-8 border-2 border-dashed rounded-2xl text-center cursor-pointer transition-colors hover:border-teal-500 hover:bg-teal-50/50 ${
+              dragOver ? "bg-teal-50 border-teal-400" : "bg-[#f0fdfa] border-teal-600"
             }`}
           >
-            <span className="text-3xl mb-2.5" aria-hidden="true">⇧</span>
-            <p className="text-sm font-semibold text-teal-800 mb-1">파일을 끌어다 놓거나 클릭하여 선택</p>
+            <Upload className="w-8 h-8 mb-2.5 text-teal-600 group-hover:text-teal-500 transition-colors" />
+            <p className="text-sm font-semibold text-teal-800 group-hover:text-teal-600 transition-colors mb-1">파일을 끌어다 놓거나 클릭하여 선택</p>
             <p className="text-xs text-slate-500">SVS, NDPI, TIFF, PNG, JPG 지원 · 최대 2GB</p>
             <p className="text-[11px] text-slate-400 mt-2.5">품질 검증을 위해 해상도 20x 이상 권장</p>
             <input
@@ -318,7 +318,7 @@ export default function UploadPage() {
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="px-4.5 py-2.5 rounded-lg text-[13px] font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+              className="px-4.5 py-2.5 rounded-lg text-[13px] font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-400 hover:text-gray-800 transition-all duration-200"
             >
               결과리스트로 돌아가기
             </button>
