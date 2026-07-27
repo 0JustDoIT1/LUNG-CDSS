@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
+import RoleRoute from "./RoleRoute";
 import PathologistLayout from "../layouts/PathologistLayout";
 import LoginPage from "../pages/LoginPage";
 import SignupPage from "../pages/SignupPage";
@@ -20,14 +21,24 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           {
-            element: <PathologistLayout />,
+            element: <RoleRoute allowedRole="pathologist" />,
             children: [
-              { path: "/", element: <CaseListPage /> },
-              { path: "/upload", element: <UploadPage /> },
-              { path: "/analysis/:id", element: <AnalysisPage /> },
+              {
+                element: <PathologistLayout />,
+                children: [
+                  { path: "/", element: <CaseListPage /> },
+                  { path: "/upload", element: <UploadPage /> },
+                  { path: "/analysis/:id", element: <AnalysisPage /> },
+                ],
+              },
             ],
           },
-          { path: "/doctor-dashboard", element: <Dashboard /> },
+          {
+            element: <RoleRoute allowedRole="doctor" />,
+            children: [
+              { path: "/doctor-dashboard", element: <Dashboard /> },
+            ],
+          },
         ],
       },
       { path: "*", element: <NotFoundPage /> },
