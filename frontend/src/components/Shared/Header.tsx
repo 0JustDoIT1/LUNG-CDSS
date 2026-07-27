@@ -21,14 +21,10 @@ export default function Header() {
   return (
     <header className="flex items-center justify-between px-6 py-3 bg-white border-b-2 border-teal-600 flex-shrink-0">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f6e56" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 18h8" /><path d="M3 22h18" /><path d="M14 22a7 7 0 1 0 0-14h-1" />
-            <path d="M9 14h2" /><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z" />
-            <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3" />
-          </svg>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+          <img src="/logo.png" alt="PathoAI 로고" className="w-full h-full object-contain" />
         </div>
-        <span className="font-semibold text-gray-900 text-sm">PathoAI</span>
+        <span className="font-semibold text-gray-900 text-sm">OncoLensAI</span>
         <div className="w-px h-4 bg-gray-200" />
         <span className="text-xs text-gray-400">병리 슬라이드 AI 진단 플랫폼</span>
       </div>

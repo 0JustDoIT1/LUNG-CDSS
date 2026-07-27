@@ -39,6 +39,7 @@ export default function LoginPage() {
             회원가입이 완료되었습니다. 로그인해주세요.
           </p>
         )}
+
         <div>
           <label htmlFor="login-hospital-code" className="block text-xs font-medium mb-1.5 text-gray-700">
             병원코드
@@ -48,15 +49,11 @@ export default function LoginPage() {
             type="text"
             inputMode="numeric"
             maxLength={6}
-            //{...register("hospital_code", { required: "병원코드를 입력해주세요." })}
-            {...register("hospital_code", {
-              required: "병원코드를 입력해주세요.",
-              pattern: { value: /^\d{6}$/, message: "병원코드는 숫자 6자리입니다." },
-            })}            
+            {...register("hospital_code", { required: "병원코드를 입력해주세요." })}
             className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none focus:ring-1 transition ${
               errors.hospital_code
                 ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                : "border-gray-200 focus:border-indigo-400 focus:ring-indigo-100"
+                : "border-gray-200 focus:border-teal-400 focus:ring-teal-100"
             }`}
             placeholder="숫자 6자리"
           />
@@ -74,7 +71,7 @@ export default function LoginPage() {
             className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none focus:ring-1 transition ${
               errors.password
                 ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                : "border-gray-200 focus:border-indigo-400 focus:ring-indigo-100"
+                : "border-gray-200 focus:border-teal-400 focus:ring-teal-100"
             }`}
             placeholder="••••••••"
           />
@@ -85,14 +82,14 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-2.5 rounded-xl text-sm font-medium transition hover:opacity-90 bg-indigo-600 text-white disabled:opacity-50"
+          className="w-full py-2.5 rounded-xl text-sm font-medium transition hover:opacity-90 bg-teal-600 text-white disabled:opacity-50"
         >
           {isSubmitting ? "로그인 중..." : "로그인"}
         </button>
 
         <p className="text-center text-xs mt-3 text-gray-500">
           계정이 없으신가요?{" "}
-          <span className="cursor-pointer font-medium text-indigo-600" onClick={() => navigate("/signup")}>
+          <span className="cursor-pointer font-medium text-teal-600" onClick={() => navigate("/signup")}>
             회원가입
           </span>
         </p>
