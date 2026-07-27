@@ -7,13 +7,28 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   const isLogin = location.pathname === "/login";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "#F8F9FB" }}>
-      <main className="w-full max-w-sm">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden" style={{ background: "#F8F9FB" }}>
+      {/* 배경 유기적 블롭 애니메이션 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute -top-20 -left-20 w-[420px] h-[420px] bg-teal-300/60 blur-3xl animate-blob"
+          style={{ borderRadius: "42% 58% 65% 35% / 45% 45% 55% 55%" }}
+        />
+        <div
+          className="absolute -bottom-24 -right-16 w-[420px] h-[420px] bg-emerald-300/60 blur-3xl animate-blob"
+          style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%", animationDelay: "2.5s" }}
+        />
+        <div
+          className="absolute top-1/3 right-1/4 w-[320px] h-[320px] bg-teal-200/70 blur-3xl animate-blob"
+          style={{ borderRadius: "38% 62% 55% 45% / 58% 42% 58% 42%", animationDelay: "5s" }}
+        />
+      </div>
+      <main className="relative z-10 w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3">
-            <img src="/logo.png" alt="PathoAI 로고" className="w-full h-full object-contain" />
+            <img src="/logo.png" alt="OncoLensAI 로고" className="w-full h-full object-contain" />
           </div>
-          <p className="font-semibold text-lg text-gray-900">OncoLensAI</p>
+          <p className="font-bold text-xl text-gray-900">OncoLensAI</p>
           <p className="text-sm mt-1 text-gray-500">병리 슬라이드 AI 진단 플랫폼</p>
         </div>
 
