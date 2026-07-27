@@ -12,7 +12,7 @@ const ANALYSIS_STEPS: { key: Exclude<CaseStep, null>; name: string; msg: string 
   { key: "generating_result", name: "결과 생성", msg: "리포트를 생성하고 있습니다…" },
 ];
 
-const POLL_INTERVAL_MS = 4000;
+const POLL_INTERVAL_MS = 1500;
 
 export default function AnalysisPage() {
   const { id } = useParams<{ id: string }>();
@@ -82,28 +82,33 @@ export default function AnalysisPage() {
         }
       }
 
-      pollRef.current = setInterval(async () => {
-        try {
-          const detail = await getCase(id!);
-          const idx = ANALYSIS_STEPS.findIndex((s) => s.key === detail.current_step);
-          if (idx >= 0) setStepIndex(idx);
-
-          if (detail.analyzed_at) {
-            setAnalyzedAt(detail.analyzed_at);
-          }
-
-          if (detail.status === "completed") {
-            setStatus("completed");
-            if (pollRef.current) clearInterval(pollRef.current);
-          } else if (detail.status === "failed") {
-            setStatus("failed");
-            setError("분석 중 오류가 발생했습니다.");
-            if (pollRef.current) clearInterval(pollRef.current);
-          }
-        } catch {
-          // 폴링 중 일시적 에러는 무시하고 다음 폴링에서 재시도
+    pollRef.current = setInterval(async () => {
+      try {
+        const detail = await getCase(id!);
+        console.log("[분석 폴링] current_step:", JSON.stringify(detail.current_step), "status:", detail.status);
+        const idx = ANALYSIS_STEPS.findIndex((s) => s.key === detail.current_step);
+        if (idx >= 0) {
+          setStepIndex(idx);
+        } else {
+          console.warn("[분석 폴링] current_step이 ANALYSIS_STEPS 키와 매칭 안 됨:", detail.current_step);
         }
-      }, POLL_INTERVAL_MS);
+      
+        if (detail.analyzed_at) {
+          setAnalyzedAt(detail.analyzed_at);
+        }
+      
+        if (detail.status === "completed") {
+          setStatus("completed");
+          if (pollRef.current) clearInterval(pollRef.current);
+        } else if (detail.status === "failed") {
+          setStatus("failed");
+          setError("분석 중 오류가 발생했습니다.");
+          if (pollRef.current) clearInterval(pollRef.current);
+        }
+      } catch {
+        // 폴링 중 일시적 에러는 무시하고 다음 폴링에서 재시도
+      }
+    }, POLL_INTERVAL_MS);
     }
 
     start();
