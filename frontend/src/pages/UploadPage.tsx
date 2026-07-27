@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload } from "lucide-react";
 import { getUploadUrl, uploadFileToGcs, createCase } from "../api/cases";
+import { createSvsPreview } from "../utils/createSvsPreview";
 
 const ALLOWED_EXT = ["svs", "ndpi", "tiff", "tif", "png", "jpg", "jpeg"];
 const PREVIEWABLE_EXT = ["png", "jpg", "jpeg"];
@@ -53,26 +54,70 @@ export default function UploadPage() {
 
   const hasReadyFile = files.some((f) => f.status === "ready");
 
-  const addFiles = useCallback((fileList: FileList) => {
-    setValMsg(null);
-    let hasError = false;
-    const newFiles: QueuedFile[] = Array.from(fileList).map((file) => {
-      const e = ext(file.name);
-      const previewUrl = PREVIEWABLE_EXT.includes(e) ? URL.createObjectURL(file) : undefined;
+ const addFiles = useCallback(async (fileList: FileList) => {
+  setValMsg(null);
 
-      if (!ALLOWED_EXT.includes(e)) {
+  let hasError = false;
+
+  const newFiles: QueuedFile[] = await Promise.all(
+    Array.from(fileList).map(async (file) => {
+      const extension = ext(file.name);
+      let previewUrl: string | undefined;
+
+      if (!ALLOWED_EXT.includes(extension)) {
         hasError = true;
-        return { file, status: "error" as const, error: "지원하지 않는 파일 형식", progress: 0, previewUrl };
+
+        return {
+          file,
+          status: "error" as const,
+          error: "지원하지 않는 파일 형식",
+          progress: 0,
+        };
       }
+
       if (file.size > MAX_SIZE) {
         hasError = true;
-        return { file, status: "error" as const, error: "파일 크기 초과 (최대 2GB)", progress: 0, previewUrl };
+
+        return {
+          file,
+          status: "error" as const,
+          error: "파일 크기 초과 (최대 2GB)",
+          progress: 0,
+        };
       }
-      return { file, status: "ready" as const, progress: 0, previewUrl };
-    });
-    setFiles((prev) => [...prev, ...newFiles]);
-    if (hasError) setValMsg("일부 파일이 요구 사항을 충족하지 않습니다.");
-  }, []);
+
+      try {
+        if (PREVIEWABLE_EXT.includes(extension)) {
+          previewUrl = URL.createObjectURL(file);
+        } else if (["svs", "tif", "tiff"].includes(extension)) {
+          previewUrl = await createSvsPreview(file);
+        }
+      } catch (error) {
+        console.error("슬라이드 미리보기 생성 실패:", error);
+
+        return {
+          file,
+          status: "ready" as const,
+          error: "미리보기 생성 실패",
+          progress: 0,
+        };
+      }
+
+      return {
+        file,
+        status: "ready" as const,
+        progress: 0,
+        previewUrl,
+      };
+    }),
+  );
+
+  setFiles((prev) => [...prev, ...newFiles]);
+
+  if (hasError) {
+    setValMsg("일부 파일이 요구 사항을 충족하지 않습니다.");
+  }
+}, []);
 
   function handleRemove(index: number) {
     setFiles((prev) => {
