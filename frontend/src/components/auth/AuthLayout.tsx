@@ -25,7 +25,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       </div>
       <main className="relative z-10 w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3">
+          <div className="w-10 h-20 rounded-xl flex items-center justify-center mx-auto mb-3">
             <img src="/logo.png" alt="OncoLensAI 로고" className="w-full h-full object-contain" />
           </div>
           <p className="font-bold text-xl text-gray-900">OncoLensAI</p>

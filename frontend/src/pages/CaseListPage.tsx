@@ -130,51 +130,54 @@ export default function CaseListPage(): React.JSX.Element {
   }
 
   if (initialLoading)
-    return (
-      <div className="relative space-y-5 animate-pulse">
-        {/* 스피너 오버레이 */}
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/60">
-          <Loader2 className="w-10 h-10 text-teal-600 animate-spin" />
-          <p className="text-sm text-gray-500">불러오는 중...</p>
+  return (
+    <div className="relative space-y-5 animate-pulse">
+      {/* 스피너 오버레이 */}
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-white/60">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-4 border-teal-100" />
+          <div className="absolute inset-0 rounded-full border-4 border-teal-500 border-t-transparent animate-spin" />
         </div>
-  
-        {/* 헤더 스켈레톤 */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <div className="h-3 w-20 bg-gray-200 rounded mb-2" />
-            <div className="h-7 w-32 bg-gray-200 rounded" />
-          </div>
-          <div className="h-10 w-36 bg-gray-200 rounded-lg" />
-        </div>
-  
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="rounded-xl border border-gray-200 bg-white p-4 h-[74px]">
-              <div className="h-3 w-16 bg-gray-200 rounded mb-3" />
-              <div className="h-6 w-10 bg-gray-200 rounded" />
-            </div>
-          ))}
-        </div>
-  
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="h-9 w-64 bg-gray-200 rounded-lg" />
-          <div className="h-9 flex-1 min-w-[160px] bg-gray-200 rounded-lg" />
-        </div>
-  
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <div className="bg-gray-50/80 h-10" />
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center gap-4 px-4 py-3.5 border-t border-gray-100">
-              <div className="h-3.5 w-24 bg-gray-200 rounded" />
-              <div className="h-3.5 w-28 bg-gray-200 rounded" />
-              <div className="h-3.5 w-12 bg-gray-200 rounded" />
-              <div className="h-3.5 w-14 bg-gray-200 rounded" />
-              <div className="h-5 w-16 bg-gray-200 rounded-full" />
-            </div>
-          ))}
-        </div>
+        <p className="text-xs font-medium text-gray-400 tracking-wide">케이스 목록을 불러오는 중...</p>
       </div>
-    );
+
+      {/* 헤더 스켈레톤 */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <div className="h-3 w-20 bg-gray-200 rounded mb-2" />
+          <div className="h-7 w-32 bg-gray-200 rounded" />
+        </div>
+        <div className="h-10 w-36 bg-gray-200 rounded-lg" />
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="rounded-xl border border-gray-200 bg-white p-4 h-[74px]">
+            <div className="h-3 w-16 bg-gray-200 rounded mb-3" />
+            <div className="h-6 w-10 bg-gray-200 rounded" />
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="h-9 w-64 bg-gray-200 rounded-lg" />
+        <div className="h-9 flex-1 min-w-[160px] bg-gray-200 rounded-lg" />
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div className="bg-gray-50/80 h-10" />
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex items-center gap-4 px-4 py-3.5 border-t border-gray-100">
+            <div className="h-3.5 w-24 bg-gray-200 rounded" />
+            <div className="h-3.5 w-28 bg-gray-200 rounded" />
+            <div className="h-3.5 w-12 bg-gray-200 rounded" />
+            <div className="h-3.5 w-14 bg-gray-200 rounded" />
+            <div className="h-5 w-16 bg-gray-200 rounded-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
   if (error) return <div className="p-8 text-sm text-rose-600">에러: {error}</div>;
 
   const statusFilters: { v: CaseStatus | ""; l: string }[] = [
