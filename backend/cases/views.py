@@ -14,6 +14,7 @@ from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upl
 
 from rag.rag_service import generate_treatment_note
 from rag.exceptions import RAGServiceError
+from .pagination import CasePagination
 
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 
@@ -23,7 +24,7 @@ INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 def case_list_create(request):
     if request.method == "GET":
         # 조회는 의사와 병리사 모두 가능
-        queryset = Case.objects.all()
+        queryset = Case.objects.all().order_by("-uploaded_at")
 
         status_param = request.query_params.get("status")
         if status_param:
@@ -39,14 +40,21 @@ def case_list_create(request):
 
         favorite_param = request.query_params.get("favorite")
         if favorite_param == "true":
-            queryset = queryset.filter(favorited_by__user=request.user)
+            queryset = queryset.filter(
+                favorited_by__user=request.user
+            ).distinct()
+
+        paginator = CasePagination()
+        page = paginator.paginate_queryset(queryset, request)
 
         serializer = CaseListSerializer(
-            queryset,
+            page,
             many=True,
             context={"request": request},
         )
-        return Response(serializer.data)
+
+        return paginator.get_paginated_response(serializer.data)
+
 
     # POST: 케이스 생성은 병리사만 가능
     if not IsPathologist().has_permission(request, None):

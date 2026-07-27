@@ -68,6 +68,8 @@ export interface CaseListParams {
   status?: CaseStatus;
   label?: PredictionLabel;
   search?: string;
+  page?: number;
+  page_size?: number;
 }
 
 export interface CreateCasePayload {

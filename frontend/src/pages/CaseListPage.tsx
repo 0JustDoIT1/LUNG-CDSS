@@ -37,8 +37,12 @@ export default function CaseListPage(): React.JSX.Element {
   const [cases, setCases] = useState<CaseListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const [statusFilter, setStatusFilter] = useState<CaseStatus | "">("");
   const [search, setSearch] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   const [modalCase, setModalCase] = useState<CaseDetail | CaseListItem | null>(null);
   const [detailLoading, setDetailLoading] = useState<boolean>(false);
@@ -47,15 +51,26 @@ export default function CaseListPage(): React.JSX.Element {
   const fetchCases = useCallback(async () => {
     setLoading(true);
     setError(null);
+
     try {
-      const data = await getCases();
-      setCases(data);
+      const data = await getCases({
+        page: currentPage,
+        page_size: 10,
+        status: statusFilter || undefined,
+        search: search.trim() || undefined,
+      });
+
+      setCases(data.results);
+      setCurrentPage(data.current_page);
+      setTotalPages(data.total_pages);
+      setTotalCount(data.count);
     } catch (e) {
       setError(e instanceof Error ? e.message : "케이스 목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
-  }, []);
+  }, [currentPage, statusFilter, search]);
 
   useEffect(() => {
     fetchCases();
@@ -68,16 +83,7 @@ export default function CaseListPage(): React.JSX.Element {
     return { total: cases.length, uploaded, completed, failed };
   }, [cases]);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return cases.filter(
-      (c) =>
-        (!statusFilter || c.status === statusFilter) &&
-        (!q ||
-          (c.specimen_id ?? "").toLowerCase().includes(q) ||
-          (c.prediction_label ?? "").toLowerCase().includes(q))
-    );
-  }, [cases, statusFilter, search]);
+
 
   const openModal = useCallback(async (c: CaseListItem): Promise<void> => {
     setModalCase(c);
@@ -124,7 +130,7 @@ export default function CaseListPage(): React.JSX.Element {
     }
   }
 
-  if (loading)
+  if (initialLoading)
     return (
       <div className="relative space-y-5 animate-pulse">
         {/* 스피너 오버레이 */}
@@ -210,7 +216,10 @@ export default function CaseListPage(): React.JSX.Element {
             return (
               <button
                 key={s.v || "all"}
-                onClick={() => setStatusFilter(s.v)}
+                onClick={() => {
+                  setStatusFilter(s.v);
+                  setCurrentPage(1);
+                }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                   active ? "bg-gray-900 text-white" : "text-gray-500 hover:text-gray-900"
                 }`}
@@ -225,14 +234,25 @@ export default function CaseListPage(): React.JSX.Element {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="검체 ID / 진단 검색..."
             className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-teal-400"
           />
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+      <div className="relative overflow-x-auto rounded-xl border border-gray-200 bg-white">
+        {loading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="w-7 h-7 text-teal-600 animate-spin" />
+              <p className="text-xs text-gray-500">불러오는 중...</p>
+            </div>
+          </div>
+        )}
         <table className="w-full text-sm">
           <thead className="bg-gray-50/80 sticky top-0">
             <tr>
@@ -245,7 +265,7 @@ export default function CaseListPage(): React.JSX.Element {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {filtered.map((c) => {
+            {cases.map((c) => {
               const luad = c.luad_probability ?? 0;
               const lusc = c.lusc_probability ?? 0;
               const conf = c.luad_probability != null ? Math.max(luad, lusc) : null;
@@ -294,7 +314,7 @@ export default function CaseListPage(): React.JSX.Element {
                 </tr>
               );
             })}
-            {filtered.length === 0 && (
+            {cases.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-400">
                   케이스가 없습니다
@@ -304,6 +324,49 @@ export default function CaseListPage(): React.JSX.Element {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-gray-500">
+            전체 {totalCount}건 · {currentPage}/{totalPages}페이지
+          </p>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 rounded-md border border-gray-200 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              이전
+            </button>
+
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => setCurrentPage(page)}
+                className={`w-8 h-8 rounded-md text-xs font-medium transition ${
+                  currentPage === page
+                    ? "bg-teal-600 text-white"
+                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 rounded-md border border-gray-200 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              다음
+            </button>
+          </div>
+        </div>
+      )}
 
       {modalCase && (
         <CaseResultModal caseData={modalCase} loading={detailLoading} onClose={closeModal} />

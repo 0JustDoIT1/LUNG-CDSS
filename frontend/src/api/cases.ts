@@ -9,13 +9,23 @@ import type {
   UploadUrlResponse,
 } from "../types/case";
 
+export interface PaginatedCaseResponse {
+  count: number;
+  total_pages: number;
+  current_page: number;
+  page_size: number;
+  next: string | null;
+  previous: string | null;
+  results: CaseListItem[];
+}
+
 // 1. 업로드 URL 발급
 export async function getUploadUrl(payload: UploadUrlPayload) {
   const { data } = await apiClient.post<UploadUrlResponse>("/cases/upload-url/", payload);
   return data;
 }
 
-// 2. 발급받은 URL로 파일 직접 GCS 업로드 (Django 안 거침)
+// 2. 발급받은 URL로 파일 직접 GCS 업로드
 export async function uploadFileToGcs(uploadUrl: string, file: File) {
   await fetch(uploadUrl, {
     method: "PUT",
@@ -24,8 +34,9 @@ export async function uploadFileToGcs(uploadUrl: string, file: File) {
   });
 }
 
+// 3. 케이스 목록 조회
 export async function getCases(params?: CaseListParams) {
-  const { data } = await apiClient.get<CaseListItem[]>("/cases/", { params });
+  const { data } = await apiClient.get<PaginatedCaseResponse>("/cases/", { params });
   return data;
 }
 
