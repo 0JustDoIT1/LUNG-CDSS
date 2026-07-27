@@ -251,9 +251,9 @@ export default function UploadPage() {
             }`}
           >
             <Upload className="w-8 h-8 mb-2.5 text-teal-600 group-hover:text-teal-500 transition-colors" />
-            <p className="text-sm font-semibold text-teal-800 group-hover:text-teal-600 transition-colors mb-1">파일을 끌어다 놓거나 클릭하여 선택</p>
-            <p className="text-xs text-slate-500">SVS, NDPI, TIFF, PNG, JPG 지원 · 최대 2GB</p>
-            <p className="text-[11px] text-slate-400 mt-2.5">품질 검증을 위해 해상도 20x 이상 권장</p>
+            <p className="text-sm font-semibold text-teal-800 group-hover:text-teal-600 transition-colors mb-1">파일 업로드</p>
+            <p className="text-xs text-slate-500">파일을 끌어다 놓거나 클릭하여 선택</p>
+            <p className="text-xs text-slate-500">SVS, NDPI, TIFF, PNG, JPG 지원</p>
             <input
               ref={fileInputRef}
               id="file-input"

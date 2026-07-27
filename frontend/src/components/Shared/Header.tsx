@@ -32,9 +32,9 @@ export default function Header() {
       <div className="flex items-center gap-3">
         {userName && (
           <div className="text-right">
-            <p className="text-xs font-medium text-gray-700">{userName}</p>
+            <p className="text-sm font-semibold text-gray-700">{userName}</p>
             {userDepartment && (
-              <p className="text-[10px] text-gray-400">
+              <p className="text-[12px] text-gray-500">
                 {DEPARTMENT_LABELS[userDepartment] ?? userDepartment}
               </p>
             )}
