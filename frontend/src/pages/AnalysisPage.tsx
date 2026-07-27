@@ -12,7 +12,7 @@ const ANALYSIS_STEPS: { key: Exclude<CaseStep, null>; name: string; msg: string 
   { key: "generating_result", name: "결과 생성", msg: "리포트를 생성하고 있습니다…" },
 ];
 
-const POLL_INTERVAL_MS = 1500;
+const POLL_INTERVAL_MS = 1000;
 
 export default function AnalysisPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +30,8 @@ export default function AnalysisPage() {
 
   // 경과 시간 타이머 — analyzed_at을 받으면 실제 시작 시각 기준으로 계산
   useEffect(() => {
+    if (status !== "running") return;
+  
     timerRef.current = setInterval(() => {
       if (analyzedAt) {
         const elapsed = Math.floor((Date.now() - new Date(analyzedAt).getTime()) / 1000);
@@ -41,7 +43,7 @@ export default function AnalysisPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [analyzedAt]);
+  }, [analyzedAt, status]);
 
   // 미리보기 모드: 가짜 진행
   useEffect(() => {
@@ -125,8 +127,8 @@ export default function AnalysisPage() {
   return (
     <div>
       <header className="mb-5">
-        <p className="text-[11px] text-gray-400 tracking-wider">ANALYSIS PIPELINE</p>
-        <h1 className="text-lg font-semibold text-gray-900 mt-0.5">
+        <p className="text-xs font-medium text-gray-400">진단 워크플로우</p>
+        <h1 className="font-semibold text-2xl text-gray-900 tracking-tight">
           {status === "completed" ? "분석 완료" : status === "failed" ? "분석 실패" : "분석 진행 중"}
         </h1>
         <p className="text-[13px] text-gray-500 mt-1.5">
@@ -134,6 +136,16 @@ export default function AnalysisPage() {
           {status === "completed" && "결과가 준비되었습니다. 결과 보기를 클릭하세요."}
           {status === "failed" && "분석 중 문제가 발생했습니다."}
         </p>
+
+        {status === "completed" && (
+          <div className="mt-4 flex items-center gap-2.5 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+            <span className="text-2xl">🎉</span>
+            <div>
+              <p className="text-sm font-semibold text-green-800">분석이 완료되었습니다!</p>
+              <p className="text-xs text-green-600">아래 버튼을 눌러 결과를 확인하세요.</p>
+            </div>
+          </div>
+        )}
       </header>
 
       {status !== "failed" && (
@@ -208,7 +220,7 @@ export default function AnalysisPage() {
       <div className="flex gap-2.5 flex-wrap">
         <button
           type="button"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/", { state: { openCaseId: id } })}
           disabled={status === "running"}
           className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-green-700 text-white hover:bg-green-800 transition disabled:opacity-45 disabled:cursor-not-allowed"
         >
