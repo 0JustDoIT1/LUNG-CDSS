@@ -99,8 +99,8 @@ function AccessibilityControls({
   highContrast,
   onToggleHighContrast,
 }: AccessibilityControlsProps): React.JSX.Element {
-  const minIdx = FONT_SCALE_STEPS.indexOf(fontScale as (typeof FONT_SCALE_STEPS)[number]) <= 0;
-  const maxIdx =
+  const atMin = FONT_SCALE_STEPS.indexOf(fontScale as (typeof FONT_SCALE_STEPS)[number]) <= 0;
+  const atMax =
     FONT_SCALE_STEPS.indexOf(fontScale as (typeof FONT_SCALE_STEPS)[number]) >= FONT_SCALE_STEPS.length - 1;
 
   return (
@@ -108,7 +108,7 @@ function AccessibilityControls({
       <div className="inline-flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white p-0.5">
         <button
           onClick={onDecreaseFont}
-          disabled={minIdx}
+          disabled={atMin}
           aria-label="글자 크기 축소"
           className="p-1.5 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
         >
@@ -119,7 +119,7 @@ function AccessibilityControls({
         </span>
         <button
           onClick={onIncreaseFont}
-          disabled={maxIdx}
+          disabled={atMax}
           aria-label="글자 크기 확대"
           className="p-1.5 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
         >
@@ -486,10 +486,10 @@ export default function Dashboard(): React.JSX.Element {
     }
   }, []);
 
-  const closeModal = (): void => {
+  const closeModal = useCallback((): void => {
     setModalCase(null);
     setModalType(null);
-  };
+  }, []);
 
   const toggleCompare = useCallback((id: string) => {
     setCompareIds((prev) => {
@@ -511,23 +511,21 @@ export default function Dashboard(): React.JSX.Element {
     }
   }, []);
 
-  
-
   const handleReviewed = useCallback((updated: CaseListItem) => {
-  setCases((prev) => prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
-}, []);
+    setCases((prev) => prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
+  }, []);
 
-const moveSelection = useCallback(
-  (dir: 1 | -1) => {
-    if (filtered.length === 0) return;
-    const idx = filtered.findIndex((c) => c.id === selectedIdRef.current);
-    const nextIdx = idx === -1 ? 0 : Math.min(Math.max(idx + dir, 0), filtered.length - 1);
-    const next = filtered[nextIdx];
-    setSelectedId(next.id);
-    rowRefs.current.get(next.id)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  },
-  [filtered]
-);
+  const moveSelection = useCallback(
+    (dir: 1 | -1) => {
+      if (filtered.length === 0) return;
+      const idx = filtered.findIndex((c) => c.id === selectedIdRef.current);
+      const nextIdx = idx === -1 ? 0 : Math.min(Math.max(idx + dir, 0), filtered.length - 1);
+      const next = filtered[nextIdx];
+      setSelectedId(next.id);
+      rowRefs.current.get(next.id)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    },
+    [filtered]
+  );
 
   // ----------------------------- 키보드 단축키 -----------------------------
   useEffect(() => {
@@ -608,7 +606,7 @@ const moveSelection = useCallback(
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [filtered, moveSelection, openModal]);
+  }, [filtered, moveSelection, openModal, closeModal]);
 
   const statusFilters: { v: CaseStatus | ""; l: string }[] = [
     { v: "", l: "전체" },

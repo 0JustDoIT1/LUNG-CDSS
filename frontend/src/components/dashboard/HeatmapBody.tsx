@@ -72,7 +72,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
     original: [],
   });
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
-  const [zoomPct, setZoomPct] = useState<number>(100);
+  const [zoomPct, setZoomPct] = useState<number>(1);
   const [saveFlash, setSaveFlash] = useState<boolean>(false);
   const [findings, setFindings] = useState<SavedFinding[]>(() => loadFindings(caseData.id));
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
@@ -108,7 +108,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
   // ---------------- 탭(모드) 전환 시 줌/팬 초기화 ----------------
   useEffect(() => {
     transformRef.current?.resetTransform();
-    setZoomPct(100);
+    setZoomPct(1);
   }, [mode]);
 
   // 소견기록 탭 진입 시 최신 항목 자동 선택
@@ -152,11 +152,11 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
     isDrawing.current = false;
     if (currentPoints.current.length > 1 && canDraw) {
       const newStroke: Stroke = {
-  color: tool === "eraser" ? "#000000" : color,
-  size: tool === "eraser" ? brushSize * 6 : brushSize,
-  points: currentPoints.current,
-  composite: tool === "eraser" ? "destination-out" : "source-over",
-};
+        color: tool === "eraser" ? "#000000" : color,
+        size: tool === "eraser" ? brushSize * 6 : brushSize,
+        points: currentPoints.current,
+        composite: tool === "eraser" ? "destination-out" : "source-over",
+      };
       setStrokesByMode((prev) => ({
         ...prev,
         [mode as DrawableMode]: [...prev[mode as DrawableMode], newStroke],
@@ -441,6 +441,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
                         lineCap="round"
                         lineJoin="round"
                         tension={0.3}
+                        globalCompositeOperation={s.composite ?? "source-over"}
                       />
                     ))}
                   </Layer>

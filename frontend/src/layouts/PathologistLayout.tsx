@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { ClipboardList, Upload } from "lucide-react";
-import Header from "../components/shared/Header";
-import Sidebar from "../components/shared/Sidebar";
+import Header from "../components/Shared/Header";
+import Sidebar from "../components/Shared/Sidebar";
 
 const NAV_ITEMS = [
   { to: "/", label: "케이스 리스트", icon: ClipboardList, end: true },

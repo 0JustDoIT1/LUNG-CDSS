@@ -1,5 +1,35 @@
 @import './styles/typography.css';
 @import "tailwindcss";
+
+/* ----------------------------- 인쇄 / PDF 내보내기 ----------------------------- */
+/* 평소 화면에서는 숨기고, 인쇄(또는 브라우저의 '인쇄 > PDF로 저장')를 실행할 때만 노출 */
+.print-only {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .print-only,
+  .print-only * {
+    visibility: visible;
+  }
+  .print-only {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+  }
+}
+
 @keyframes flip {
   0% {
     transform: rotate(0deg);
