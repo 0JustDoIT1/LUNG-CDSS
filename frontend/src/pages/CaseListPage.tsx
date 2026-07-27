@@ -210,7 +210,7 @@ export default function CaseListPage(): React.JSX.Element {
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5">
           {statusFilters.map((s) => {
-            const count = s.v === "" ? cases.length : cases.filter((c) => c.status === s.v).length;
+            const count = s.v === "" ? metrics.total : metrics[s.v as "uploaded" | "completed" | "failed"];
             const active = statusFilter === s.v;
           
             const activeColors: Record<string, string> = {
@@ -223,7 +223,10 @@ export default function CaseListPage(): React.JSX.Element {
             return (
               <button
                 key={s.v || "all"}
-                onClick={() => setStatusFilter(s.v)}
+                onClick={() => {
+                  setStatusFilter(s.v);
+                  setCurrentPage(1);
+                }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                   active ? activeColors[s.v] : "text-gray-500 hover:text-gray-900"
                 }`}
