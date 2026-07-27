@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+
 class Case(models.Model):
     STATUS_CHOICES = [
         ("uploaded", "Uploaded"),        # 업로드 완료, 분석 전 (원본 뷰어만 표시)
@@ -127,3 +128,5 @@ class CaseFavorite(models.Model):
 
     def __str__(self):
         return f"{self.user.username} ♥ {self.case.specimen_id}"
+
+

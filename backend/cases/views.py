@@ -15,6 +15,9 @@ from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upl
 from rag.rag_service import generate_treatment_note
 from rag.exceptions import RAGServiceError
 
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 
 
@@ -252,11 +255,22 @@ def review_case(request, case_id):
     except Case.DoesNotExist:
         return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
 
+    if case.review_status != "pending":
+        return Response({"error": "이미 검토가 완료된 케이스입니다"}, status=status.HTTP_400_BAD_REQUEST)
+
     action = request.data.get("action")
     reviewer_note = request.data.get("reviewer_note", "")
 
     if action not in ["confirm", "reject"]:
         return Response({"error": "action은 confirm 또는 reject여야 합니다"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if action == "reject":
+        final_dx = request.data.get("final_diagnosis")
+        if not final_dx or not reviewer_note:
+            return Response({"error": "미승인 시 최종 진단과 사유를 모두 입력해야 합니다"}, status=status.HTTP_400_BAD_REQUEST)
+        if final_dx not in ("LUAD", "LUSC"):
+            return Response({"error": "final_diagnosis는 LUAD 또는 LUSC여야 합니다"}, status=status.HTTP_400_BAD_REQUEST)
+        case.prediction_label = final_dx
 
     case.review_status = "confirmed" if action == "confirm" else "rejected"
     case.reviewed_by = request.user
@@ -298,3 +312,4 @@ def get_upload_url(request):
 
     result = generate_upload_url(filename)
     return Response(result)
+
