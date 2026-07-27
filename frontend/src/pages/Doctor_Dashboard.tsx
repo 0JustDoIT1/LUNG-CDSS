@@ -11,6 +11,10 @@ import {
   XCircle,
   ClipboardCheck,
   GitCompare,
+  ArrowUpDown,
+  Minus,
+  Plus,
+  Contrast,
 } from "lucide-react";
 import type {
   CaseStatus,
@@ -25,6 +29,7 @@ import { ReviewActionCell } from "../components/dashboard/ReviewActionCell";
 import { DetailModal } from "../components/dashboard/DetailModal";
 import { ConfidenceCompact } from "../components/dashboard/ConfidenceIndicator";
 import { CompareModal } from "../components/dashboard/CompareModal";
+import Header from "../components/Shared/Header";
 import apiClient from "../api/client";
 
 const STATUS_DOT: Record<CaseStatus, string> = {
@@ -33,6 +38,110 @@ const STATUS_DOT: Record<CaseStatus, string> = {
   completed: "bg-green-500",
   failed: "bg-rose-500",
 };
+
+// ----------------------------- 접근성 설정 (글자 크기 / 고대비) -----------------------------
+// 두 설정 모두 localStorage에 저장해 새로고침 후에도 유지됨.
+// 글자 크기는 <html> 루트 font-size를 조정해 rem 기반 Tailwind 클래스 전체에 반영됨.
+const FONT_SCALE_STORAGE_KEY = "dashboard_a11y_font_scale";
+const HIGH_CONTRAST_STORAGE_KEY = "dashboard_a11y_high_contrast";
+const FONT_SCALE_STEPS = [0.875, 1, 1.125, 1.25] as const;
+const BASE_ROOT_FONT_PX = 16;
+
+function readStoredFontScale(): number {
+  if (typeof window === "undefined") return 1;
+  const saved = Number(window.localStorage.getItem(FONT_SCALE_STORAGE_KEY));
+  return FONT_SCALE_STEPS.includes(saved as (typeof FONT_SCALE_STEPS)[number]) ? saved : 1;
+}
+
+function readStoredHighContrast(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(HIGH_CONTRAST_STORAGE_KEY) === "true";
+}
+
+// 자주 쓰이는 배경/텍스트/보더 클래스만 고대비 톤으로 재정의하는 스코프 스타일.
+// 어두운 병원 환경에서 눈부심을 줄이고 텍스트 대비를 높이는 목적.
+const HIGH_CONTRAST_CSS = `
+.a11y-hc { background-color: #000 !important; }
+.a11y-hc .bg-\\[\\#F7F8FA\\] { background-color: #000 !important; }
+.a11y-hc .bg-white { background-color: #0a0a0a !important; }
+.a11y-hc .bg-gray-50, .a11y-hc .bg-gray-50\\/80, .a11y-hc .bg-gray-50\\/60 { background-color: #1a1a1a !important; }
+.a11y-hc .bg-gray-100 { background-color: #1a1a1a !important; }
+.a11y-hc .bg-gray-900 { background-color: #fff !important; color: #000 !important; }
+.a11y-hc .bg-gray-900 * { color: #000 !important; }
+.a11y-hc .text-gray-900 { color: #fff !important; }
+.a11y-hc .text-gray-700 { color: #f0f0f0 !important; }
+.a11y-hc .text-gray-600 { color: #e2e2e2 !important; }
+.a11y-hc .text-gray-500 { color: #cfcfcf !important; }
+.a11y-hc .text-gray-400 { color: #b5b5b5 !important; }
+.a11y-hc .border-gray-200, .a11y-hc .border-gray-100 { border-color: #4a4a4a !important; }
+.a11y-hc .divide-gray-100 > * + * { border-color: #4a4a4a !important; }
+.a11y-hc .bg-teal-50\\/70, .a11y-hc .bg-teal-50\\/60 { background-color: #003b3b !important; }
+.a11y-hc .bg-rose-50\\/50, .a11y-hc .bg-rose-50\\/60, .a11y-hc .bg-rose-50\\/80 { background-color: #4a0d14 !important; }
+.a11y-hc .bg-amber-50, .a11y-hc .bg-amber-50\\/60 { background-color: #4a2e00 !important; }
+.a11y-hc .text-amber-700, .a11y-hc .text-amber-900 { color: #ffd27a !important; }
+.a11y-hc .text-amber-600 { color: #ffcc66 !important; }
+.a11y-hc .text-rose-600 { color: #ff8fa3 !important; }
+.a11y-hc kbd { background-color: #1a1a1a !important; color: #fff !important; border-color: #666 !important; }
+`;
+
+interface AccessibilityControlsProps {
+  fontScale: number;
+  onDecreaseFont: () => void;
+  onIncreaseFont: () => void;
+  highContrast: boolean;
+  onToggleHighContrast: () => void;
+}
+
+function AccessibilityControls({
+  fontScale,
+  onDecreaseFont,
+  onIncreaseFont,
+  highContrast,
+  onToggleHighContrast,
+}: AccessibilityControlsProps): React.JSX.Element {
+  const minIdx = FONT_SCALE_STEPS.indexOf(fontScale as (typeof FONT_SCALE_STEPS)[number]) <= 0;
+  const maxIdx =
+    FONT_SCALE_STEPS.indexOf(fontScale as (typeof FONT_SCALE_STEPS)[number]) >= FONT_SCALE_STEPS.length - 1;
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="inline-flex items-center gap-0.5 rounded-lg border border-gray-200 bg-white p-0.5">
+        <button
+          onClick={onDecreaseFont}
+          disabled={minIdx}
+          aria-label="글자 크기 축소"
+          className="p-1.5 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <Minus className="w-3.5 h-3.5" />
+        </button>
+        <span className="px-1 text-xs font-medium text-gray-500 tabular-nums w-9 text-center">
+          {Math.round(fontScale * 100)}%
+        </span>
+        <button
+          onClick={onIncreaseFont}
+          disabled={maxIdx}
+          aria-label="글자 크기 확대"
+          className="p-1.5 rounded-md text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <Plus className="w-3.5 h-3.5" />
+        </button>
+      </div>
+      <button
+        onClick={onToggleHighContrast}
+        aria-pressed={highContrast}
+        aria-label="고대비 모드 전환"
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+          highContrast
+            ? "bg-gray-900 text-white border-gray-900"
+            : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+        }`}
+      >
+        <Contrast className="w-3.5 h-3.5" />
+        고대비
+      </button>
+    </div>
+  );
+}
 
 function normalizeCases(data: unknown): CaseListItem[] {
   if (Array.isArray(data)) return data as CaseListItem[];
@@ -46,6 +155,32 @@ function getConfidence(c: CaseListItem): number | null {
   if (c.luad_probability == null && c.lusc_probability == null) return null;
   return Math.max(c.luad_probability ?? 0, c.lusc_probability ?? 0);
 }
+
+// 긴급 케이스 판정: 완료됐지만 신뢰도가 낮은 경우(재검 권장 구간)
+function isUrgentCase(c: CaseListItem): boolean {
+  if (c.status !== "completed") return false;
+  const conf = getConfidence(c);
+  return conf != null && conf > 0 && conf < 0.7;
+}
+
+// 분석 실패로 재처리가 필요한 케이스 (긴급과는 별도로 구분)
+function isReprocessNeeded(c: CaseListItem): boolean {
+  return c.status === "failed";
+}
+
+// 긴급도 점수: 낮을수록 더 긴급 (신뢰도 오름차순)
+function urgencyScore(c: CaseListItem): number {
+  const conf = getConfidence(c);
+  return conf ?? 1;
+}
+
+type SortMode = "upload" | "confidence" | "review";
+
+const SORT_OPTIONS: { v: SortMode; l: string }[] = [
+  { v: "upload", l: "업로드순" },
+  { v: "confidence", l: "신뢰도 낮은순" },
+  { v: "review", l: "리뷰 대기순" },
+];
 
 // ----------------------------- 사이드 패널 (xl 이상에서만 노출) -----------------------------
 
@@ -187,6 +322,7 @@ export default function Dashboard(): React.JSX.Element {
   const [statusFilter, setStatusFilter] = useState<CaseStatus | "">("");
   const [search, setSearch] = useState<string>("");
   const [favoritesOnly, setFavoritesOnly] = useState<boolean>(false);
+  const [sortMode, setSortMode] = useState<SortMode>("upload");
 
   const [modalCase, setModalCase] = useState<CaseDetail | CaseListItem | null>(null);
   const [modalType, setModalType] = useState<ModalType | null>(null);
@@ -195,6 +331,10 @@ export default function Dashboard(): React.JSX.Element {
   // 비교 모드
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
+
+  // 접근성: 글자 크기 / 고대비 모드 (의사마다 선호가 달라 개인 설정으로 저장)
+  const [fontScale, setFontScale] = useState<number>(readStoredFontScale);
+  const [highContrast, setHighContrast] = useState<boolean>(readStoredHighContrast);
 
   // 키보드 네비게이션용 선택 상태
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -227,6 +367,38 @@ export default function Dashboard(): React.JSX.Element {
     return () => clearInterval(timer);
   }, []);
 
+  // 글자 크기: html 루트 font-size를 조정해 rem 기반 Tailwind 클래스 전체에 반영.
+  // 대시보드를 벗어나도 유지되도록 document 레벨에 적용하고 localStorage에 저장.
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${BASE_ROOT_FONT_PX * fontScale}px`;
+    window.localStorage.setItem(FONT_SCALE_STORAGE_KEY, String(fontScale));
+    return () => {
+      // 컴포넌트가 언마운트되어도 사용자가 선택한 크기는 유지 (원복하지 않음)
+    };
+  }, [fontScale]);
+
+  useEffect(() => {
+    window.localStorage.setItem(HIGH_CONTRAST_STORAGE_KEY, String(highContrast));
+  }, [highContrast]);
+
+  const decreaseFont = useCallback(() => {
+    setFontScale((prev) => {
+      const idx = FONT_SCALE_STEPS.indexOf(prev as (typeof FONT_SCALE_STEPS)[number]);
+      const nextIdx = Math.max((idx === -1 ? 1 : idx) - 1, 0);
+      return FONT_SCALE_STEPS[nextIdx];
+    });
+  }, []);
+
+  const increaseFont = useCallback(() => {
+    setFontScale((prev) => {
+      const idx = FONT_SCALE_STEPS.indexOf(prev as (typeof FONT_SCALE_STEPS)[number]);
+      const nextIdx = Math.min((idx === -1 ? 1 : idx) + 1, FONT_SCALE_STEPS.length - 1);
+      return FONT_SCALE_STEPS[nextIdx];
+    });
+  }, []);
+
+  const toggleHighContrast = useCallback(() => setHighContrast((v) => !v), []);
+
   const metrics: Metrics = useMemo(() => {
     const completed = cases.filter((c) => c.status === "completed").length;
     const failed = cases.filter((c) => c.status === "failed").length;
@@ -249,7 +421,7 @@ export default function Dashboard(): React.JSX.Element {
     [cases]
   );
 
-  const filtered = useMemo(() => {
+  const baseFiltered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return cases.filter(
       (c) =>
@@ -260,6 +432,35 @@ export default function Dashboard(): React.JSX.Element {
           (c.prediction_label ?? "").toLowerCase().includes(q))
     );
   }, [cases, statusFilter, search, favoritesOnly]);
+
+  // 재처리 필요(분석 실패) 및 긴급(완료+저신뢰도) 케이스는 정렬 옵션과 무관하게 상단에 고정
+  const filtered = useMemo(() => {
+    const pinnedReprocess = baseFiltered.filter(isReprocessNeeded);
+    const pinnedUrgent = baseFiltered
+      .filter(isUrgentCase)
+      .sort((a, b) => urgencyScore(a) - urgencyScore(b));
+    const rest = baseFiltered.filter((c) => !isUrgentCase(c) && !isReprocessNeeded(c));
+
+    let sortedRest = rest;
+    if (sortMode === "confidence") {
+      sortedRest = [...rest].sort((a, b) => {
+        const ca = getConfidence(a);
+        const cb = getConfidence(b);
+        if (ca == null && cb == null) return 0;
+        if (ca == null) return 1;
+        if (cb == null) return -1;
+        return ca - cb;
+      });
+    } else if (sortMode === "review") {
+      sortedRest = [...rest].sort((a, b) => {
+        const pa = a.review_status === "pending" ? 0 : 1;
+        const pb = b.review_status === "pending" ? 0 : 1;
+        return pa - pb;
+      });
+    }
+
+    return [...pinnedReprocess, ...pinnedUrgent, ...sortedRest];
+  }, [baseFiltered, sortMode]);
 
   useEffect(() => {
     if (filtered.length === 0) {
@@ -419,7 +620,9 @@ const moveSelection = useCallback(
 
   if (loading)
     return (
-      <div className="min-h-screen bg-[#F7F8FA]">
+      <div className={`min-h-screen bg-[#F7F8FA] ${highContrast ? "a11y-hc" : ""}`}>
+        <style>{HIGH_CONTRAST_CSS}</style>
+        <Header />
         <div className="mx-auto w-full max-w-[1760px] p-4 lg:p-6 xl:grid xl:grid-cols-[240px_minmax(0,1fr)_300px] xl:gap-5 xl:items-start">
           <div className="hidden xl:flex xl:flex-col gap-4">
             <SidebarSkeleton />
@@ -476,7 +679,9 @@ const moveSelection = useCallback(
   if (error) return <div className="p-8 text-sm text-rose-600">에러: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA]">
+    <div className={`min-h-screen bg-[#F7F8FA] ${highContrast ? "a11y-hc" : ""}`}>
+      <style>{HIGH_CONTRAST_CSS}</style>
+      <Header />
       <div className="mx-auto w-full max-w-[1760px] p-4 lg:p-6 xl:grid xl:grid-cols-[240px_minmax(0,1fr)_300px] xl:gap-5 xl:items-start">
         <LeftSidebar
           statusFilters={statusFilters}
@@ -493,17 +698,26 @@ const moveSelection = useCallback(
               <p className="text-xs font-medium text-gray-400">진단 워크플로우</p>
               <h1 className="font-semibold text-2xl text-gray-900 tracking-tight">의사 대시보드</h1>
             </div>
-            <div className="flex flex-col items-end gap-1">
-              <p className="text-sm font-semibold text-gray-700 tabular-nums">
-                {now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
-              </p>
-              <p className="text-[11px] text-gray-400">
-                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">J</kbd>/
-                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">K</kbd> 이동 ·{" "}
-                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Enter</kbd> 상세 ·{" "}
-                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">H/S/N</kbd> 탭 전환 ·{" "}
-                <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Esc</kbd> 닫기
-              </p>
+            <div className="flex flex-col items-end gap-2">
+              <AccessibilityControls
+                fontScale={fontScale}
+                onDecreaseFont={decreaseFont}
+                onIncreaseFont={increaseFont}
+                highContrast={highContrast}
+                onToggleHighContrast={toggleHighContrast}
+              />
+              <div className="flex flex-col items-end gap-1">
+                <p className="text-sm font-semibold text-gray-700 tabular-nums">
+                  {now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+                </p>
+                <p className="text-[11px] text-gray-400">
+                  <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">J</kbd>/
+                  <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">K</kbd> 이동 ·{" "}
+                  <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Enter</kbd> 상세 ·{" "}
+                  <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">H/S/N</kbd> 탭 전환 ·{" "}
+                  <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Esc</kbd> 닫기
+                </p>
+              </div>
             </div>
           </div>
 
@@ -520,7 +734,7 @@ const moveSelection = useCallback(
                 <AlertTriangle className="h-3 w-3 text-amber-700" />
               </div>
               <p className="text-sm text-amber-900">
-                <span className="font-medium">신뢰도 낮은 케이스 {urgent.length}건</span>
+                <span className="font-medium">신뢰도 낮은 케이스 <span className="tabular-nums">{urgent.length}</span>건</span>
                 <span className="text-amber-700">
                   {" "}
                   — {urgent.slice(0, 3).map((c) => c.specimen_id).join(", ")}
@@ -553,6 +767,23 @@ const moveSelection = useCallback(
                 className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-teal-400"
               />
             </div>
+            <div className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white p-0.5">
+              <span className="flex items-center gap-1 pl-2 pr-1 text-[11px] font-medium text-gray-400">
+                <ArrowUpDown className="w-3 h-3" />
+                정렬
+              </span>
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.v}
+                  onClick={() => setSortMode(opt.v)}
+                  className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+                    sortMode === opt.v ? "bg-gray-900 text-white" : "text-gray-500 hover:text-gray-900"
+                  }`}
+                >
+                  {opt.l}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
@@ -561,7 +792,7 @@ const moveSelection = useCallback(
                 <tr>
                   <Th>{null}</Th>
                   <Th>{null}</Th>
-                  <Th>Specimen ID</Th>
+                  <Th>환자 ID</Th>
                   <Th>상태</Th>
                   <Th>진단 / 신뢰도</Th>
                   <Th>진행상황</Th>
@@ -574,6 +805,8 @@ const moveSelection = useCallback(
                   const conf = getConfidence(c);
                   const isSelected = c.id === selectedId;
                   const isCompareChecked = compareIds.includes(c.id);
+                  const isUrgent = isUrgentCase(c);
+                  const isReprocess = isReprocessNeeded(c);
                   return (
                     <tr
                       key={c.id}
@@ -583,7 +816,13 @@ const moveSelection = useCallback(
                       }}
                       onClick={() => setSelectedId(c.id)}
                       className={`transition-colors cursor-pointer ${
-                        isSelected ? "bg-teal-50/70" : "hover:bg-gray-50/60"
+                        isSelected
+                          ? "bg-teal-50/70"
+                          : isReprocess
+                          ? "bg-gray-50 hover:bg-gray-100/80"
+                          : isUrgent
+                          ? "bg-rose-50/50 hover:bg-rose-50/80"
+                          : "hover:bg-gray-50/60"
                       }`}
                     >
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -609,8 +848,20 @@ const moveSelection = useCallback(
                         </button>
                       </td>
                       <td className="px-4 py-3 font-mono text-xs text-gray-700">
-                        <span className={`inline-block w-1 h-4 rounded-full mr-2 align-middle ${isSelected ? "bg-teal-500" : "bg-transparent"}`} />
+                        <span className={`inline-block w-1 h-4 rounded-full mr-2 align-middle ${isSelected ? "bg-teal-500" : isReprocess ? "bg-gray-400" : isUrgent ? "bg-rose-400" : "bg-transparent"}`} />
                         {c.specimen_id}
+                        {isReprocess && (
+                          <span className="ml-2 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-gray-200 text-gray-600 align-middle">
+                            <XCircle className="w-2.5 h-2.5" />
+                            재처리 필요
+                          </span>
+                        )}
+                        {isUrgent && (
+                          <span className="ml-2 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-rose-100 text-rose-700 align-middle">
+                            <AlertTriangle className="w-2.5 h-2.5" />
+                            긴급
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1.5 text-xs text-gray-600">
@@ -669,15 +920,15 @@ const moveSelection = useCallback(
             <span className="font-medium text-gray-600">신뢰도 구간:</span>
             <span className="flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-green-500" />
-              90%↑ 확정 권장
+              <span className="tabular-nums">90%↑</span> 확정 권장
             </span>
             <span className="flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-amber-500" />
-              70~90% 참고용
+              <span className="tabular-nums">70~90%</span> 참고용
             </span>
             <span className="flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-rose-500" />
-              &lt;70% 재검 권장
+              <span className="tabular-nums">&lt;70%</span> 재검 권장
             </span>
           </div>
         </main>
@@ -692,7 +943,7 @@ const moveSelection = useCallback(
       {compareIds.length > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-xl border border-gray-200 bg-white shadow-lg px-4 py-2.5 z-40">
           <span className="text-xs text-gray-500">
-            {compareIds.length}개 선택됨{compareIds.length < 2 ? " · 1개 더 선택하세요" : ""}
+            <span className="tabular-nums">{compareIds.length}</span>개 선택됨{compareIds.length < 2 ? " · 1개 더 선택하세요" : ""}
           </span>
           <button
             onClick={() => setShowCompare(true)}
