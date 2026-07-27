@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Loader2, Layers, UploadCloud, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import type { CaseStatus, CaseListItem, CaseDetail } from "../types/case";
@@ -94,11 +94,14 @@ export default function CaseListPage(): React.JSX.Element {
 
   const closeModal = (): void => setModalCase(null);
 
+  const openedFromStateRef = useRef(false);
+
   useEffect(() => {
     const openCaseId = (location.state as { openCaseId?: string } | null)?.openCaseId;
-    if (openCaseId && cases.length > 0) {
+    if (openCaseId && cases.length > 0 && !openedFromStateRef.current) {
       const target = cases.find((c) => c.id === openCaseId);
       if (target) {
+        openedFromStateRef.current = true;
         openModal(target);
         window.history.replaceState({}, document.title);
       }
