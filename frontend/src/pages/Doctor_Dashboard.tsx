@@ -29,6 +29,7 @@ import { ReviewActionCell } from "../components/dashboard/ReviewActionCell";
 import { DetailModal } from "../components/dashboard/DetailModal";
 import { ConfidenceCompact } from "../components/dashboard/ConfidenceIndicator";
 import { CompareModal } from "../components/dashboard/CompareModal";
+import { DoctorStickyNote } from "../components/dashboard/DoctorStickyNote";
 import Header from "../components/Shared/Header";
 import apiClient from "../api/client";
 
@@ -293,6 +294,7 @@ function RightSidebar({ urgent, reviewPending, onOpen }: RightSidebarProps): Rea
         <p className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 uppercase tracking-wide">
           <ClipboardCheck className="w-3 h-3 text-gray-400" /> 검토 대기
         </p>
+
         {reviewPending.length === 0 ? (
           <p className="text-xs text-gray-400 py-1.5">검토 대기 케이스가 없습니다</p>
         ) : (
@@ -310,6 +312,8 @@ function RightSidebar({ urgent, reviewPending, onOpen }: RightSidebarProps): Rea
           </div>
         )}
       </div>
+
+      <DoctorStickyNote />
     </aside>
   );
 }
