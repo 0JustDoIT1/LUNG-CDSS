@@ -138,8 +138,8 @@ export default function UploadPage() {
   return (
     <div>
       <header className="mb-6">
-        <p className="text-[11px] text-gray-400 tracking-wider">UPLOAD WORKFLOW</p>
-        <h1 className="text-lg font-semibold text-gray-900 mt-0.5">슬라이드 업로드</h1>
+        <p className="text-xs text-gray-400 tracking-wider">업로드 워크플로우</p>
+        <h1 className="font-semibold text-2xl text-gray-900 tracking-tight">슬라이드 업로드</h1>
         <p className="text-[13px] text-gray-500 mt-1.5">분석을 위한 슬라이드를 준비하고 업로드합니다.</p>
       </header>
 
@@ -150,7 +150,7 @@ export default function UploadPage() {
             <div
               className={`flex items-center gap-1.5 text-xs ${
                 i === stepIndex
-                  ? "text-[#185fa5] font-semibold"
+                  ? "text-teal-600 font-semibold"
                   : i < stepIndex
                   ? "text-green-700 font-medium"
                   : "text-gray-400"
@@ -159,7 +159,7 @@ export default function UploadPage() {
               <span
                 className={`w-[22px] h-[22px] rounded-full border-2 flex items-center justify-center text-[10px] font-semibold flex-shrink-0 ${
                   i === stepIndex
-                    ? "border-[#185fa5] bg-[#e6f1fb] text-[#185fa5]"
+                    ? "border-teal-500 bg-teal-50 text-teal-600"
                     : i < stepIndex
                     ? "border-green-700 bg-green-100 text-green-700"
                     : "border-gray-300 bg-white"
@@ -175,9 +175,8 @@ export default function UploadPage() {
           </div>
         ))}
       </div>
-
       {stage === "select" && (
-        <div>
+        <div className="bg-white rounded-2xl border border-gray-200 p-6">
           {/* 검체 ID */}
           <div className="mb-5 max-w-sm">
             <label htmlFor="specimen-id" className="block text-xs font-medium mb-1.5 text-gray-700">
@@ -189,7 +188,7 @@ export default function UploadPage() {
               value={specimenId}
               onChange={(e) => setSpecimenId(e.target.value)}
               placeholder="예: TCGA-001"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#185fa5] focus:ring-1 focus:ring-blue-100 transition"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-100 transition"
             />
           </div>
 
@@ -203,11 +202,11 @@ export default function UploadPage() {
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
             className={`flex flex-col items-center justify-center min-h-[200px] p-8 border-2 border-dashed rounded-2xl text-center cursor-pointer transition-colors ${
-              dragOver ? "bg-[#edf6fd] border-[#185fa5]" : "bg-[#f7fbff] border-[#9dc3e8]"
+              dragOver ? "bg-teal-50 border-teal-500" : "bg-[#f0fdfa] border-teal-400/50"
             }`}
           >
             <span className="text-3xl mb-2.5" aria-hidden="true">⇧</span>
-            <p className="text-sm font-semibold text-[#1e3a5f] mb-1">파일을 끌어다 놓거나 클릭하여 선택</p>
+            <p className="text-sm font-semibold text-teal-800 mb-1">파일을 끌어다 놓거나 클릭하여 선택</p>
             <p className="text-xs text-slate-500">SVS, NDPI, TIFF, PNG, JPG 지원 · 최대 2GB</p>
             <p className="text-[11px] text-slate-400 mt-2.5">품질 검증을 위해 해상도 20x 이상 권장</p>
             <input
@@ -267,7 +266,7 @@ export default function UploadPage() {
                     {(f.status === "uploading" || f.status === "done") && (
                       <div className="w-full h-1 bg-gray-200 rounded-full mt-1.5 overflow-hidden">
                         <div
-                          className="h-full bg-[#185fa5] rounded-full transition-all"
+                          className="h-full bg-teal-500 rounded-full transition-all"
                           style={{ width: `${f.progress}%` }}
                         />
                       </div>
@@ -312,7 +311,7 @@ export default function UploadPage() {
               type="button"
               onClick={handleUpload}
               disabled={!hasReadyFile || !specimenId}
-              className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-[#185fa5] text-white hover:bg-[#144d8a] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-teal-600 text-white hover:bg-teal-700 transition" 
             >
               업로드 시작
             </button>
@@ -323,30 +322,25 @@ export default function UploadPage() {
             >
               결과리스트로 돌아가기
             </button>
-            {/* 임시: CORS 해결 전 분석 화면 미리보기용 */}
-            <button
-              type="button"
-              onClick={() => navigate("/analysis/preview")}
-              className="px-4.5 py-2.5 rounded-lg text-[13px] font-medium border border-dashed border-amber-400 text-amber-700 hover:bg-amber-50 transition"
-            >
-              (임시) 분석 화면 미리보기
-            </button>
+
           </div>
         </div>
       )}
 
       {stage === "processing" && (
-        <div className="text-center p-10 border border-[#bfdbfe] rounded-2xl bg-[#f7fbff]">
-          <div
-            className="text-4xl mb-3"
-            style={{ transform: `rotate(${hourglassRotation}deg)`, transition: "transform 0.6s ease-in-out" }}
-          >
-            ⏳
+        <div className="text-center p-10 border border-teal-100 rounded-2xl bg-teal-50/40">
+          <div className="h-12 flex items-center justify-center mb-3">
+            <div
+              className="text-4xl"
+              style={{ transform: `rotate(${hourglassRotation}deg)`, transition: "transform 0.6s ease-in-out" }}
+            >
+              ⏳
+            </div>
           </div>
           <p className="text-base font-semibold text-gray-900 mb-1.5">업로드 진행 중…</p>
           <p className="text-xs text-slate-500 mb-4">슬라이드를 분석 파이프라인에 등록하고 있습니다.</p>
           <div className="max-w-xs mx-auto h-1.5 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-[#185fa5] rounded-full transition-all" style={{ width: `${globalProgress}%` }} />
+          <div className="h-full bg-teal-500 rounded-full transition-all" style={{ width: `${globalProgress}%` }} />
           </div>
           <p className="text-[11px] text-gray-400 mt-2.5">{globalProgress}%</p>
         </div>
@@ -361,7 +355,7 @@ export default function UploadPage() {
             <button
               type="button"
               onClick={() => createdCaseId && navigate(`/analysis/${createdCaseId}`)}
-              className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-[#185fa5] text-white hover:bg-[#144d8a] transition"
+              className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-teal-600 text-white hover:bg-teal-700 transition"
             >
               분석 시작
             </button>

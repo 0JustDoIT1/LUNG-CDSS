@@ -132,7 +132,7 @@ export default function AnalysisPage() {
       </header>
 
       {status !== "failed" && (
-        <div className="border border-[#bfdbfe] rounded-2xl bg-[#f7fbff] px-6 py-5 mb-6">
+        <div className="border border-teal-100 rounded-2xl bg-teal-50/40 px-6 py-5 mb-6">
           <h3 className="text-[15px] font-semibold text-gray-900">
             {status === "completed" ? "결과 생성" : current.name}
           </h3>
@@ -145,7 +145,7 @@ export default function AnalysisPage() {
           </div>
           <div className="w-full h-1.5 bg-gray-200 rounded-full mt-3 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#185fa5] to-blue-400 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-teal-600 to-teal-400 rounded-full transition-all duration-500"
               style={{ width: `${status === "completed" ? 100 : progressPct}%` }}
             />
           </div>
@@ -177,7 +177,7 @@ export default function AnalysisPage() {
                     state === "done"
                       ? "border-green-700 bg-green-100 text-green-700"
                       : state === "active"
-                      ? "border-[#185fa5] bg-[#e6f1fb] text-[#185fa5]"
+                      ? "border-teal-500 bg-teal-50 text-teal-600"
                       : "border-gray-300 bg-white text-gray-300"
                   }`}
                 >
@@ -188,7 +188,7 @@ export default function AnalysisPage() {
                     state === "done"
                       ? "text-green-700 font-medium"
                       : state === "active"
-                      ? "text-[#185fa5] font-semibold"
+                      ? "text-teal-600 font-semibold"
                       : "text-gray-400"
                   }`}
                 >

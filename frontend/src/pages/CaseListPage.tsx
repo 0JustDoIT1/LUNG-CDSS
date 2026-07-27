@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Search, Loader2, Layers, UploadCloud, CheckCircle2, XCircle } from "lucide-react";
+import { Search, Loader2, Layers, UploadCloud, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import type { CaseStatus, CaseListItem, CaseDetail } from "../types/case";
 import { Th, MetricCard } from "../components/dashboard/shared";
 import { CaseResultModal } from "../components/pathologist/CaseResultModal";
-import { getCases, getCase } from "../api/cases";
+import { getCases, getCase, deleteCase } from "../api/cases";
 import { useNavigate } from "react-router-dom";
 
 const STATUS_LABELS_SIMPLE: Record<string, string> = {
-  uploaded: "업로드됨",
+  uploaded: "업로드 완료",
   processing: "분석 중",
-  completed: "완료",
-  failed: "실패",
+  completed: "분석 완료",
+  failed: "분석 실패",
 };
 
 const STATUS_CLS_SIMPLE: Record<string, string> = {
@@ -91,20 +91,37 @@ export default function CaseListPage(): React.JSX.Element {
   }, []);
 
   const closeModal = (): void => setModalCase(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  async function handleDelete(id: string, specimenId: string) {
+    const confirmed = window.confirm(`"${specimenId}" 케이스를 삭제하시겠습니까?\n삭제된 슬라이드 및 결과는 복구할 수 없습니다.`);
+    if (!confirmed) return;
+
+    setDeletingId(id);
+    try {
+      await deleteCase(id);
+      setCases((prev) => prev.filter((c) => c.id !== id));
+    } catch (e) {
+      console.error(e);
+      alert("삭제 중 문제가 발생했습니다.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
   if (loading)
     return (
-      <div className="flex items-center justify-center gap-2 text-gray-500 text-sm min-h-[60vh]">
-        <Loader2 className="w-4 h-4 animate-spin" /> 불러오는 중...
+      <div className="flex flex-col items-center justify-center gap-3 min-h-[60vh]">
+        <Loader2 className="w-10 h-10 text-[#185fa5] animate-spin" />
+        <p className="text-sm text-gray-500">불러오는 중...</p>
       </div>
     );
   if (error) return <div className="p-8 text-sm text-rose-600">에러: {error}</div>;
 
   const statusFilters: { v: CaseStatus | ""; l: string }[] = [
     { v: "", l: "전체" },
-    { v: "uploaded", l: "업로드됨" },
-    { v: "completed", l: "완료" },
-    { v: "failed", l: "실패" },
+    { v: "uploaded", l: "업로드 완료" },
+    { v: "completed", l: "분석 완료" },
+    { v: "failed", l: "분석 실패" },
   ];
 
   return (
@@ -112,12 +129,12 @@ export default function CaseListPage(): React.JSX.Element {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <p className="text-xs font-medium text-gray-400">진단 워크플로우</p>
-          <h1 className="font-semibold text-2xl text-gray-900 tracking-tight">결과리스트</h1>
+          <h1 className="font-semibold text-2xl text-gray-900 tracking-tight">케이스 리스트</h1>
         </div>
         <button
           type="button"
           onClick={() => navigate("/upload")}
-          className="px-4 py-2.5 rounded-lg text-[13px] font-semibold bg-[#185fa5] text-white hover:bg-[#144d8a] transition"
+          className="px-4 py-2.5 rounded-lg text-[13px] font-semibold bg-teal-600 text-white hover:bg-teal-700 transition"
         >
           + 새 케이스 업로드
         </button>
@@ -126,7 +143,7 @@ export default function CaseListPage(): React.JSX.Element {
       {/* 지표 카드 4개 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard label="총 케이스" value={metrics.total} icon={Layers} />
-        <MetricCard label="업로드됨" value={metrics.uploaded} tone="default" icon={UploadCloud} />
+        <MetricCard label="업로드 완료" value={metrics.uploaded} tone="default" icon={UploadCloud} />
         <MetricCard label="분석 완료" value={metrics.completed} tone="teal" icon={CheckCircle2} />
         <MetricCard label="분석 실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
       </div>
@@ -134,17 +151,22 @@ export default function CaseListPage(): React.JSX.Element {
       {/* 상태 필터 + 검색 */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5">
-          {statusFilters.map((s) => (
-            <button
-              key={s.v || "all"}
-              onClick={() => setStatusFilter(s.v)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                statusFilter === s.v ? "bg-gray-900 text-white" : "text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              {s.l}
-            </button>
-          ))}
+          {statusFilters.map((s) => {
+            const count = s.v === "" ? cases.length : cases.filter((c) => c.status === s.v).length;
+            const active = statusFilter === s.v;
+            return (
+              <button
+                key={s.v || "all"}
+                onClick={() => setStatusFilter(s.v)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  active ? "bg-teal-600 text-white" : "text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                <span>{s.l}</span>
+                <span className={`tabular-nums ${active ? "text-white/70" : "text-gray-400"}`}>{count}</span>
+              </button>
+            );
+          })}
         </div>
         <div className="relative flex-1 min-w-[160px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -152,7 +174,7 @@ export default function CaseListPage(): React.JSX.Element {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="검체 ID / 진단 검색..."
-            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[#185fa5]"
+            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-teal-400"
           />
         </div>
       </div>
@@ -166,6 +188,7 @@ export default function CaseListPage(): React.JSX.Element {
               <Th>분류</Th>
               <Th>정확도</Th>
               <Th>상태</Th>
+              <Th>{null}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -177,7 +200,7 @@ export default function CaseListPage(): React.JSX.Element {
                 <tr
                   key={c.id}
                   onClick={() => openModal(c)}
-                  className="hover:bg-blue-50 hover:shadow-sm transition-all cursor-pointer"
+                  className="hover:bg-teal-50 hover:shadow-sm transition-all cursor-pointer"
                 >
                   <td className="px-4 py-3 font-mono text-xs text-gray-700">{c.specimen_id}</td>
                   <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">
@@ -204,12 +227,23 @@ export default function CaseListPage(): React.JSX.Element {
                       {STATUS_LABELS_SIMPLE[c.status]}
                     </span>
                   </td>
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(c.id, c.specimen_id)}
+                      disabled={deletingId === c.id}
+                      className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+                      aria-label="삭제"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
                 </tr>
               );
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-sm text-gray-400">
+                <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-400">
                   케이스가 없습니다
                 </td>
               </tr>
