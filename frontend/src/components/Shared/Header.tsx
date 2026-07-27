@@ -22,9 +22,9 @@ export default function Header() {
     <header className="flex items-center justify-between px-6 py-3 bg-white border-b-2 border-teal-600 flex-shrink-0">
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-          <img src="/logo.png" alt="PathoAI 로고" className="w-full h-full object-contain" />
+          <img src="/logo.png" alt="OncoLensAI 로고" className="w-full h-full object-contain" />
         </div>
-        <span className="font-semibold text-gray-900 text-sm">OncoLensAI</span>
+        <span className="font-black text-gray-1000 text-xl">OncoLensAI</span>
         <div className="w-px h-4 bg-gray-200" />
         <span className="text-xs text-gray-400">병리 슬라이드 AI 진단 플랫폼</span>
       </div>
