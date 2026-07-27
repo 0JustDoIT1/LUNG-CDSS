@@ -25,6 +25,12 @@ def case_list_create(request):
     if request.method == "GET":
         # 조회는 의사와 병리사 모두 가능
         queryset = Case.objects.all().order_by("-uploaded_at")
+        summary = {
+            "total": Case.objects.count(),
+            "uploaded": Case.objects.filter(status="uploaded").count(),
+            "completed": Case.objects.filter(status="completed").count(),
+            "failed": Case.objects.filter(status="failed").count(),
+        }
 
         status_param = request.query_params.get("status")
         if status_param:
@@ -53,7 +59,10 @@ def case_list_create(request):
             context={"request": request},
         )
 
-        return paginator.get_paginated_response(serializer.data)
+        return paginator.get_paginated_response(
+            serializer.data,
+            summary=summary,
+        )
 
 
     # POST: 케이스 생성은 병리사만 가능

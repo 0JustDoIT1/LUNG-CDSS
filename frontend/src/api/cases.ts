@@ -16,6 +16,12 @@ export interface PaginatedCaseResponse {
   page_size: number;
   next: string | null;
   previous: string | null;
+  summary: {
+    total: number;
+    uploaded: number;
+    completed: number;
+    failed: number;
+  };
   results: CaseListItem[];
 }
 

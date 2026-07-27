@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Loader2, Layers, UploadCloud, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import type { CaseStatus, CaseListItem, CaseDetail } from "../types/case";
@@ -61,9 +61,9 @@ export default function CaseListPage(): React.JSX.Element {
       });
 
       setCases(data.results);
-      setCurrentPage(data.current_page);
       setTotalPages(data.total_pages);
       setTotalCount(data.count);
+      setMetrics(data.summary);
     } catch (e) {
       setError(e instanceof Error ? e.message : "케이스 목록을 불러오지 못했습니다.");
     } finally {
@@ -76,13 +76,12 @@ export default function CaseListPage(): React.JSX.Element {
     fetchCases();
   }, [fetchCases]);
 
-  const metrics = useMemo(() => {
-    const uploaded = cases.filter((c) => c.status === "uploaded").length;
-    const completed = cases.filter((c) => c.status === "completed").length;
-    const failed = cases.filter((c) => c.status === "failed").length;
-    return { total: cases.length, uploaded, completed, failed };
-  }, [cases]);
-
+  const [metrics, setMetrics] = useState({
+  total: 0,
+  uploaded: 0,
+  completed: 0,
+  failed: 0,
+});
 
 
   const openModal = useCallback(async (c: CaseListItem): Promise<void> => {
@@ -211,7 +210,7 @@ export default function CaseListPage(): React.JSX.Element {
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5">
           {statusFilters.map((s) => {
-            const count = s.v === "" ? cases.length : cases.filter((c) => c.status === s.v).length;
+            const count = s.v === "" ? metrics.total : metrics[s.v as "uploaded" | "completed" | "failed"];
             const active = statusFilter === s.v;
             return (
               <button
