@@ -91,7 +91,7 @@ export function Th({ children }: { children: React.ReactNode }): React.JSX.Eleme
   );
 }
 
-type MetricTone = "default" | "teal" | "rose" | "amber";
+type MetricTone = "default" | "teal" | "rose" | "amber" | "orange";
 
 export function MetricCard({
   label,
@@ -109,12 +109,14 @@ export function MetricCard({
     teal: "bg-teal-50 text-teal-600",
     rose: "bg-rose-50 text-rose-600",
     amber: "bg-amber-50 text-amber-600",
+    orange: "bg-orange-50 text-orange-600",
   };
   const valueCls: Record<MetricTone, string> = {
     default: "text-gray-900",
     teal: "text-teal-700",
     rose: "text-rose-700",
     amber: "text-amber-700",
+    orange: "text-orange-600",
   };
   return (
     <div className="rounded-xl border border-gray-200 bg-white px-4 py-3.5">

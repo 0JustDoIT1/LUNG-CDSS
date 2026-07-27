@@ -89,7 +89,10 @@ export default function LoginPage() {
 
         <p className="text-center text-xs mt-3 text-gray-500">
           계정이 없으신가요?{" "}
-          <span className="cursor-pointer font-medium text-teal-600" onClick={() => navigate("/signup")}>
+          <span
+            className="cursor-pointer font-medium text-teal-600 hover:text-teal-800 hover:underline transition-colors"
+            onClick={() => navigate("/signup")}
+          >
             회원가입
           </span>
         </p>

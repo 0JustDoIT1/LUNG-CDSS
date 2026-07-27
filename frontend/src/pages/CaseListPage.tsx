@@ -9,8 +9,8 @@ import { getCases, getCase, deleteCase } from "../api/cases";
 const STATUS_LABELS_SIMPLE: Record<string, string> = {
   uploaded: "분석 대기",
   processing: "분석 중",
-  completed: "완료",
-  failed: "실패",
+  completed: "분석 완료",
+  failed: "분석 실패",
 };
 
 const STATUS_CLS_SIMPLE: Record<string, string> = {
@@ -180,8 +180,8 @@ export default function CaseListPage(): React.JSX.Element {
   const statusFilters: { v: CaseStatus | ""; l: string }[] = [
     { v: "", l: "전체" },
     { v: "uploaded", l: "분석 대기" },
-    { v: "completed", l: "완료" },
-    { v: "failed", l: "실패" },
+    { v: "completed", l: "분석 완료" },
+    { v: "failed", l: "분석 실패" },
   ];
 
   return (
@@ -202,9 +202,9 @@ export default function CaseListPage(): React.JSX.Element {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard label="총 케이스" value={metrics.total} icon={Layers} />
-        <MetricCard label="분석 대기" value={metrics.uploaded} tone="default" icon={UploadCloud} />
-        <MetricCard label="완료" value={metrics.completed} tone="teal" icon={CheckCircle2} />
-        <MetricCard label="실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
+        <MetricCard label="업로드됨" value={metrics.uploaded} tone="orange" icon={UploadCloud} />
+        <MetricCard label="분석 완료" value={metrics.completed} tone="teal" icon={CheckCircle2} />
+        <MetricCard label="분석 실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

@@ -233,7 +233,10 @@ export default function SignupPage() {
 
         <p className="text-center text-xs mt-3 text-gray-500">
           이미 계정이 있으신가요?{" "}
-          <span className="cursor-pointer font-medium text-teal-600" onClick={() => navigate("/login")}>
+          <span
+            className="cursor-pointer font-medium text-teal-600 hover:text-teal-800 hover:underline transition-colors"
+            onClick={() => navigate("/login")}
+          >
             로그인
           </span>
         </p>
