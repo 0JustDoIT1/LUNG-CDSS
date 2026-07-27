@@ -21,6 +21,7 @@ import type {
 } from "../types/case";
 import { STATUS_LABELS, REVIEW_LABELS, REVIEW_CLS } from "../types/case";
 import { Th, MetricCard, ActionBtn } from "../components/dashboard/shared";
+import { ReviewActionCell } from "../components/dashboard/ReviewActionCell";
 import { DetailModal } from "../components/dashboard/DetailModal";
 import { ConfidenceCompact } from "../components/dashboard/ConfidenceIndicator";
 import { CompareModal } from "../components/dashboard/CompareModal";
@@ -309,17 +310,23 @@ export default function Dashboard(): React.JSX.Element {
     }
   }, []);
 
-  const moveSelection = useCallback(
-    (dir: 1 | -1) => {
-      if (filtered.length === 0) return;
-      const idx = filtered.findIndex((c) => c.id === selectedIdRef.current);
-      const nextIdx = idx === -1 ? 0 : Math.min(Math.max(idx + dir, 0), filtered.length - 1);
-      const next = filtered[nextIdx];
-      setSelectedId(next.id);
-      rowRefs.current.get(next.id)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    },
-    [filtered]
-  );
+  
+
+  const handleReviewed = useCallback((updated: CaseListItem) => {
+  setCases((prev) => prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
+}, []);
+
+const moveSelection = useCallback(
+  (dir: 1 | -1) => {
+    if (filtered.length === 0) return;
+    const idx = filtered.findIndex((c) => c.id === selectedIdRef.current);
+    const nextIdx = idx === -1 ? 0 : Math.min(Math.max(idx + dir, 0), filtered.length - 1);
+    const next = filtered[nextIdx];
+    setSelectedId(next.id);
+    rowRefs.current.get(next.id)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  },
+  [filtered]
+);
 
   // ----------------------------- 키보드 단축키 -----------------------------
   useEffect(() => {
@@ -631,13 +638,19 @@ export default function Dashboard(): React.JSX.Element {
                       <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">
                         {c.uploaded_at ? `${c.uploaded_at.slice(0, 10)} ${c.uploaded_at.slice(11, 16)}` : "—"}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-1.5 flex-wrap" onClick={(e) => e.stopPropagation()}>
-                          <ActionBtn icon={Grid3x3} label="히트맵" onClick={() => openModal(c, "heatmap")} />
-                          <ActionBtn icon={ClipboardList} label="요약" onClick={() => openModal(c, "summary")} />
-                          <ActionBtn icon={ScanSearch} label="핵형태" onClick={() => openModal(c, "nucleus")} />
-                        </div>
-                      </td>
+                      <td className="px-4 py-3 relative">
+                          <div className="flex gap-1.5 flex-wrap items-start" onClick={(e) => e.stopPropagation()}>
+                            <ActionBtn icon={Grid3x3} label="히트맵" onClick={() => openModal(c, "heatmap")} />
+                            <ActionBtn icon={ClipboardList} label="요약" onClick={() => openModal(c, "summary")} />
+                            <ActionBtn icon={ScanSearch} label="핵형태" onClick={() => openModal(c, "nucleus")} />
+                            <ReviewActionCell
+                              caseId={c.id}
+                              status={c.status}
+                              reviewStatus={c.review_status}
+                              onReviewed={handleReviewed}
+                            />
+                          </div>
+                        </td>
                     </tr>
                   );
                 })}

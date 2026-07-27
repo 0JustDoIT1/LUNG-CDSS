@@ -87,6 +87,7 @@ export interface UploadUrlResponse {
 export interface ReviewPayload {
   action: "confirm" | "reject";
   reviewer_note?: string;
+  final_diagnosis?: "LUAD" | "LUSC";
 }
 
 // ----------------------------- 대시보드 UI용 타입/상수 -----------------------------
@@ -103,6 +104,7 @@ export interface Stroke {
   color: string;
   size: number;
   points: { x: number; y: number }[];
+  composite?: "source-over" | "destination-out";
 }
 
 export const STATUS_LABELS: Record<CaseStatus, string> = {

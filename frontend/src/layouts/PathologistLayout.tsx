@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import Header from "../components/shared/Header";
+import Header from "../components/Shared/Header";
 
 const NAV_ITEMS = [
   { to: "/", label: "케이스 리스트" },

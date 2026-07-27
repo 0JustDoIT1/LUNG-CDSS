@@ -152,10 +152,11 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
     isDrawing.current = false;
     if (currentPoints.current.length > 1 && canDraw) {
       const newStroke: Stroke = {
-        color: tool === "eraser" ? "#ffffff" : color,
-        size: tool === "eraser" ? brushSize * 6 : brushSize,
-        points: currentPoints.current,
-      };
+  color: tool === "eraser" ? "#000000" : color,
+  size: tool === "eraser" ? brushSize * 6 : brushSize,
+  points: currentPoints.current,
+  composite: tool === "eraser" ? "destination-out" : "source-over",
+};
       setStrokesByMode((prev) => ({
         ...prev,
         [mode as DrawableMode]: [...prev[mode as DrawableMode], newStroke],
@@ -580,16 +581,18 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
                             lineCap="round"
                             lineJoin="round"
                             tension={0.3}
+                            globalCompositeOperation={s.composite ?? "source-over"}
                           />
                         ))}
                         {isDrawing.current && currentPoints.current.length > 1 && drawTick >= 0 && (
                           <Line
                             points={currentPoints.current.flatMap((p) => [p.x, p.y])}
-                            stroke={tool === "eraser" ? "#ffffff" : color}
+                            stroke={tool === "eraser" ? "#000000" : color}
                             strokeWidth={tool === "eraser" ? brushSize * 6 : brushSize}
                             lineCap="round"
                             lineJoin="round"
                             tension={0.3}
+                            globalCompositeOperation={tool === "eraser" ? "destination-out" : "source-over"}
                           />
                         )}
                       </Layer>
