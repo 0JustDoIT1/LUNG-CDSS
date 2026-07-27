@@ -15,9 +15,6 @@ from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upl
 from rag.rag_service import generate_treatment_note
 from rag.exceptions import RAGServiceError
 
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 
 
@@ -25,7 +22,7 @@ INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 @permission_classes([IsAuthenticated])
 def case_list_create(request):
     if request.method == "GET":
-        # 조회는 의사/병리사 둘 다 가능
+        # 조회는 의사와 병리사 모두 가능
         queryset = Case.objects.all()
 
         status_param = request.query_params.get("status")
@@ -44,51 +41,82 @@ def case_list_create(request):
         if favorite_param == "true":
             queryset = queryset.filter(favorited_by__user=request.user)
 
-        serializer = CaseListSerializer(queryset, many=True, context={"request": request})
+        serializer = CaseListSerializer(
+            queryset,
+            many=True,
+            context={"request": request},
+        )
         return Response(serializer.data)
 
-    elif request.method == "POST":
-        # 생성은 병리사만
-        if not IsPathologist().has_permission(request, None):
-            return Response({"error": "권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
+    # POST: 케이스 생성은 병리사만 가능
+    if not IsPathologist().has_permission(request, None):
+        return Response(
+            {"error": "권한이 없습니다"},
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
-        specimen_id = request.data.get("specimen_id")
-        slide_gcs_path = request.data.get("slide_gcs_path")
+    specimen_id = request.data.get("specimen_id")
+    slide_gcs_path = request.data.get("slide_gcs_path")
 
-        if not specimen_id:
-            return Response({"error": "specimen_id는 필수입니다"}, status=status.HTTP_400_BAD_REQUEST)
+    if not specimen_id:
+        return Response(
+            {"error": "specimen_id는 필수입니다"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-        # 사전 체크: 일반적인 경우 빠르게 친절한 에러 반환
-        if Case.objects.filter(specimen_id=specimen_id).exists():
-            return Response(
-                {"error": f"이미 등록된 검체 ID입니다: {specimen_id}"},
-                status=status.HTTP_409_CONFLICT,
-            )
+    if not slide_gcs_path:
+        return Response(
+            {"error": "slide_gcs_path는 필수입니다"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-        try:
-            case = Case.objects.create(
-                user=request.user,
-                specimen_id=specimen_id,
-                slide_gcs_path=slide_gcs_path,
-                status="uploaded",
-            )
-        except IntegrityError:
-            # 동시 요청으로 사전 체크를 통과했지만 DB unique 제약에 걸린 경우
-            return Response(
-                {"error": f"이미 등록된 검체 ID입니다: {specimen_id}"},
-                status=status.HTTP_409_CONFLICT,
-            )
+    # 같은 검체 ID가 이미 등록되어 있는지 확인
+    if Case.objects.filter(specimen_id=specimen_id).exists():
+        return Response(
+            {"error": f"이미 등록된 검체 ID입니다: {specimen_id}"},
+            status=status.HTTP_409_CONFLICT,
+        )
 
-        # 썸네일 동기 생성 — 실패해도 case 생성 자체는 성공 처리 (재시도로 복구 가능)
-        try:
-            thumb_result = call_mosec_thumbnail(str(case.id), slide_gcs_path)
-            case.slide_thumbnail_gcs_path = thumb_result["slide_thumbnail_gcs_path"]
-            case.save(update_fields=["slide_thumbnail_gcs_path"])
-        except Exception as e:
-            print(f"썸네일 생성 실패 (case_id={case.id}): {e}")
+    try:
+        case = Case.objects.create(
+            user=request.user,
+            specimen_id=specimen_id,
+            slide_gcs_path=slide_gcs_path,
+            status="uploaded",
+        )
+    except IntegrityError:
+        return Response(
+            {"error": f"이미 등록된 검체 ID입니다: {specimen_id}"},
+            status=status.HTTP_409_CONFLICT,
+        )
 
-        serializer = CaseDetailSerializer(case, context={"request": request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # MOSEC 서버에서 원본 슬라이드 썸네일 생성
+    # 썸네일 생성에 실패해도 Case 등록 자체는 성공 처리
+    try:
+        thumb_result = call_mosec_thumbnail(
+            str(case.id),
+            case.slide_gcs_path,
+        )
+
+        case.slide_thumbnail_gcs_path = thumb_result[
+            "slide_thumbnail_gcs_path"
+        ]
+        case.save(update_fields=["slide_thumbnail_gcs_path"])
+
+    except Exception as e:
+        print(
+            f"썸네일 생성 실패 "
+            f"(case_id={case.id}, slide={case.slide_gcs_path}): {e}"
+        )
+
+    serializer = CaseDetailSerializer(
+        case,
+        context={"request": request},
+    )
+    return Response(
+        serializer.data,
+        status=status.HTTP_201_CREATED,
+    )
 
 
 @api_view(["GET", "DELETE"])
