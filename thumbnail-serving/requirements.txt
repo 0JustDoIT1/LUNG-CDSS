@@ -1,0 +1,5 @@
+mosec
+openslide-python
+openslide-bin
+Pillow
+google-cloud-storage

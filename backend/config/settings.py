@@ -146,3 +146,4 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 MOSEC_URL = os.environ.get("MOSEC_URL", "https://mosec-serving-369117807590.us-central1.run.app")
+THUMBNAIL_SERVICE_URL = os.environ.get("THUMBNAIL_SERVICE_URL")
