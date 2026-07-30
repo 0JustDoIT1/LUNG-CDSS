@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'thumbnail-serving/**'
+    workflow_dispatch:
 
 jobs:
   deploy:
@@ -41,4 +42,4 @@ jobs:
             --image=us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/thumbnail:latest \
             --region=us-central1 \
             --memory=512Mi --cpu=1 --port=8000 --timeout=180 \
-            --min-instances=0 --max-instances=2 --no-allow-unauthenticated
+            --min-instances=0 --max-instances=1 --no-allow-unauthenticated
