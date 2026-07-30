@@ -4,9 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - "frontend/**"
-      - "backend/**"
-      - "infra/**"
+      - 'frontend/**'
+      - 'backend/**'
+      - 'infra/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -25,8 +26,8 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          source: "frontend/,backend/,infra/"
-          target: "~/lung-cdss"
+          source: 'frontend/,backend/,infra/'
+          target: '~/lung-cdss'
 
       - name: Restart containers on VM
         uses: appleboy/ssh-action@v1.0.3
