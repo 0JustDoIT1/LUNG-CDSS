@@ -44,5 +44,45 @@ services:
   #   ports:
   #     - "5432:5432"
 
+  # ── 신규: Celery(예약알림/복약알림/FCM발송/AI추론 대기 백그라운드 처리) ──
+  # Django(backend)는 WSGI 그대로 유지, Redis는 Celery 브로커 전용으로만 사용.
+  # 실시간 채팅/AI챗봇용 별도 FastAPI(ASGI) 서비스는 여기 추가하지 않았음 —
+  # Genkit/MCP 연동 스펙이 확정되면 뒤이어 추가.
+  redis:
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    restart: unless-stopped
+
+  celery_worker:
+    build:
+      context: ../backend
+    command: celery -A config worker -l info
+    env_file:
+      - ../backend/.env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gcs-key.json
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    volumes:
+      - ./gcs-key.json:/app/gcs-key.json:ro
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  celery_beat:
+    build:
+      context: ../backend
+    command: celery -A config beat -l info
+    env_file:
+      - ../backend/.env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gcs-key.json
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    volumes:
+      - ./gcs-key.json:/app/gcs-key.json:ro
+    depends_on:
+      - redis
+    restart: unless-stopped
+
 volumes:
   pgdata:
