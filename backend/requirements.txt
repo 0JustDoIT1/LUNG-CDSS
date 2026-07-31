@@ -50,3 +50,6 @@ typing-inspection==0.4.2
 typing_extensions==4.16.0
 tzdata==2026.3
 urllib3==2.7.0
+celery==5.5.1
+redis==5.2.1
+django-redis==5.4.0

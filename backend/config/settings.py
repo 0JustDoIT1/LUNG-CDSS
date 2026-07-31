@@ -139,7 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
@@ -153,3 +153,32 @@ STATIC_URL = 'static/'
 
 MOSEC_URL = os.environ.get("MOSEC_URL", "https://mosec-serving-369117807590.us-central1.run.app")
 THUMBNAIL_SERVICE_URL = os.environ.get("THUMBNAIL_SERVICE_URL")
+
+
+# ── Celery (예약 D-7/D-1 알림, 복약 재알림, FCM 발송, AI추론 백그라운드 처리) ──
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE  # Asia/Seoul
+
+CELERY_BEAT_SCHEDULE = {
+    "appointment-reminders-d7-d1": {
+        "task": "appointments.tasks.send_appointment_reminders",
+        "schedule": 3600.0,  # 매시 정각 실행, 대상 필터링은 task 내부에서
+    },
+    "medication-escalation-check": {
+        "task": "medications.tasks.check_medication_compliance",
+        "schedule": 3600.0,
+    },
+}
+
+# accounts/views.py의 SMS 인증코드·소셜가입 임시세션이 여러 워커/프로세스에서
+# 공유돼야 하므로 로컬메모리 캐시가 아닌 Redis 캐시를 사용.
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": CELERY_BROKER_URL.replace("/0", "/1"),  # Celery와 DB 번호 분리
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+    }
+}
