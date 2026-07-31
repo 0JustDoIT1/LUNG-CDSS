@@ -1,0 +1,19 @@
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("departments/", views.department_list, name="appt-departments"),
+    path("doctors/", views.doctor_list, name="appt-doctors"),
+    path("doctors/<uuid:doctor_id>/slots/", views.available_slots, name="appt-slots"),
+    path("", views.create_appointment, name="appt-create"),
+    path("mine/", views.my_appointments, name="appt-mine"),
+    path("<uuid:appointment_id>/cancel/", views.cancel_appointment, name="appt-cancel"),
+
+    path("queue/", views.request_queue, name="appt-queue"),
+    path("<uuid:appointment_id>/process/", views.process_request, name="appt-process"),
+
+    path("today-visits/", views.today_visits, name="appt-today-visits"),
+    path("<uuid:appointment_id>/check-in/", views.check_in, name="appt-check-in"),
+    path("<uuid:appointment_id>/no-show/", views.mark_no_show, name="appt-no-show"),
+]
