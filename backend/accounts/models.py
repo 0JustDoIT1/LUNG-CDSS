@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
 
@@ -41,12 +42,16 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     """
     Root identity table shared by every role. Role-specific auth
     (PatientAuth / StaffAuth) and role-specific profile data
     (PatientProfile / DoctorProfile / NurseProfile / PathologistProfile)
     live in separate 1:1 tables — see the ERD in the project docs.
+
+    PermissionsMixin은 실제 app-level 권한체계(그건 accounts/permissions.py의
+    역할기반 체크로 따로 함)를 쓰려는 게 아니라, Django Admin(/admin/)이
+    is_superuser/has_perm을 요구해서 최소한으로 붙여둔 것.
     """
 
     class Role(models.TextChoices):
@@ -64,11 +69,19 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
+    groups = models.ManyToManyField(
+        "auth.Group", related_name="lung_cdss_users", blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        "auth.Permission", related_name="lung_cdss_users", blank=True
+    )
+
     # No unique login handle lives on User itself (email is on StaffAuth,
     # phone/social id is on PatientAuth). USERNAME_FIELD must point at
     # something unique on this model for AbstractBaseUser's contract, so
     # we use the PK; actual login always goes through the role-specific
-    # auth flow in accounts/views.py, not Django's authenticate().
+    # auth flow in accounts/views.py (JWT) or accounts/backends.py
+    # (Django Admin), not Django's default authenticate().
     USERNAME_FIELD = "id"
     REQUIRED_FIELDS = []
 

@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # FastAPI(realtime-service)가 같은 값으로 JWT를 검증해야 하므로 .env의
 # DJANGO_SECRET_KEY로 공유한다. 값을 안 주면 기존 하드코딩값을 그대로 씀
 # (기존 배포와 호환).
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-la3ebbh6lr4i*235v&ndo12qazp@ow6&^3+bthoc9^p$)w5h_+')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -140,6 +140,10 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = 'accounts.User'
+
+# Django Admin 로그인 전용. User.USERNAME_FIELD가 UUID라 기본 ModelBackend는
+# 이메일 문자열을 UUID로 파싱하려다 에러나므로 완전히 대체한다.
+AUTHENTICATION_BACKENDS = ['accounts.backends.StaffEmailBackend']
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
