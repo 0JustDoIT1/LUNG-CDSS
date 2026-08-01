@@ -31,6 +31,7 @@ from .serializers import (
     ReviewActionSerializer,
 )
 from .services import call_mosec_predict, call_mosec_thumbnail
+from core.responses import error_response, validation_error_response
 
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 
@@ -82,7 +83,7 @@ def case_list_create(request):
 
     # POST: 케이스 생성은 병리사만 (React 웹 업로드 흐름)
     if not IsPathologist().has_permission(request, None):
-        return Response({"error": "권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
+        return error_response("권한이 없습니다", status_code=status.HTTP_403_FORBIDDEN)
 
     specimen_id = request.data.get("specimen_id")
     slide_gcs_path = request.data.get("slide_gcs_path")
@@ -103,7 +104,7 @@ def case_list_create(request):
             status=Case.Status.UPLOADED,
         )
     except IntegrityError:
-        return Response({"error": f"이미 등록된 검체 ID입니다: {specimen_id}"}, status=status.HTTP_409_CONFLICT)
+        return error_response(f"이미 등록된 검체 ID입니다: {specimen_id}", status_code=status.HTTP_409_CONFLICT)
 
     try:
         thumb_result = call_mosec_thumbnail(str(case.id), case.slide_gcs_path)
@@ -123,14 +124,14 @@ def case_detail(request, case_id):
     try:
         case = Case.objects.get(id=case_id)
     except Case.DoesNotExist:
-        return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     if request.user.role == "patient" and case.patient_id != request.user.id:
-        return Response({"error": "권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
+        return error_response("권한이 없습니다", status_code=status.HTTP_403_FORBIDDEN)
 
     # 환자는 확정(confirmed)된 케이스만 열람 가능
     if request.user.role == "patient" and case.status != Case.Status.CONFIRMED:
-        return Response({"error": "아직 확인할 수 없는 결과입니다"}, status=status.HTTP_403_FORBIDDEN)
+        return error_response("아직 확인할 수 없는 결과입니다", status_code=status.HTTP_403_FORBIDDEN)
 
     if request.method == "GET":
         serializer = CaseDetailSerializer(case, context={"request": request})
@@ -154,10 +155,10 @@ def predict_case(request, case_id):
     try:
         case = Case.objects.get(id=case_id)
     except Case.DoesNotExist:
-        return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     if case.status == Case.Status.PROCESSING:
-        return Response({"error": "이미 분석이 진행 중입니다"}, status=status.HTTP_409_CONFLICT)
+        return error_response("이미 분석이 진행 중입니다", status_code=status.HTTP_409_CONFLICT)
 
     case.status = Case.Status.PROCESSING
     case.analyzed_at = timezone.now()
@@ -168,7 +169,7 @@ def predict_case(request, case_id):
     except Exception as e:
         case.status = Case.Status.FAILED
         case.save(update_fields=["status"])
-        return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+        return error_response(str(e), status_code=status.HTTP_502_BAD_GATEWAY)
 
     if not case.slide_thumbnail_gcs_path:
         try:
@@ -227,12 +228,12 @@ def predict_case(request, case_id):
 @permission_classes([AllowAny])
 def update_case_step(request, case_id):
     if request.headers.get("X-Internal-Token") != INTERNAL_CALLBACK_TOKEN:
-        return Response({"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+        return error_response("unauthorized", status_code=status.HTTP_401_UNAUTHORIZED)
 
     try:
         case = Case.objects.get(id=case_id)
     except Case.DoesNotExist:
-        return Response({"error": "not found"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("not found", status_code=status.HTTP_404_NOT_FOUND)
 
     case.current_step = request.data.get("step")
     case.save(update_fields=["current_step"])
@@ -251,18 +252,18 @@ def review_case(request, case_id):
     try:
         case = Case.objects.select_related("confirmed_finding").get(id=case_id)
     except Case.DoesNotExist:
-        return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     if hasattr(case, "confirmed_finding"):
-        return Response({"error": "이미 확정된 케이스입니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("이미 확정된 케이스입니다", status_code=status.HTTP_400_BAD_REQUEST)
 
     latest_result = case.ai_results.first()
     if latest_result is None:
-        return Response({"error": "AI 분석 결과가 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("AI 분석 결과가 없습니다", status_code=status.HTTP_400_BAD_REQUEST)
 
     serializer = ReviewActionSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
     data = serializer.validated_data
 
     if data["action"] == "confirm":
@@ -314,7 +315,7 @@ def case_finding_list_create(request, case_id):
 
     serializer = CaseFindingSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
     finding = CaseFinding.objects.create(case_id=case_id, user=request.user, **serializer.validated_data)
     return Response(CaseFindingSerializer(finding).data, status=status.HTTP_201_CREATED)
 
@@ -325,7 +326,7 @@ def case_finding_list_create(request, case_id):
 def case_finding_delete(request, case_id, finding_id):
     deleted, _ = CaseFinding.objects.filter(id=finding_id, case_id=case_id, user=request.user).delete()
     if not deleted:
-        return Response({"error": "찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -336,7 +337,7 @@ def toggle_favorite(request, case_id):
     try:
         case = Case.objects.get(id=case_id)
     except Case.DoesNotExist:
-        return Response({"error": "케이스를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     favorite = CaseFavorite.objects.filter(user=request.user, case=case).first()
     if favorite:
@@ -352,5 +353,5 @@ def toggle_favorite(request, case_id):
 def get_upload_url(request):
     filename = request.data.get("filename")
     if not filename:
-        return Response({"error": "filename은 필수입니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("filename은 필수입니다", status_code=status.HTTP_400_BAD_REQUEST)
     return Response(generate_upload_url(filename))

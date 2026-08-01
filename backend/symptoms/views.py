@@ -10,6 +10,7 @@ from communication.services import notify
 from .models import SymptomCheck
 from .rules import compute_risk_level
 from .serializers import SymptomCheckSerializer, SymptomSubmitSerializer
+from core.responses import error_response, validation_error_response
 
 
 @extend_schema(tags=["symptoms"], request=SymptomSubmitSerializer, responses={201: SymptomCheckSerializer})
@@ -18,11 +19,11 @@ from .serializers import SymptomCheckSerializer, SymptomSubmitSerializer
 def submit_check(request):
     today = timezone.localdate()
     if SymptomCheck.objects.filter(patient=request.user, checked_at__date=today).exists():
-        return Response({"error": "오늘 체크는 완료되었습니다"}, status=status.HTTP_409_CONFLICT)
+        return error_response("오늘 체크는 완료되었습니다", status_code=status.HTTP_409_CONFLICT)
 
     serializer = SymptomSubmitSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
 
     symptoms = serializer.validated_data
     risk_level = compute_risk_level(symptoms)
@@ -85,7 +86,7 @@ def my_checks(request):
 def update_visibility(request):
     visible = request.data.get("visible_to_nurse")
     if visible is None:
-        return Response({"error": "visible_to_nurse는 필수입니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("visible_to_nurse는 필수입니다", status_code=status.HTTP_400_BAD_REQUEST)
 
     # 마지막 체크뿐 아니라, 이후 새로 생성되는 체크에도 적용되도록 프로필 레벨 설정이 이상적이나
     # 지금 스키마는 체크 단위 필드라 최근 기록에 반영 (RED는 이후 로직에서 무시되므로 안전)
@@ -117,7 +118,7 @@ def mark_reviewed(request, check_id):
     try:
         check = SymptomCheck.objects.get(id=check_id)
     except SymptomCheck.DoesNotExist:
-        return Response({"error": "찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     check.nurse_reviewed = True
     check.nurse_reviewed_by = request.user

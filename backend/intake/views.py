@@ -10,6 +10,7 @@ from accounts.permissions import IsNurse, IsPatient
 
 from .models import IntakeForm
 from .serializers import IntakeFormSerializer
+from core.responses import error_response, validation_error_response
 
 QR_TOKEN_TTL = 300  # 5분
 
@@ -25,7 +26,7 @@ def my_intake_form(request):
 
     content = request.data.get("content")
     if content is None:
-        return Response({"error": "content는 필수입니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("content는 필수입니다", status_code=status.HTTP_400_BAD_REQUEST)
     form.content = content
     form.save(update_fields=["content", "updated_at"])
     return Response(IntakeFormSerializer(form).data)
@@ -65,13 +66,13 @@ def resolve_qr_token(request, token):
     """
     patient_id = cache.get(f"qr_token:{token}")
     if patient_id is None:
-        return Response({"error": "QR이 만료되었거나 유효하지 않습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("QR이 만료되었거나 유효하지 않습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     from accounts.models import PatientProfile
 
     profile = PatientProfile.objects.select_related("user").filter(user_id=patient_id).first()
     if not profile:
-        return Response({"error": "환자 정보를 찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("환자 정보를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     form = IntakeForm.objects.filter(patient_id=patient_id).first()
 

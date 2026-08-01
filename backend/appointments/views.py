@@ -14,6 +14,7 @@ from communication.services import notify
 
 from .models import Appointment
 from .serializers import AppointmentCreateSerializer, AppointmentSerializer
+from core.responses import error_response, validation_error_response
 
 DAY_CODES = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 SLOTS_AM = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30"]
@@ -34,7 +35,7 @@ def department_list(request):
 def doctor_list(request):
     department = request.query_params.get("department")
     if not department:
-        return Response({"error": "department는 필수입니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("department는 필수입니다", status_code=status.HTTP_400_BAD_REQUEST)
 
     profiles = DoctorProfile.objects.filter(department=department).select_related("user")
     assigned_doctor_id = getattr(getattr(request.user, "patient_profile", None), "assigned_doctor_id", None)
@@ -98,7 +99,7 @@ def _available_slots_for_date(doctor_id, date):
 def available_slots(request, doctor_id):
     date_str = request.query_params.get("date")
     if not date_str:
-        return Response({"error": "date는 필수입니다 (YYYY-MM-DD)"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("date는 필수입니다 (YYYY-MM-DD)", status_code=status.HTTP_400_BAD_REQUEST)
     date = datetime.date.fromisoformat(date_str)
     return Response(_available_slots_for_date(doctor_id, date))
 
@@ -113,7 +114,7 @@ def create_appointment(request):
     """
     serializer = AppointmentCreateSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
 
     data = serializer.validated_data
     slot = data["requested_at_slot"]
@@ -121,7 +122,7 @@ def create_appointment(request):
 
     available = _available_slots_for_date(doctor.id, slot.date())
     if slot.strftime("%H:%M") not in available:
-        return Response({"error": "선택하신 시간은 더 이상 예약할 수 없습니다"}, status=status.HTTP_409_CONFLICT)
+        return error_response("선택하신 시간은 더 이상 예약할 수 없습니다", status_code=status.HTTP_409_CONFLICT)
 
     appointment = Appointment.objects.create(
         patient=request.user, doctor=doctor, department=data["department"], requested_at_slot=slot,
@@ -165,7 +166,7 @@ def request_queue(request):
 def process_request(request, appointment_id):
     action = request.data.get("action")
     if action not in ("approve", "reject"):
-        return Response({"error": "action은 approve 또는 reject여야 합니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("action은 approve 또는 reject여야 합니다", status_code=status.HTTP_400_BAD_REQUEST)
 
     appt = get_object_or_404(Appointment, id=appointment_id, status=Appointment.Status.REQUESTED)
 

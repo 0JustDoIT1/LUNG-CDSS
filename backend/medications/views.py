@@ -11,6 +11,7 @@ from accounts.permissions import IsNurse, IsPatient
 
 from .models import MedicationLog, MedicationSchedule
 from .serializers import MedicationLogSerializer, MedicationScheduleCreateSerializer, MedicationScheduleSerializer
+from core.responses import error_response, validation_error_response
 
 MAX_AUTOGEN_DAYS = 90  # end_date 미정인 처방도 무한정 로그를 만들지 않도록 상한
 
@@ -21,7 +22,7 @@ MAX_AUTOGEN_DAYS = 90  # end_date 미정인 처방도 무한정 로그를 만들
 def create_schedule(request):
     serializer = MedicationScheduleCreateSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
 
     schedule = MedicationSchedule.objects.create(set_by=request.user, **serializer.validated_data)
     _generate_logs(schedule)
@@ -62,7 +63,7 @@ def mark_taken(request, log_id):
     try:
         log = MedicationLog.objects.select_related("schedule").get(id=log_id, schedule__patient=request.user)
     except MedicationLog.DoesNotExist:
-        return Response({"error": "찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     taken = request.data.get("taken", True)
     log.taken = bool(taken)

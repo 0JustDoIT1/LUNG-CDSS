@@ -12,6 +12,7 @@ from accounts.permissions import IsDoctorOrNurse
 from .models import ChatThread, ChatThreadParticipant, Message, MessageMention, Notification
 from .serializers import ChatThreadSerializer, MessageSerializer, NotificationSerializer
 from .services import notify
+from core.responses import error_response, validation_error_response
 
 
 def _my_department(user):
@@ -62,7 +63,7 @@ def start_thread(request):
     counterpart_id = request.data.get("user_id")
     related_case_id = request.data.get("case_id")
     if not counterpart_id:
-        return Response({"error": "user_id는 필수입니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("user_id는 필수입니다", status_code=status.HTTP_400_BAD_REQUEST)
 
     counterpart = get_object_or_404(User, id=counterpart_id)
 
@@ -96,7 +97,7 @@ def message_list_create(request, thread_id):
     mentioned_user_ids = request.data.get("mentioned_user_ids", [])
 
     if not content and not voice_url:
-        return Response({"error": "content 또는 voice_url이 필요합니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("content 또는 voice_url이 필요합니다", status_code=status.HTTP_400_BAD_REQUEST)
 
     message = Message.objects.create(thread=thread, sender=request.user, content=content, voice_url=voice_url)
 
@@ -140,5 +141,5 @@ def notification_list(request):
 def notification_mark_read(request, notification_id):
     updated = Notification.objects.filter(id=notification_id, recipient=request.user).update(is_read=True)
     if not updated:
-        return Response({"error": "찾을 수 없습니다"}, status=status.HTTP_404_NOT_FOUND)
+        return error_response("찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
     return Response({"is_read": True})

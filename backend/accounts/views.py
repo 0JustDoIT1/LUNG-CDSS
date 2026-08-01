@@ -19,6 +19,7 @@ from .serializers import (
     StaffSignupSerializer,
 )
 from .services import SocialTokenError, verify_social_token
+from core.responses import error_response, validation_error_response
 
 SMS_CODE_TTL = 180  # 3분
 SIGNUP_SESSION_TTL = 600  # 10분
@@ -38,7 +39,7 @@ def _issue_tokens(user):
 def staff_signup(request):
     serializer = StaffSignupSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
     user = serializer.save()
     tokens = _issue_tokens(user)
     return Response({**tokens, "role": user.role, "name": user.name}, status=status.HTTP_201_CREATED)
@@ -51,14 +52,14 @@ def staff_signup(request):
 def staff_login(request):
     serializer = StaffLoginSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
 
     email = serializer.validated_data["email"]
     password = serializer.validated_data["password"]
 
     staff_auth = StaffAuth.objects.select_related("user").filter(email=email).first()
     if staff_auth is None or not staff_auth.check_password(password):
-        return Response({"error": "이메일 또는 비밀번호가 올바르지 않습니다"}, status=status.HTTP_401_UNAUTHORIZED)
+        return error_response("이메일 또는 비밀번호가 올바르지 않습니다", status_code=status.HTTP_401_UNAUTHORIZED)
 
     user = staff_auth.user
     tokens = _issue_tokens(user)
@@ -74,7 +75,7 @@ def staff_login(request):
 def social_login(request):
     serializer = SocialLoginSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
 
     provider = serializer.validated_data["provider"]
     token = serializer.validated_data["token"]
@@ -82,7 +83,7 @@ def social_login(request):
     try:
         verified = verify_social_token(provider, token)
     except SocialTokenError as e:
-        return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+        return error_response(str(e), status_code=status.HTTP_401_UNAUTHORIZED)
 
     social_uid = verified["social_uid"]
     patient_auth = PatientAuth.objects.select_related("user").filter(
@@ -111,12 +112,12 @@ def social_login(request):
 def phone_verify_request(request):
     serializer = PhoneVerifyRequestSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
 
     phone_number = serializer.validated_data["phone_number"]
 
     if PatientAuth.objects.filter(phone_number=phone_number).exists():
-        return Response({"error": "이미 등록된 번호입니다"}, status=status.HTTP_409_CONFLICT)
+        return error_response("이미 등록된 번호입니다", status_code=status.HTTP_409_CONFLICT)
 
     code = f"{random.randint(0, 999999):06d}"
     cache.set(f"sms_code:{phone_number}", code, timeout=SMS_CODE_TTL)
@@ -134,26 +135,25 @@ def phone_verify_request(request):
 def phone_verify_confirm(request):
     serializer = PhoneVerifyConfirmSerializer(data=request.data)
     if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return validation_error_response(serializer.errors)
 
     data = serializer.validated_data
     phone_number = data["phone_number"]
 
     cached_code = cache.get(f"sms_code:{phone_number}")
     if cached_code is None:
-        return Response({"error": "인증번호가 만료되었습니다. 재전송해주세요"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("인증번호가 만료되었습니다. 재전송해주세요", status_code=status.HTTP_400_BAD_REQUEST)
     if cached_code != data["code"]:
-        return Response({"error": "인증번호가 일치하지 않습니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("인증번호가 일치하지 않습니다", status_code=status.HTTP_400_BAD_REQUEST)
 
     session = cache.get(f"signup_session:{data['signup_token']}")
     if session is None:
-        return Response({"error": "가입 세션이 만료되었습니다. 처음부터 다시 시도해주세요"},
-                         status=status.HTTP_400_BAD_REQUEST)
+        return error_response("가입 세션이 만료되었습니다. 처음부터 다시 시도해주세요", status_code=status.HTTP_400_BAD_REQUEST)
 
     try:
         hospital = Hospital.objects.get(id=data["hospital_id"])
     except Hospital.DoesNotExist:
-        return Response({"error": "존재하지 않는 병원입니다"}, status=status.HTTP_400_BAD_REQUEST)
+        return error_response("존재하지 않는 병원입니다", status_code=status.HTTP_400_BAD_REQUEST)
 
     user = User.objects.create_patient(name=session.get("name") or "환자")
     PatientAuth.objects.create(
