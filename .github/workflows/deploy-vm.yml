@@ -7,6 +7,8 @@ on:
       - 'frontend/**'
       - 'backend/**'
       - 'infra/**'
+      - 'realtime-service/**'
+      - 'genkit-service/**'
   workflow_dispatch:
 
 jobs:
@@ -26,7 +28,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          source: 'frontend/,backend/,infra/'
+          source: 'frontend/,backend/,infra/,realtime-service/,genkit-service/'
           target: '~/lung-cdss'
 
       - name: Restart containers on VM
