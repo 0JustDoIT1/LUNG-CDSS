@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'drf_spectacular',
     'cases',
     'accounts',
     'symptoms',
@@ -55,6 +56,26 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'LUNG-CDSS API',
+    'DESCRIPTION': (
+        '폐암(LUAD/LUSC) 진단·치료 지원 플랫폼 API. '
+        '인증은 Bearer JWT (accounts 앱의 로그인 엔드포인트에서 발급).'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'TAGS': [
+        {'name': 'accounts', 'description': '의사/간호사/병리사(이메일+비번) · 환자(소셜+SMS) 인증'},
+        {'name': 'cases', 'description': '케이스 검토 — AI결과(불변)/확정본(의사) 3단 분리'},
+        {'name': 'symptoms', 'description': '일일 증상체크, 위험도 룰엔진'},
+        {'name': 'medications', 'description': '복약스케줄/로그/순응도'},
+        {'name': 'appointments', 'description': '예약 신청~확정~체크인'},
+        {'name': 'intake', 'description': '문진표, QR 프로필공유'},
+        {'name': 'communication', 'description': '채팅(REST), 알림'},
+    ],
 }
 
 from datetime import timedelta

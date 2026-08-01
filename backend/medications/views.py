@@ -2,6 +2,7 @@ import datetime
 
 from django.db.models import Count, Q
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -14,6 +15,7 @@ from .serializers import MedicationLogSerializer, MedicationScheduleCreateSerial
 MAX_AUTOGEN_DAYS = 90  # end_date 미정인 처방도 무한정 로그를 만들지 않도록 상한
 
 
+@extend_schema(tags=["medications"], request=MedicationScheduleCreateSerializer, responses={201: MedicationScheduleSerializer})
 @api_view(["POST"])
 @permission_classes([IsNurse])
 def create_schedule(request):
@@ -42,6 +44,7 @@ def _generate_logs(schedule):
     MedicationLog.objects.bulk_create(logs)
 
 
+@extend_schema(tags=["medications"], responses={200: MedicationLogSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def today_logs(request):
@@ -52,6 +55,7 @@ def today_logs(request):
     return Response(MedicationLogSerializer(logs, many=True).data)
 
 
+@extend_schema(tags=["medications"], responses={200: MedicationLogSerializer})
 @api_view(["POST"])
 @permission_classes([IsPatient])
 def mark_taken(request, log_id):
@@ -67,6 +71,7 @@ def mark_taken(request, log_id):
     return Response(MedicationLogSerializer(log).data)
 
 
+@extend_schema(tags=["medications"])
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def monthly_compliance(request):
@@ -98,6 +103,7 @@ def monthly_compliance(request):
     })
 
 
+@extend_schema(tags=["medications"])
 @api_view(["GET"])
 @permission_classes([IsNurse])
 def patient_compliance_summary(request, patient_id):

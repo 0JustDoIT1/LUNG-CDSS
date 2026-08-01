@@ -2,6 +2,7 @@ import os
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -32,6 +33,17 @@ from .serializers import (
 from .services import call_mosec_predict, call_mosec_thumbnail
 
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
+
+
+@extend_schema(
+    tags=["cases"],
+    parameters=[
+        OpenApiParameter("status", str, description="uploaded/processing/pending_review/confirmed/failed"),
+        OpenApiParameter("search", str, description="specimen_id 부분검색"),
+        OpenApiParameter("favorite", str, description="'true'면 즐겨찾기만"),
+    ],
+    responses={200: CaseListSerializer(many=True)},
+)
 
 
 @api_view(["GET", "POST"])
@@ -104,6 +116,7 @@ def case_list_create(request):
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(tags=["cases"], responses={200: CaseDetailSerializer})
 @api_view(["GET", "DELETE"])
 @permission_classes([IsAuthenticated])
 def case_detail(request, case_id):
@@ -129,6 +142,7 @@ def case_detail(request, case_id):
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_schema(tags=["cases"])
 @api_view(["POST"])
 @permission_classes([IsPathologist])
 def predict_case(request, case_id):
@@ -208,6 +222,7 @@ def predict_case(request, case_id):
     return Response(serializer.data)
 
 
+@extend_schema(tags=["cases"])
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def update_case_step(request, case_id):
@@ -224,6 +239,7 @@ def update_case_step(request, case_id):
     return Response({"status": "ok"})
 
 
+@extend_schema(tags=["cases"], request=ReviewActionSerializer, responses={200: CaseDetailSerializer})
 @api_view(["POST"])
 @permission_classes([IsDoctor])
 def review_case(request, case_id):
@@ -279,6 +295,7 @@ def review_case(request, case_id):
     return Response(CaseDetailSerializer(case, context={"request": request}).data)
 
 
+@extend_schema(tags=["cases"])
 @api_view(["GET"])
 @permission_classes([IsDoctor])
 def case_review_log_list(request, case_id):
@@ -287,6 +304,7 @@ def case_review_log_list(request, case_id):
     return Response(CaseReviewLogSerializer(logs, many=True).data)
 
 
+@extend_schema(tags=["cases"])
 @api_view(["GET", "POST"])
 @permission_classes([IsDoctor])
 def case_finding_list_create(request, case_id):
@@ -301,6 +319,7 @@ def case_finding_list_create(request, case_id):
     return Response(CaseFindingSerializer(finding).data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(tags=["cases"])
 @api_view(["DELETE"])
 @permission_classes([IsDoctor])
 def case_finding_delete(request, case_id, finding_id):
@@ -310,6 +329,7 @@ def case_finding_delete(request, case_id, finding_id):
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@extend_schema(tags=["cases"])
 @api_view(["POST"])
 @permission_classes([IsDoctor])
 def toggle_favorite(request, case_id):
@@ -326,6 +346,7 @@ def toggle_favorite(request, case_id):
     return Response({"is_favorite": True})
 
 
+@extend_schema(tags=["cases"])
 @api_view(["POST"])
 @permission_classes([IsPathologist])
 def get_upload_url(request):

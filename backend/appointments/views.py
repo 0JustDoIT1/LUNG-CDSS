@@ -3,6 +3,7 @@ import datetime
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -19,6 +20,7 @@ SLOTS_AM = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30"]
 SLOTS_PM = ["13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"]
 
 
+@extend_schema(tags=["appointments"])
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def department_list(request):
@@ -26,6 +28,7 @@ def department_list(request):
     return Response(sorted(set(departments)))
 
 
+@extend_schema(tags=["appointments"])
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def doctor_list(request):
@@ -89,6 +92,7 @@ def _available_slots_for_date(doctor_id, date):
     return [slot for slot in candidates if slot not in taken_str]
 
 
+@extend_schema(tags=["appointments"])
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def available_slots(request, doctor_id):
@@ -99,6 +103,7 @@ def available_slots(request, doctor_id):
     return Response(_available_slots_for_date(doctor_id, date))
 
 
+@extend_schema(tags=["appointments"], request=AppointmentCreateSerializer, responses={201: AppointmentSerializer})
 @api_view(["POST"])
 @permission_classes([IsPatient])
 def create_appointment(request):
@@ -124,6 +129,7 @@ def create_appointment(request):
     return Response(AppointmentSerializer(appointment).data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(tags=["appointments"], responses={200: AppointmentSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def my_appointments(request):
@@ -131,6 +137,7 @@ def my_appointments(request):
     return Response(AppointmentSerializer(appointments, many=True).data)
 
 
+@extend_schema(tags=["appointments"])
 @api_view(["POST"])
 @permission_classes([IsPatient])
 def cancel_appointment(request, appointment_id):
@@ -142,6 +149,7 @@ def cancel_appointment(request, appointment_id):
 
 # ── 간호사: 예약요청 큐 ──────────────────────────────────────────────
 
+@extend_schema(tags=["appointments"], responses={200: AppointmentSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsNurse])
 def request_queue(request):
@@ -151,6 +159,7 @@ def request_queue(request):
     return Response(AppointmentSerializer(queue, many=True).data)
 
 
+@extend_schema(tags=["appointments"])
 @api_view(["POST"])
 @permission_classes([IsNurse])
 def process_request(request, appointment_id):
@@ -181,6 +190,7 @@ def process_request(request, appointment_id):
 
 # ── 간호사: 진료관리(오늘 방문/미방문) ──────────────────────────────
 
+@extend_schema(tags=["appointments"], responses={200: AppointmentSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsNurse])
 def today_visits(request):
@@ -196,6 +206,7 @@ def today_visits(request):
     return Response(AppointmentSerializer(appts, many=True).data)
 
 
+@extend_schema(tags=["appointments"])
 @api_view(["POST"])
 @permission_classes([IsNurse])
 def check_in(request, appointment_id):
@@ -206,6 +217,7 @@ def check_in(request, appointment_id):
     return Response(AppointmentSerializer(appt).data)
 
 
+@extend_schema(tags=["appointments"])
 @api_view(["POST"])
 @permission_classes([IsNurse])
 def mark_no_show(request, appointment_id):

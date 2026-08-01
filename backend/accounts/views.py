@@ -3,6 +3,7 @@ import uuid
 
 from django.core.cache import cache
 from django.utils import timezone
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -30,6 +31,8 @@ def _issue_tokens(user):
 
 # ── 의사/간호사/병리사 ────────────────────────────────────────────────
 
+@extend_schema(tags=["accounts"], request=StaffSignupSerializer,
+                responses={201: OpenApiResponse(description="가입 성공, JWT 발급")})
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def staff_signup(request):
@@ -41,6 +44,8 @@ def staff_signup(request):
     return Response({**tokens, "role": user.role, "name": user.name}, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(tags=["accounts"], request=StaffLoginSerializer,
+                responses={200: OpenApiResponse(description="로그인 성공, JWT 발급")})
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def staff_login(request):
@@ -62,6 +67,8 @@ def staff_login(request):
 
 # ── 환자: 소셜로그인 ──────────────────────────────────────────────────
 
+@extend_schema(tags=["accounts"], request=SocialLoginSerializer,
+                responses={200: OpenApiResponse(description="기존회원=JWT / 신규회원=signup_token")})
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def social_login(request):
@@ -97,6 +104,8 @@ def social_login(request):
     return Response({"is_new_user": True, "signup_token": signup_token})
 
 
+@extend_schema(tags=["accounts"], request=PhoneVerifyRequestSerializer,
+                responses={200: OpenApiResponse(description="SMS 발송됨, expires_in 반환")})
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def phone_verify_request(request):
@@ -118,6 +127,8 @@ def phone_verify_request(request):
     return Response({"expires_in": SMS_CODE_TTL})
 
 
+@extend_schema(tags=["accounts"], request=PhoneVerifyConfirmSerializer,
+                responses={201: OpenApiResponse(description="가입 완료, JWT 발급")})
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def phone_verify_confirm(request):

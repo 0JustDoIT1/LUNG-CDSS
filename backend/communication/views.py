@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -23,6 +24,7 @@ def _my_department(user):
     return profile.department if profile else None
 
 
+@extend_schema(tags=["communication"], responses={200: ChatThreadSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsDoctorOrNurse])
 def thread_list(request):
@@ -36,6 +38,7 @@ def thread_list(request):
     return Response(ChatThreadSerializer(threads, many=True, context={"request": request}).data)
 
 
+@extend_schema(tags=["communication"])
 @api_view(["GET"])
 @permission_classes([IsDoctorOrNurse])
 def department_counterparts(request):
@@ -52,6 +55,7 @@ def department_counterparts(request):
     return Response([{"id": str(u.id), "name": u.name} for u in counterparts])
 
 
+@extend_schema(tags=["communication"])
 @api_view(["POST"])
 @permission_classes([IsDoctorOrNurse])
 def start_thread(request):
@@ -77,6 +81,7 @@ def start_thread(request):
     return Response(ChatThreadSerializer(thread, context={"request": request}).data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(tags=["communication"])
 @api_view(["GET", "POST"])
 @permission_classes([IsDoctorOrNurse])
 def message_list_create(request, thread_id):
@@ -121,6 +126,7 @@ def message_list_create(request, thread_id):
     return Response(MessageSerializer(message).data, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(tags=["communication"], responses={200: NotificationSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def notification_list(request):
@@ -128,6 +134,7 @@ def notification_list(request):
     return Response(NotificationSerializer(notifications, many=True).data)
 
 
+@extend_schema(tags=["communication"])
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def notification_mark_read(request, notification_id):

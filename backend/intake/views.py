@@ -1,6 +1,7 @@
 import secrets
 
 from django.core.cache import cache
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -13,6 +14,7 @@ from .serializers import IntakeFormSerializer
 QR_TOKEN_TTL = 300  # 5분
 
 
+@extend_schema(tags=["intake"], responses={200: IntakeFormSerializer})
 @api_view(["GET", "PUT"])
 @permission_classes([IsPatient])
 def my_intake_form(request):
@@ -29,6 +31,7 @@ def my_intake_form(request):
     return Response(IntakeFormSerializer(form).data)
 
 
+@extend_schema(tags=["intake"])
 @api_view(["GET"])
 @permission_classes([IsNurse])
 def patient_intake_form(request, patient_id):
@@ -39,6 +42,7 @@ def patient_intake_form(request, patient_id):
     return Response(IntakeFormSerializer(form).data)
 
 
+@extend_schema(tags=["intake"])
 @api_view(["POST"])
 @permission_classes([IsPatient])
 def issue_qr_token(request):
@@ -51,6 +55,7 @@ def issue_qr_token(request):
     return Response({"token": token, "expires_in": QR_TOKEN_TTL})
 
 
+@extend_schema(tags=["intake"])
 @api_view(["GET"])
 @permission_classes([IsNurse])
 def resolve_qr_token(request, token):

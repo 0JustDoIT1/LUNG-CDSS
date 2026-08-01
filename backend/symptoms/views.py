@@ -1,4 +1,5 @@
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -11,6 +12,7 @@ from .rules import compute_risk_level
 from .serializers import SymptomCheckSerializer, SymptomSubmitSerializer
 
 
+@extend_schema(tags=["symptoms"], request=SymptomSubmitSerializer, responses={201: SymptomCheckSerializer})
 @api_view(["POST"])
 @permission_classes([IsPatient])
 def submit_check(request):
@@ -69,6 +71,7 @@ def _notify_care_team(check):
         )
 
 
+@extend_schema(tags=["symptoms"], responses={200: SymptomCheckSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def my_checks(request):
@@ -76,6 +79,7 @@ def my_checks(request):
     return Response(SymptomCheckSerializer(checks, many=True).data)
 
 
+@extend_schema(tags=["symptoms"])
 @api_view(["PATCH"])
 @permission_classes([IsPatient])
 def update_visibility(request):
@@ -93,6 +97,7 @@ def update_visibility(request):
     return Response({"visible_to_nurse": bool(visible)})
 
 
+@extend_schema(tags=["symptoms"], responses={200: SymptomCheckSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsNurse])
 def nurse_visible_checks(request):
@@ -105,6 +110,7 @@ def nurse_visible_checks(request):
     return Response(SymptomCheckSerializer(checks, many=True).data)
 
 
+@extend_schema(tags=["symptoms"], responses={200: SymptomCheckSerializer})
 @api_view(["POST"])
 @permission_classes([IsNurse])
 def mark_reviewed(request, check_id):

@@ -53,3 +53,4 @@ urllib3==2.7.0
 celery==5.5.1
 redis==5.2.1
 django-redis==5.4.0
+drf-spectacular==0.28.0
