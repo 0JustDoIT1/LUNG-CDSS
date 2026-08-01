@@ -4,11 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - 'infra/**'
-      - 'realtime-service/**'
-      - 'genkit-service/**'
+      - "frontend/**"
+      - "backend/**"
+      - "infra/**"
+      - "realtime-service/**"
+      - "genkit-service/**"
+      - ".github/workflows/deploy-vm.yml"
   workflow_dispatch:
 
 jobs:
@@ -28,8 +29,8 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          source: 'frontend/,backend/,infra/,realtime-service/,genkit-service/'
-          target: '~/lung-cdss'
+          source: "frontend/,backend/,infra/,realtime-service/,genkit-service/"
+          target: "~/lung-cdss"
 
       - name: Restart containers on VM
         uses: appleboy/ssh-action@v1.0.3
