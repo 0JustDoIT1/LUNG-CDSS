@@ -5,6 +5,7 @@ from .models import (
     DoctorOffDay,
     DoctorProfile,
     DoctorWeeklySchedule,
+    GuardianLink,
     Hospital,
     NotificationPreference,
     NurseProfile,
@@ -90,3 +91,10 @@ class DeviceTokenAdmin(admin.ModelAdmin):
 class NotificationPreferenceAdmin(admin.ModelAdmin):
     list_display = ("user", "category", "enabled")
     list_filter = ("category", "enabled")
+
+
+@admin.register(GuardianLink)
+class GuardianLinkAdmin(admin.ModelAdmin):
+    list_display = ("patient", "guardian", "invite_code", "invited_at", "accepted_at")
+    list_filter = ("accepted_at",)
+    search_fields = ("patient__name", "guardian__name", "invite_code")
