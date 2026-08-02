@@ -137,6 +137,11 @@ def case_detail(request, case_id):
         serializer = CaseDetailSerializer(case, context={"request": request})
         return Response(serializer.data)
 
+    # DELETE — 병리사만 가능. 환자/의사/간호사는 GET 권한체크를 통과했더라도
+    # 진료기록 삭제까지 넘어가면 안 됨(의료법상 보관의무와 충돌 소지).
+    if request.user.role != "pathologist":
+        return error_response("권한이 없습니다", status_code=status.HTTP_403_FORBIDDEN)
+
     delete_case_reports(str(case.id))
     delete_slide_file(case.slide_gcs_path)
     case.delete()

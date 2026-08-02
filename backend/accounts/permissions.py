@@ -25,6 +25,11 @@ class IsPathologist(BasePermission):
         return _has_role(request, "pathologist")
 
 
+class IsGuardian(BasePermission):
+    def has_permission(self, request, view):
+        return _has_role(request, "guardian")
+
+
 class IsDoctorOrNurse(BasePermission):
     """의료진 앱(의사/간호사) 공통 접근 — 병리사는 React 웹 전용이라 여기 포함 안 됨."""
 

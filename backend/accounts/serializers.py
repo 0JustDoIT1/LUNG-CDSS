@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from .models import (
     DoctorProfile,
+    GuardianLink,
     Hospital,
     NurseProfile,
     PathologistProfile,
@@ -132,3 +133,18 @@ class PatientProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientProfile
         fields = ["patient_number", "birth_date", "hospital", "assigned_doctor", "name"]
+
+
+# ── 보호자 ────────────────────────────────────────────────────────
+
+class GuardianRegisterSerializer(serializers.Serializer):
+    invite_code = serializers.CharField(max_length=12)
+    name = serializers.CharField(trim_whitespace=True)
+
+
+class GuardianLinkSerializer(serializers.ModelSerializer):
+    guardian_name = serializers.CharField(source="guardian.name", read_only=True, allow_null=True)
+
+    class Meta:
+        model = GuardianLink
+        fields = ["id", "invite_code", "guardian_name", "invited_at", "accepted_at"]

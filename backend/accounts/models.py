@@ -59,6 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         DOCTOR = "doctor", "의사"
         NURSE = "nurse", "간호사"
         PATHOLOGIST = "pathologist", "병리사"  # React 웹 전용, Flutter 앱 대상 아님
+        GUARDIAN = "guardian", "보호자"  # 환자 진료정보 열람전용, 별도 프로필 없음
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     role = models.CharField(max_length=20, choices=Role.choices)
@@ -144,9 +145,14 @@ class StaffAuth(models.Model):
 
 
 class PatientProfile(models.Model):
+    class Gender(models.TextChoices):
+        MALE = "male", "남성"
+        FEMALE = "female", "여성"
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="patient_profile")
     patient_number = models.CharField(max_length=20, unique=True, editable=False)
     birth_date = models.DateField()
+    gender = models.CharField(max_length=10, choices=Gender.choices, null=True, blank=True)
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
     assigned_doctor = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
@@ -296,3 +302,27 @@ class NotificationPreference(models.Model):
 
     def __str__(self):
         return f"{self.user.name} · {self.category}: {'on' if self.enabled else 'off'}"
+
+
+class GuardianLink(models.Model):
+    """
+    보호자는 환자 계정과 별개의 role(guardian)로 존재 — PatientProfile을
+    만들지 않는다. 초대코드로 최초 1회만 등록하고, 이후엔 발급된 JWT로
+    재로그인(A안 확정: 별도 PIN 없이 토큰 저장 방식).
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="guardian_links",
+                                 limit_choices_to={"role": "patient"})
+    guardian = models.ForeignKey(User, on_delete=models.CASCADE, related_name="patient_links",
+                                  null=True, blank=True, limit_choices_to={"role": "guardian"})
+    invite_code = models.CharField(max_length=12, unique=True)
+    invited_at = models.DateTimeField(auto_now_add=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-invited_at"]
+
+    def __str__(self):
+        status = "등록완료" if self.accepted_at else "대기중"
+        return f"{self.patient.name} 보호자링크 ({status})"

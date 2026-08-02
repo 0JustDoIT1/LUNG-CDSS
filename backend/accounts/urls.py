@@ -14,4 +14,13 @@ urlpatterns = [
     path("patient/phone/confirm/", views.phone_verify_confirm, name="patient-phone-confirm"),
 
     path("refresh/", TokenRefreshView.as_view(), name="token-refresh"),
+    path("logout/", views.logout, name="logout"),
+
+    # 보호자
+    path("guardian/invite/", views.guardian_invite, name="guardian-invite"),
+    path("guardian/links/", views.guardian_link_list, name="guardian-link-list"),
+    path("guardian/links/<uuid:link_id>/", views.guardian_unlink, name="guardian-unlink"),
+    path("guardian/register/", views.guardian_register, name="guardian-register"),
+    path("guardian/patients/", views.guardian_my_patients, name="guardian-my-patients"),
+    path("guardian/patients/<uuid:patient_id>/summary/", views.guardian_patient_summary, name="guardian-patient-summary"),
 ]
