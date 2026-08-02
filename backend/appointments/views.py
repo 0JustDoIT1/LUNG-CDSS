@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from accounts.models import DoctorOffDay, DoctorProfile, DoctorWeeklySchedule, User
-from accounts.permissions import IsNurse, IsPatient
+from accounts.permissions import IsDoctor, IsNurse, IsPatient
 from communication.services import notify
 
 from .models import Appointment
@@ -227,3 +227,60 @@ def mark_no_show(request, appointment_id):
     appt.processed_by = request.user
     appt.save(update_fields=["status", "processed_by"])
     return Response(AppointmentSerializer(appt).data)
+
+
+# ── 의사: 휴진일정 관리 ──────────────────────────────────────────────
+
+@extend_schema(tags=["appointments"])
+@api_view(["GET", "POST"])
+@permission_classes([IsDoctor])
+def doctor_off_days(request):
+    if request.method == "GET":
+        days = DoctorOffDay.objects.filter(doctor=request.user)
+        return Response([{"id": str(d.id), "date": d.date, "reason": d.reason} for d in days])
+
+    date_str = request.data.get("date")
+    reason = request.data.get("reason", "")
+    if not date_str:
+        return error_response("date는 필수입니다", status_code=status.HTTP_400_BAD_REQUEST)
+
+    off_day = DoctorOffDay.objects.create(doctor=request.user, date=date_str, reason=reason)
+    return Response({"id": str(off_day.id), "date": off_day.date, "reason": off_day.reason},
+                     status=status.HTTP_201_CREATED)
+
+
+@extend_schema(tags=["appointments"])
+@api_view(["DELETE"])
+@permission_classes([IsDoctor])
+def doctor_off_day_delete(request, off_day_id):
+    deleted, _ = DoctorOffDay.objects.filter(id=off_day_id, doctor=request.user).delete()
+    if not deleted:
+        return error_response("찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@extend_schema(tags=["appointments"])
+@api_view(["GET", "PUT"])
+@permission_classes([IsDoctor])
+def doctor_weekly_schedule(request):
+    """
+    PUT은 12칸(6요일×2기간) 전체를 한번에 upsert — 목업의 그리드 토글 방식과
+    맞춰서, 클라이언트가 한 화면분 전체를 한번에 저장하게 함.
+    body: [{"day_of_week": "mon", "period": "am", "available": true}, ...]
+    """
+    if request.method == "GET":
+        rows = DoctorWeeklySchedule.objects.filter(doctor=request.user)
+        return Response([
+            {"day_of_week": r.day_of_week, "period": r.period, "available": r.available} for r in rows
+        ])
+
+    entries = request.data if isinstance(request.data, list) else []
+    for entry in entries:
+        DoctorWeeklySchedule.objects.update_or_create(
+            doctor=request.user, day_of_week=entry["day_of_week"], period=entry["period"],
+            defaults={"available": entry["available"]},
+        )
+    rows = DoctorWeeklySchedule.objects.filter(doctor=request.user)
+    return Response([
+        {"day_of_week": r.day_of_week, "period": r.period, "available": r.available} for r in rows
+    ])

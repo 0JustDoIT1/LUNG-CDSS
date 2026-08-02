@@ -13,17 +13,22 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .permissions import IsGuardian, IsPatient
 
-from .models import Hospital, PatientAuth, PatientProfile, StaffAuth, User
-from .models import GuardianLink
+from .models import DeviceToken, DoctorProfile, GuardianLink, Hospital, NotificationPreference, PatientAuth, PatientProfile, StaffAuth, User
 from .serializers import (
+    DeviceTokenSerializer,
+    DoctorProfileUpdateSerializer,
     GuardianLinkSerializer,
     GuardianRegisterSerializer,
+    HospitalSerializer,
+    NotificationPreferenceSerializer,
+    PatientProfileSerializer,
     PhoneVerifyConfirmSerializer,
     PhoneVerifyRequestSerializer,
     SocialLoginSerializer,
     StaffLoginSerializer,
     StaffSignupSerializer,
 )
+from .permissions import IsDoctor
 from .services import SocialTokenError, verify_social_token
 from core.responses import error_response, validation_error_response
 
@@ -307,3 +312,93 @@ def guardian_patient_summary(request, patient_id):
         "latest_risk_level": latest_check.risk_level if latest_check else None,
         "latest_checked_at": latest_check.checked_at if latest_check else None,
     })
+
+
+# ── 환자 프로필 (이름/환자번호/소속병원 읽기전용, 생년월일/성별만 수정가능) ──
+
+@extend_schema(tags=["accounts"], responses={200: PatientProfileSerializer})
+@api_view(["GET", "PUT"])
+@permission_classes([IsPatient])
+def patient_profile(request):
+    profile = PatientProfile.objects.select_related("user", "hospital").get(user=request.user)
+
+    if request.method == "GET":
+        return Response(PatientProfileSerializer(profile).data)
+
+    serializer = PatientProfileSerializer(profile, data=request.data, partial=True)
+    if not serializer.is_valid():
+        return validation_error_response(serializer.errors)
+    serializer.save()
+    return Response(serializer.data)
+
+
+# ── 의사 프로필 (사진/태그) ───────────────────────────────────────────
+
+@api_view(["GET", "PUT"])
+@permission_classes([IsDoctor])
+def doctor_profile(request):
+    profile = DoctorProfile.objects.get(user=request.user)
+
+    if request.method == "GET":
+        return Response(DoctorProfileUpdateSerializer(profile).data)
+
+    serializer = DoctorProfileUpdateSerializer(profile, data=request.data, partial=True)
+    if not serializer.is_valid():
+        return validation_error_response(serializer.errors)
+    serializer.save()
+    return Response(serializer.data)
+
+
+# ── 병원 정보 (약도/전화/주소) — 병원 1곳 고정이라 파라미터 없이 조회 ──────
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def hospital_info(request):
+    hospital = Hospital.objects.first()
+    if hospital is None:
+        return error_response("등록된 병원이 없습니다", status_code=status.HTTP_404_NOT_FOUND)
+    return Response(HospitalSerializer(hospital).data)
+
+
+# ── 알림 설정 (카테고리별 on/off) ─────────────────────────────────────
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def notification_preference_list(request):
+    """설정 안 한 카테고리는 기본값 enabled=True로 채워서 반환."""
+    existing = {p.category: p.enabled for p in NotificationPreference.objects.filter(user=request.user)}
+    all_categories = ["medication", "appointment", "chat", "triage", "case_review"]
+    return Response([
+        {"category": c, "enabled": existing.get(c, True)} for c in all_categories
+    ])
+
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def notification_preference_update(request):
+    serializer = NotificationPreferenceSerializer(data=request.data)
+    if not serializer.is_valid():
+        return validation_error_response(serializer.errors)
+
+    data = serializer.validated_data
+    pref, _ = NotificationPreference.objects.update_or_create(
+        user=request.user, category=data["category"], defaults={"enabled": data["enabled"]},
+    )
+    return Response({"category": pref.category, "enabled": pref.enabled})
+
+
+# ── FCM 디바이스 토큰 등록 ────────────────────────────────────────────
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def register_device_token(request):
+    serializer = DeviceTokenSerializer(data=request.data)
+    if not serializer.is_valid():
+        return validation_error_response(serializer.errors)
+
+    data = serializer.validated_data
+    DeviceToken.objects.update_or_create(
+        user=request.user, app_type=data["app_type"], platform=data["platform"],
+        defaults={"fcm_token": data["fcm_token"]},
+    )
+    return Response(status=status.HTTP_201_CREATED)

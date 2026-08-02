@@ -16,4 +16,8 @@ urlpatterns = [
     path("today-visits/", views.today_visits, name="appt-today-visits"),
     path("<uuid:appointment_id>/check-in/", views.check_in, name="appt-check-in"),
     path("<uuid:appointment_id>/no-show/", views.mark_no_show, name="appt-no-show"),
+
+    path("doctor/off-days/", views.doctor_off_days, name="doctor-off-days"),
+    path("doctor/off-days/<uuid:off_day_id>/", views.doctor_off_day_delete, name="doctor-off-day-delete"),
+    path("doctor/weekly-schedule/", views.doctor_weekly_schedule, name="doctor-weekly-schedule"),
 ]

@@ -12,6 +12,12 @@ urlpatterns = [
     path("patient/social-login/", views.social_login, name="patient-social-login"),
     path("patient/phone/request/", views.phone_verify_request, name="patient-phone-request"),
     path("patient/phone/confirm/", views.phone_verify_confirm, name="patient-phone-confirm"),
+    path("patient/profile/", views.patient_profile, name="patient-profile"),
+    path("doctor/profile/", views.doctor_profile, name="doctor-profile"),
+    path("hospital/", views.hospital_info, name="hospital-info"),
+    path("notifications/preferences/", views.notification_preference_list, name="notification-pref-list"),
+    path("notifications/preferences/update/", views.notification_preference_update, name="notification-pref-update"),
+    path("device-token/", views.register_device_token, name="device-token-register"),
 
     path("refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("logout/", views.logout, name="logout"),

@@ -128,11 +128,22 @@ class PhoneVerifyConfirmSerializer(serializers.Serializer):
 
 
 class PatientProfileSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="user.name", read_only=True)
+    name = serializers.CharField(source="user.name")
+    hospital_name = serializers.CharField(source="hospital.name", read_only=True)
 
     class Meta:
         model = PatientProfile
-        fields = ["patient_number", "birth_date", "hospital", "assigned_doctor", "name"]
+        fields = ["patient_number", "birth_date", "gender", "hospital_name", "assigned_doctor", "name"]
+        read_only_fields = ["patient_number", "hospital_name", "assigned_doctor"]
+        # 소셜로그인에서 받아온 이름이 실명이 아니라 닉네임일 수 있어 수정 허용.
+        # birth_date, gender, name만 수정 가능 — 환자번호/소속병원/담당의는 불가.
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", None)
+        if user_data and "name" in user_data:
+            instance.user.name = user_data["name"]
+            instance.user.save(update_fields=["name"])
+        return super().update(instance, validated_data)
 
 
 # ── 보호자 ────────────────────────────────────────────────────────
@@ -148,3 +159,26 @@ class GuardianLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = GuardianLink
         fields = ["id", "invite_code", "guardian_name", "invited_at", "accepted_at"]
+
+
+class DoctorProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorProfile
+        fields = ["photo_url", "specialty_tags"]
+
+
+class HospitalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hospital
+        fields = ["id", "name", "address", "phone", "map_image_url"]
+
+
+class NotificationPreferenceSerializer(serializers.Serializer):
+    category = serializers.ChoiceField(choices=["medication", "appointment", "chat", "triage", "case_review"])
+    enabled = serializers.BooleanField()
+
+
+class DeviceTokenSerializer(serializers.Serializer):
+    fcm_token = serializers.CharField()
+    app_type = serializers.ChoiceField(choices=["patient_app", "medical_app"])
+    platform = serializers.ChoiceField(choices=["ios", "android"])
