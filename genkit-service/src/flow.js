@@ -20,7 +20,7 @@ const RAG_SEARCH_URL =
 
 const ai = genkit({
   plugins: [googleAI()],
-  model: googleAI.model("gemini-2.0-flash"),
+  model: googleAI.model("gemini-2.5-flash"),
 });
 
 // ── MCP 클라이언트 연결 (개인데이터 tool 3개) ────────────────────────
