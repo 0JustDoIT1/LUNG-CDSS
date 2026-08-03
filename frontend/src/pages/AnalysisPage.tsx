@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import type { AxiosError } from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { predictCase, getCase } from '../api/cases';
-import type { CaseStep } from '../types/case';
+import { UnifiedCaseResultSections } from '../components/dashboard/UnifiedCaseResultSections';
+import { PrintableReport } from '../components/dashboard/PrintableReport';
+import type { CaseDetail, CaseStep } from '../types/case';
 
 const ANALYSIS_STEPS: {
   key: Exclude<CaseStep, null>;
@@ -50,6 +53,7 @@ export default function AnalysisPage() {
   );
   const [error, setError] = useState<string | null>(null);
   const [analyzedAt, setAnalyzedAt] = useState<string | null>(null);
+  const [resultDetail, setResultDetail] = useState<CaseDetail | null>(null);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -101,10 +105,10 @@ export default function AnalysisPage() {
 
     let cancelled = false;
 
-    predictCase(id).catch((e: any) => {
+    predictCase(id).catch((e: unknown) => {
       if (cancelled) return;
       // 409(이미 분석 중)는 정상 케이스로 간주 — 폴링이 어차피 진행 상황을 알려줌
-      if (e?.response?.status !== 409) {
+      if ((e as AxiosError).response?.status !== 409) {
         setError('분석 요청에 실패했습니다.');
         setStatus('failed');
       }
@@ -149,7 +153,12 @@ export default function AnalysisPage() {
           setAnalyzedAt(detail.analyzed_at);
         }
 
-        if (detail.status === 'completed') {
+        if (
+          detail.status === 'completed' ||
+          detail.status === 'pending_review' ||
+          detail.status === 'confirmed'
+        ) {
+          setResultDetail(detail);
           setStatus('completed');
           if (pollRef.current) clearInterval(pollRef.current);
         } else if (detail.status === 'failed') {
@@ -167,6 +176,23 @@ export default function AnalysisPage() {
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [id, isPreview, status]);
+
+  useEffect(() => {
+    if (isPreview || !id || status !== 'completed' || resultDetail) return;
+
+    let cancelled = false;
+    getCase(id)
+      .then((detail) => {
+        if (!cancelled) setResultDetail(detail);
+      })
+      .catch(() => {
+        if (!cancelled) setError('완료된 결과를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isPreview, resultDetail, status]);
 
   const current = ANALYSIS_STEPS[stepIndex];
   const progressPct = Math.min(
@@ -189,7 +215,7 @@ export default function AnalysisPage() {
           {status === 'running' &&
             'AI가 슬라이드를 분석하고 있습니다. 잠시만 기다려 주세요.'}
           {status === 'completed' &&
-            '결과가 준비되었습니다. 결과 보기를 클릭하세요.'}
+            '원본 이미지와 AI 분석 결과가 아래에 모두 표시됩니다.'}
           {status === 'failed' && '분석 중 문제가 발생했습니다.'}
         </p>
 
@@ -201,7 +227,7 @@ export default function AnalysisPage() {
                 분석이 완료되었습니다!
               </p>
               <p className="text-xs text-green-600">
-                아래 버튼을 눌러 결과를 확인하세요.
+                이 화면에서 진단, 히트맵, 핵형태와 AI 소견을 이어서 확인하세요.
               </p>
             </div>
           </div>
@@ -246,17 +272,15 @@ export default function AnalysisPage() {
         </div>
       )}
 
-      {status !== 'failed' && (
+      {status === 'running' && (
         <div className="space-y-0 mb-6">
           {ANALYSIS_STEPS.map((step, i) => {
             const state =
-              status === 'completed'
+              i < stepIndex
                 ? 'done'
-                : i < stepIndex
-                  ? 'done'
-                  : i === stepIndex
-                    ? 'active'
-                    : 'waiting';
+                : i === stepIndex
+                  ? 'active'
+                  : 'waiting';
             return (
               <div
                 key={step.key}
@@ -297,15 +321,20 @@ export default function AnalysisPage() {
         </div>
       )}
 
+      {status === 'completed' && resultDetail && (
+        <div className="mb-6">
+          <UnifiedCaseResultSections caseData={resultDetail} />
+          <PrintableReport caseData={resultDetail} />
+        </div>
+      )}
+
+      {status === 'completed' && !resultDetail && !isPreview && (
+        <div className="mb-6 flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-6 py-10 text-sm text-gray-500">
+          결과 데이터를 불러오는 중입니다…
+        </div>
+      )}
+
       <div className="flex gap-2.5 flex-wrap">
-        <button
-          type="button"
-          onClick={() => navigate('/', { state: { openCaseId: id } })}
-          disabled={status === 'running'}
-          className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-green-700 text-white hover:bg-green-800 transition disabled:opacity-45 disabled:cursor-not-allowed"
-        >
-          결과 보기 →
-        </button>
         <button
           type="button"
           onClick={() => navigate('/upload')}

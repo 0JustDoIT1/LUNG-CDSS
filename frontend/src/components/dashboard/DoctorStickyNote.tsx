@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Plus, X, Pin } from "lucide-react";
+import { getStoredItem, setStoredItem } from "../../utils/storage";
 
 interface StickyTodo {
   id: string;
@@ -23,22 +24,22 @@ function getTodayKey(): string {
   return `${STORAGE_KEY_PREFIX}${y}-${m}-${d}`;
 }
 
+function loadTodos(storageKey: string): StickyTodo[] {
+  try {
+    const raw = getStoredItem(storageKey);
+    return raw ? (JSON.parse(raw) as StickyTodo[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function DoctorStickyNote(): React.JSX.Element {
-  const storageKey = getTodayKey();
-  const [todos, setTodos] = useState<StickyTodo[]>([]);
+  const [storageKey] = useState(getTodayKey);
+  const [todos, setTodos] = useState<StickyTodo[]>(() => loadTodos(storageKey));
   const [input, setInput] = useState("");
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      setTodos(raw ? (JSON.parse(raw) as StickyTodo[]) : []);
-    } catch {
-      setTodos([]);
-    }
-  }, [storageKey]);
-
-  useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(todos));
+    setStoredItem(storageKey, JSON.stringify(todos));
   }, [todos, storageKey]);
 
   function addTodo(): void {

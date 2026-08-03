@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .permissions import IsGuardian, IsPatient
+from .permissions import IsGuardian, IsPathologist, IsPatient
 
 from .models import DeviceToken, DoctorProfile, GuardianLink, Hospital, NotificationPreference, PatientAuth, PatientProfile, StaffAuth, User
 from .serializers import (
@@ -326,12 +326,22 @@ def doctor_profile(request):
 # ── 병원 정보 (약도/전화/주소) — 병원 1곳 고정이라 파라미터 없이 조회 ──────
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def hospital_info(request):
     hospital = Hospital.objects.first()
     if hospital is None:
         return error_response("등록된 병원이 없습니다", status_code=status.HTTP_404_NOT_FOUND)
     return Response(HospitalSerializer(hospital).data)
+
+
+@api_view(["GET"])
+@permission_classes([IsPathologist])
+def patient_list(request):
+    patients = User.objects.filter(
+        role=User.Role.PATIENT,
+        is_active=True,
+    ).order_by("name").values("id", "name")
+    return Response(list(patients))
 
 
 # ── 알림 설정 (카테고리별 on/off) ─────────────────────────────────────

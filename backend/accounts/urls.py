@@ -14,6 +14,7 @@ urlpatterns = [
     path("patient/profile/", views.patient_profile, name="patient-profile"),
     path("doctor/profile/", views.doctor_profile, name="doctor-profile"),
     path("hospital/", views.hospital_info, name="hospital-info"),
+    path("staff/patients/", views.patient_list, name="staff-patient-list"),
     path("notifications/preferences/", views.notification_preference_list, name="notification-pref-list"),
     path("notifications/preferences/update/", views.notification_preference_update, name="notification-pref-update"),
     path("device-token/", views.register_device_token, name="device-token-register"),

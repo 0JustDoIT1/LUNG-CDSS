@@ -20,7 +20,7 @@ export interface ConfidenceBand {
   dotColor: string;        // 점 색
 }
 
-export function getConfidenceBand(conf: number): ConfidenceBand {
+function getConfidenceBand(conf: number): ConfidenceBand {
   if (conf >= 0.9) {
     return {
       level: "high",

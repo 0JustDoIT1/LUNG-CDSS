@@ -4,6 +4,7 @@ import type {
   CaseListItem,
   CaseListParams,
   CreateCasePayload,
+  PatientOption,
   ReviewPayload,
   UploadUrlPayload,
   UploadUrlResponse,
@@ -48,7 +49,13 @@ export async function getCases(params?: CaseListParams) {
 
 export async function getCase(id: string) {
   const { data } = await apiClient.get<CaseDetail>(`/cases/${id}/`);
-  return data;
+  const { latest_ai_result, ...caseData } = data;
+
+  return {
+    ...caseData,
+    ...(latest_ai_result ?? {}),
+    latest_ai_result,
+  } as CaseDetail;
 }
 
 export async function createCase(payload: CreateCasePayload) {
@@ -72,5 +79,10 @@ export async function retryCase(id: string) {
 
 export async function reviewCase(id: string, payload: ReviewPayload) {
   const { data } = await apiClient.post(`/cases/${id}/review/`, payload);
+  return data;
+}
+
+export async function getPatients() {
+  const { data } = await apiClient.get<PatientOption[]>("/auth/staff/patients/");
   return data;
 }

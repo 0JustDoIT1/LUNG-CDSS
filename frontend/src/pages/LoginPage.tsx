@@ -27,7 +27,7 @@ export default function LoginPage() {
         navigate("/");
       }
     } catch {
-      setServerError("병원코드 또는 비밀번호가 올바르지 않습니다.");
+      setServerError("이메일 또는 비밀번호가 올바르지 않습니다.");
     }
   }
 
@@ -41,23 +41,21 @@ export default function LoginPage() {
         )}
 
         <div>
-          <label htmlFor="login-hospital-code" className="block text-xs font-medium mb-1.5 text-gray-700">
-            병원코드
+          <label htmlFor="login-email" className="block text-xs font-medium mb-1.5 text-gray-700">
+            이메일
           </label>
           <input
-            id="login-hospital-code"
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            {...register("hospital_code", { required: "병원코드를 입력해주세요." })}
+            id="login-email"
+            type="email"
+            {...register("email", { required: "이메일을 입력해주세요." })}
             className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none focus:ring-1 transition ${
-              errors.hospital_code
+              errors.email
                 ? "border-red-300 focus:border-red-400 focus:ring-red-100"
                 : "border-gray-200 focus:border-teal-400 focus:ring-teal-100"
             }`}
-            placeholder="숫자 6자리"
+            placeholder="name@example.com"
           />
-          {errors.hospital_code && <p className="text-[11px] text-red-500 mt-1.5">{errors.hospital_code.message}</p>}
+          {errors.email && <p className="text-[11px] text-red-500 mt-1.5">{errors.email.message}</p>}
         </div>
 
         <div>

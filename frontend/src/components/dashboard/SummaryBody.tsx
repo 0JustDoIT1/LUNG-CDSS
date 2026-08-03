@@ -27,7 +27,7 @@ export function SummaryBody({ caseData }: { caseData: CaseDetail }): React.JSX.E
     setTimeout(() => setCopied(false), 2000);
   }, [note]);
 
-  if (caseData.status !== "completed") {
+  if (!["completed", "pending_review", "confirmed"].includes(caseData.status)) {
     return <AnalysisStatusNote status={caseData.status} fallbackText="결과 요약이 아직 없습니다." />;
   }
 

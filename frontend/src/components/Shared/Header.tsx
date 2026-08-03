@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../api/auth";
+import { getStoredItem } from "../../utils/storage";
+import NotificationCenter from "./NotificationCenter";
 
 const DEPARTMENT_LABELS: Record<string, string> = {
   pathology: "병리과",
@@ -10,8 +12,8 @@ const DEPARTMENT_LABELS: Record<string, string> = {
 export default function Header() {
   const navigate = useNavigate();
 
-  const userName = localStorage.getItem("user_name");
-  const userDepartment = localStorage.getItem("user_department");
+  const userName = getStoredItem("user_name");
+  const userDepartment = getStoredItem("user_department");
 
   function handleLogout() {
     logout();
@@ -30,6 +32,7 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-3">
+        <NotificationCenter />
         {userName && (
           <div className="text-right">
             <p className="text-sm font-semibold text-gray-700">{userName}</p>

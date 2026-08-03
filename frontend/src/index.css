@@ -1,6 +1,118 @@
 @import './styles/typography.css';
 @import "tailwindcss";
 
+/* ----------------------------- 다크/고대비 화면 ----------------------------- */
+/* 대시보드와 전체 결과 페이지에서 같은 색 체계를 공유한다. */
+.a11y-hc {
+  color-scheme: dark;
+  background-color: #0b1220 !important;
+  color: #e2e8f0;
+}
+
+.a11y-hc .bg-white {
+  background-color: #111827 !important;
+}
+
+.a11y-hc .bg-gray-50,
+.a11y-hc .bg-gray-50\/80,
+.a11y-hc .bg-gray-50\/60,
+.a11y-hc .bg-gray-100 {
+  background-color: #172033 !important;
+}
+
+/* 슬라이드·히트맵 뷰어는 어두운 캔버스를 유지한다. */
+.a11y-hc .bg-gray-900 {
+  background-color: #050a13 !important;
+}
+
+.a11y-hc .text-gray-900,
+.a11y-hc .text-gray-1000 {
+  color: #f8fafc !important;
+}
+
+.a11y-hc .text-gray-700,
+.a11y-hc .text-gray-600 {
+  color: #e2e8f0 !important;
+}
+
+.a11y-hc .text-gray-500 {
+  color: #cbd5e1 !important;
+}
+
+.a11y-hc .text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+.a11y-hc .border-gray-200,
+.a11y-hc .border-gray-100,
+.a11y-hc .divide-gray-100 > * + * {
+  border-color: #334155 !important;
+}
+
+.a11y-hc .bg-teal-50,
+.a11y-hc .bg-teal-50\/70,
+.a11y-hc .bg-teal-50\/60 {
+  background-color: #0f2f32 !important;
+}
+
+.a11y-hc .bg-indigo-50 {
+  background-color: #1e2345 !important;
+}
+
+.a11y-hc .bg-amber-50,
+.a11y-hc .bg-amber-50\/60,
+.a11y-hc .bg-amber-100 {
+  background-color: #392b15 !important;
+}
+
+.a11y-hc .bg-rose-50,
+.a11y-hc .bg-rose-50\/50,
+.a11y-hc .bg-rose-50\/60,
+.a11y-hc .bg-rose-50\/80,
+.a11y-hc .bg-rose-100 {
+  background-color: #3b1d28 !important;
+}
+
+.a11y-hc .text-teal-500,
+.a11y-hc .text-teal-600,
+.a11y-hc .text-teal-700,
+.a11y-hc .text-teal-800 {
+  color: #5eead4 !important;
+}
+
+.a11y-hc .text-indigo-400,
+.a11y-hc .text-indigo-600,
+.a11y-hc .text-indigo-700 {
+  color: #a5b4fc !important;
+}
+
+.a11y-hc .text-amber-600,
+.a11y-hc .text-amber-700,
+.a11y-hc .text-amber-900 {
+  color: #fcd34d !important;
+}
+
+.a11y-hc .text-rose-600,
+.a11y-hc .text-rose-700,
+.a11y-hc .text-rose-800 {
+  color: #fda4af !important;
+}
+
+.a11y-hc input,
+.a11y-hc select,
+.a11y-hc textarea,
+.a11y-hc kbd {
+  background-color: #172033 !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+.a11y-hc button:focus-visible,
+.a11y-hc [tabindex]:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 2px;
+}
+
 /* ----------------------------- 인쇄 / PDF 내보내기 ----------------------------- */
 /* 평소 화면에서는 숨기고, 인쇄(또는 브라우저의 '인쇄 > PDF로 저장')를 실행할 때만 노출 */
 .print-only {

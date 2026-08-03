@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
-  Grid3x3,
-  ClipboardList,
-  ScanSearch,
   AlertTriangle,
   Star,
   Users,
@@ -19,24 +17,24 @@ import {
 import type {
   CaseStatus,
   CaseListItem,
-  CaseDetail,
-  ModalType,
   Metrics,
 } from "../types/case";
 import { STATUS_LABELS, REVIEW_LABELS, REVIEW_CLS } from "../types/case";
-import { Th, MetricCard, ActionBtn } from "../components/dashboard/shared";
+import { Th, MetricCard } from "../components/dashboard/shared";
 import { ReviewActionCell } from "../components/dashboard/ReviewActionCell";
-import { DetailModal } from "../components/dashboard/DetailModal";
 import { ConfidenceCompact } from "../components/dashboard/ConfidenceIndicator";
 import { CompareModal } from "../components/dashboard/CompareModal";
 import { DoctorStickyNote } from "../components/dashboard/DoctorStickyNote";
 import Header from "../components/Shared/Header";
 import apiClient from "../api/client";
+import { getStoredItem, setStoredItem } from "../utils/storage";
 
 const STATUS_DOT: Record<CaseStatus, string> = {
   uploaded: "bg-gray-400",
   processing: "bg-blue-500",
   completed: "bg-green-500",
+  pending_review: "bg-amber-500",
+  confirmed: "bg-green-700",
   failed: "bg-rose-500",
 };
 
@@ -50,40 +48,14 @@ const BASE_ROOT_FONT_PX = 16;
 
 function readStoredFontScale(): number {
   if (typeof window === "undefined") return 1;
-  const saved = Number(window.localStorage.getItem(FONT_SCALE_STORAGE_KEY));
+  const saved = Number(getStoredItem(FONT_SCALE_STORAGE_KEY));
   return FONT_SCALE_STEPS.includes(saved as (typeof FONT_SCALE_STEPS)[number]) ? saved : 1;
 }
 
 function readStoredHighContrast(): boolean {
   if (typeof window === "undefined") return false;
-  return window.localStorage.getItem(HIGH_CONTRAST_STORAGE_KEY) === "true";
+  return getStoredItem(HIGH_CONTRAST_STORAGE_KEY) === "true";
 }
-
-// 자주 쓰이는 배경/텍스트/보더 클래스만 고대비 톤으로 재정의하는 스코프 스타일.
-// 어두운 병원 환경에서 눈부심을 줄이고 텍스트 대비를 높이는 목적.
-const HIGH_CONTRAST_CSS = `
-.a11y-hc { background-color: #000 !important; }
-.a11y-hc .bg-\\[\\#F7F8FA\\] { background-color: #000 !important; }
-.a11y-hc .bg-white { background-color: #0a0a0a !important; }
-.a11y-hc .bg-gray-50, .a11y-hc .bg-gray-50\\/80, .a11y-hc .bg-gray-50\\/60 { background-color: #1a1a1a !important; }
-.a11y-hc .bg-gray-100 { background-color: #1a1a1a !important; }
-.a11y-hc .bg-gray-900 { background-color: #fff !important; color: #000 !important; }
-.a11y-hc .bg-gray-900 * { color: #000 !important; }
-.a11y-hc .text-gray-900 { color: #fff !important; }
-.a11y-hc .text-gray-700 { color: #f0f0f0 !important; }
-.a11y-hc .text-gray-600 { color: #e2e2e2 !important; }
-.a11y-hc .text-gray-500 { color: #cfcfcf !important; }
-.a11y-hc .text-gray-400 { color: #b5b5b5 !important; }
-.a11y-hc .border-gray-200, .a11y-hc .border-gray-100 { border-color: #4a4a4a !important; }
-.a11y-hc .divide-gray-100 > * + * { border-color: #4a4a4a !important; }
-.a11y-hc .bg-teal-50\\/70, .a11y-hc .bg-teal-50\\/60 { background-color: #003b3b !important; }
-.a11y-hc .bg-rose-50\\/50, .a11y-hc .bg-rose-50\\/60, .a11y-hc .bg-rose-50\\/80 { background-color: #4a0d14 !important; }
-.a11y-hc .bg-amber-50, .a11y-hc .bg-amber-50\\/60 { background-color: #4a2e00 !important; }
-.a11y-hc .text-amber-700, .a11y-hc .text-amber-900 { color: #ffd27a !important; }
-.a11y-hc .text-amber-600 { color: #ffcc66 !important; }
-.a11y-hc .text-rose-600 { color: #ff8fa3 !important; }
-.a11y-hc kbd { background-color: #1a1a1a !important; color: #fff !important; border-color: #666 !important; }
-`;
 
 interface AccessibilityControlsProps {
   fontScale: number;
@@ -257,7 +229,7 @@ function LeftSidebar({
 interface RightSidebarProps {
   urgent: CaseListItem[];
   reviewPending: CaseListItem[];
-  onOpen: (c: CaseListItem, type: ModalType) => void;
+  onOpen: (c: CaseListItem) => void;
 }
 
 function RightSidebar({ urgent, reviewPending, onOpen }: RightSidebarProps): React.JSX.Element {
@@ -276,7 +248,7 @@ function RightSidebar({ urgent, reviewPending, onOpen }: RightSidebarProps): Rea
               return (
                 <button
                   key={c.id}
-                  onClick={() => onOpen(c, "summary")}
+                  onClick={() => onOpen(c)}
                   className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs hover:bg-amber-50/60 transition-colors"
                 >
                   <span className="font-mono text-gray-700 truncate">{c.specimen_id}</span>
@@ -302,7 +274,7 @@ function RightSidebar({ urgent, reviewPending, onOpen }: RightSidebarProps): Rea
             {reviewPending.slice(0, 6).map((c) => (
               <button
                 key={c.id}
-                onClick={() => onOpen(c, "summary")}
+                onClick={() => onOpen(c)}
                 className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs hover:bg-gray-50 transition-colors"
               >
                 <span className="font-mono text-gray-700 truncate">{c.specimen_id}</span>
@@ -320,6 +292,7 @@ function RightSidebar({ urgent, reviewPending, onOpen }: RightSidebarProps): Rea
 
 // ----------------------------- 컴포넌트 -----------------------------
 export default function Dashboard(): React.JSX.Element {
+  const navigate = useNavigate();
   const [cases, setCases] = useState<CaseListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -327,10 +300,6 @@ export default function Dashboard(): React.JSX.Element {
   const [search, setSearch] = useState<string>("");
   const [favoritesOnly, setFavoritesOnly] = useState<boolean>(false);
   const [sortMode, setSortMode] = useState<SortMode>("upload");
-
-  const [modalCase, setModalCase] = useState<CaseDetail | CaseListItem | null>(null);
-  const [modalType, setModalType] = useState<ModalType | null>(null);
-  const [detailLoading, setDetailLoading] = useState<boolean>(false);
 
   // 비교 모드
   const [compareIds, setCompareIds] = useState<string[]>([]);
@@ -344,10 +313,6 @@ export default function Dashboard(): React.JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [now, setNow] = useState<Date>(new Date());
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
-  const modalTypeRef = useRef<ModalType | null>(null);
-  const selectedIdRef = useRef<string | null>(null);
-  modalTypeRef.current = modalType;
-  selectedIdRef.current = selectedId;
 
   useEffect(() => {
     let active = true;
@@ -375,14 +340,14 @@ export default function Dashboard(): React.JSX.Element {
   // 대시보드를 벗어나도 유지되도록 document 레벨에 적용하고 localStorage에 저장.
   useEffect(() => {
     document.documentElement.style.fontSize = `${BASE_ROOT_FONT_PX * fontScale}px`;
-    window.localStorage.setItem(FONT_SCALE_STORAGE_KEY, String(fontScale));
+    setStoredItem(FONT_SCALE_STORAGE_KEY, String(fontScale));
     return () => {
       // 컴포넌트가 언마운트되어도 사용자가 선택한 크기는 유지 (원복하지 않음)
     };
   }, [fontScale]);
 
   useEffect(() => {
-    window.localStorage.setItem(HIGH_CONTRAST_STORAGE_KEY, String(highContrast));
+    setStoredItem(HIGH_CONTRAST_STORAGE_KEY, String(highContrast));
   }, [highContrast]);
 
   const decreaseFont = useCallback(() => {
@@ -466,34 +431,17 @@ export default function Dashboard(): React.JSX.Element {
     return [...pinnedReprocess, ...pinnedUrgent, ...sortedRest];
   }, [baseFiltered, sortMode]);
 
-  useEffect(() => {
-    if (filtered.length === 0) {
-      setSelectedId(null);
-      return;
-    }
-    if (!selectedId || !filtered.some((c) => c.id === selectedId)) {
-      setSelectedId(filtered[0].id);
-    }
-  }, [filtered, selectedId]);
+  const effectiveSelectedId =
+    selectedId && filtered.some((c) => c.id === selectedId)
+      ? selectedId
+      : (filtered[0]?.id ?? null);
 
-  const openModal = useCallback(async (c: CaseListItem, type: ModalType): Promise<void> => {
-    setModalType(type);
-    setModalCase(c);
-    setDetailLoading(true);
-    try {
-      const res = await apiClient.get<CaseDetail>(`/cases/${c.id}/`);
-      setModalCase(res.data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setDetailLoading(false);
-    }
-  }, []);
-
-  const closeModal = useCallback((): void => {
-    setModalCase(null);
-    setModalType(null);
-  }, []);
+  const openResultPage = useCallback(
+    (c: CaseListItem): void => {
+      navigate(`/doctor-dashboard/cases/${c.id}`);
+    },
+    [navigate]
+  );
 
   const toggleCompare = useCallback((id: string) => {
     setCompareIds((prev) => {
@@ -522,13 +470,13 @@ export default function Dashboard(): React.JSX.Element {
   const moveSelection = useCallback(
     (dir: 1 | -1) => {
       if (filtered.length === 0) return;
-      const idx = filtered.findIndex((c) => c.id === selectedIdRef.current);
+      const idx = filtered.findIndex((c) => c.id === effectiveSelectedId);
       const nextIdx = idx === -1 ? 0 : Math.min(Math.max(idx + dir, 0), filtered.length - 1);
       const next = filtered[nextIdx];
       setSelectedId(next.id);
       rowRefs.current.get(next.id)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     },
-    [filtered]
+    [effectiveSelectedId, filtered]
   );
 
   // ----------------------------- 키보드 단축키 -----------------------------
@@ -544,25 +492,7 @@ export default function Dashboard(): React.JSX.Element {
         return;
       }
 
-      const currentType = modalTypeRef.current;
-      const currentCase = filtered.find((c) => c.id === selectedIdRef.current) ?? null;
-
-      if (currentType) {
-        if (e.key === "Escape") {
-          e.preventDefault();
-          closeModal();
-        } else if ((e.key === "h" || e.key === "H") && currentCase) {
-          e.preventDefault();
-          openModal(currentCase, "heatmap");
-        } else if ((e.key === "s" || e.key === "S") && currentCase) {
-          e.preventDefault();
-          openModal(currentCase, "summary");
-        } else if ((e.key === "n" || e.key === "N") && currentCase) {
-          e.preventDefault();
-          openModal(currentCase, "nucleus");
-        }
-        return;
-      }
+      const currentCase = filtered.find((c) => c.id === effectiveSelectedId) ?? null;
 
       switch (e.key) {
         case "j":
@@ -579,28 +509,7 @@ export default function Dashboard(): React.JSX.Element {
         case "Enter":
           if (currentCase) {
             e.preventDefault();
-            openModal(currentCase, "summary");
-          }
-          break;
-        case "h":
-        case "H":
-          if (currentCase) {
-            e.preventDefault();
-            openModal(currentCase, "heatmap");
-          }
-          break;
-        case "s":
-        case "S":
-          if (currentCase) {
-            e.preventDefault();
-            openModal(currentCase, "summary");
-          }
-          break;
-        case "n":
-        case "N":
-          if (currentCase) {
-            e.preventDefault();
-            openModal(currentCase, "nucleus");
+            openResultPage(currentCase);
           }
           break;
         default:
@@ -610,7 +519,7 @@ export default function Dashboard(): React.JSX.Element {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [filtered, moveSelection, openModal, closeModal]);
+  }, [effectiveSelectedId, filtered, moveSelection, openResultPage]);
 
   const statusFilters: { v: CaseStatus | ""; l: string }[] = [
     { v: "", l: "전체" },
@@ -623,7 +532,6 @@ export default function Dashboard(): React.JSX.Element {
   if (loading)
     return (
       <div className={`min-h-screen bg-[#F7F8FA] ${highContrast ? "a11y-hc" : ""}`}>
-        <style>{HIGH_CONTRAST_CSS}</style>
         <Header />
         <div className="mx-auto w-full max-w-[1760px] p-4 lg:p-6 xl:grid xl:grid-cols-[240px_minmax(0,1fr)_300px] xl:gap-5 xl:items-start">
           <div className="hidden xl:flex xl:flex-col gap-4">
@@ -682,7 +590,6 @@ export default function Dashboard(): React.JSX.Element {
 
   return (
     <div className={`min-h-screen bg-[#F7F8FA] ${highContrast ? "a11y-hc" : ""}`}>
-      <style>{HIGH_CONTRAST_CSS}</style>
       <Header />
       <div className="mx-auto w-full max-w-[1760px] p-4 lg:p-6 xl:grid xl:grid-cols-[240px_minmax(0,1fr)_300px] xl:gap-5 xl:items-start">
         <LeftSidebar
@@ -715,9 +622,7 @@ export default function Dashboard(): React.JSX.Element {
                 <p className="text-[11px] text-gray-400">
                   <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">J</kbd>/
                   <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">K</kbd> 이동 ·{" "}
-                  <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Enter</kbd> 상세 ·{" "}
-                  <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">H/S/N</kbd> 탭 전환 ·{" "}
-                  <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Esc</kbd> 닫기
+                  <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">Enter</kbd> 결과 화면 열기
                 </p>
               </div>
             </div>
@@ -805,7 +710,7 @@ export default function Dashboard(): React.JSX.Element {
               <tbody className="divide-y divide-gray-100">
                 {filtered.map((c) => {
                   const conf = getConfidence(c);
-                  const isSelected = c.id === selectedId;
+                  const isSelected = c.id === effectiveSelectedId;
                   const isCompareChecked = compareIds.includes(c.id);
                   const isUrgent = isUrgentCase(c);
                   const isReprocess = isReprocessNeeded(c);
@@ -816,7 +721,7 @@ export default function Dashboard(): React.JSX.Element {
                         if (el) rowRefs.current.set(c.id, el);
                         else rowRefs.current.delete(c.id);
                       }}
-                      onClick={() => setSelectedId(c.id)}
+                      onClick={() => openResultPage(c)}
                       className={`transition-colors cursor-pointer ${
                         isSelected
                           ? "bg-teal-50/70"
@@ -893,9 +798,6 @@ export default function Dashboard(): React.JSX.Element {
                       </td>
                       <td className="px-4 py-3 relative">
                           <div className="flex gap-1.5 flex-wrap items-start" onClick={(e) => e.stopPropagation()}>
-                            <ActionBtn icon={Grid3x3} label="히트맵" onClick={() => openModal(c, "heatmap")} />
-                            <ActionBtn icon={ClipboardList} label="요약" onClick={() => openModal(c, "summary")} />
-                            <ActionBtn icon={ScanSearch} label="핵형태" onClick={() => openModal(c, "nucleus")} />
                             <ReviewActionCell
                               caseId={c.id}
                               status={c.status}
@@ -935,12 +837,8 @@ export default function Dashboard(): React.JSX.Element {
           </div>
         </main>
 
-        <RightSidebar urgent={urgent} reviewPending={reviewPending} onOpen={openModal} />
+        <RightSidebar urgent={urgent} reviewPending={reviewPending} onOpen={openResultPage} />
       </div>
-
-      {modalCase && modalType && (
-        <DetailModal caseData={modalCase} type={modalType} loading={detailLoading} onClose={closeModal} />
-      )}
 
       {compareIds.length > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-xl border border-gray-200 bg-white shadow-lg px-4 py-2.5 z-40">

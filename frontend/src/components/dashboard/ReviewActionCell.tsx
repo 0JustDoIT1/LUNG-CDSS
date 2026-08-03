@@ -26,7 +26,7 @@ export function ReviewActionCell({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // 분석 완료 + 검토 대기 상태가 아니면 액션 버튼을 노출하지 않음 (상태 배지는 다른 컬럼에서 표시)
-  if (status !== "completed" || reviewStatus !== "pending") return null;
+  if (status !== "pending_review" || reviewStatus !== "pending") return null;
 
   function openForm(nextMode: ActionMode): void {
     setMode(nextMode);

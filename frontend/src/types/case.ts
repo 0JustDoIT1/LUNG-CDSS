@@ -1,4 +1,10 @@
-export type CaseStatus = "uploaded" | "processing" | "completed" | "failed";
+export type CaseStatus =
+  | "uploaded"
+  | "processing"
+  | "completed"
+  | "pending_review"
+  | "confirmed"
+  | "failed";
 
 export type CaseStep =
   | "uploaded"
@@ -28,11 +34,29 @@ export interface GenePrediction {
   likelihood: number;
 }
 
+export interface AIAnalysisResult {
+  id: string;
+  model_version: string;
+  prediction_label: PredictionLabel;
+  luad_probability: number | null;
+  lusc_probability: number | null;
+  nuclei_density_score: number | null;
+  nuclei_density_level: DensityLevel;
+  nuclei_irregularity_score: number | null;
+  nuclei_irregularity_level: IrregularityLevel;
+  heatmap_url: string | null;
+  nuclei_patches: NucleiPatch[];
+  gene_predictions: GenePrediction[];
+  treatment_note: string | null;
+  created_at: string;
+}
+
 export interface CaseListItem {
   id: string;
   specimen_id: string;
   status: CaseStatus;
   review_status: ReviewStatus | null;
+  patient_name?: string;
   prediction_label: PredictionLabel;
   luad_probability: number | null;
   lusc_probability: number | null;
@@ -46,6 +70,7 @@ export interface CaseDetail {
   specimen_id: string;
   status: CaseStatus;
   current_step: CaseStep;
+  patient_name?: string;
   review_status: ReviewStatus;
   prediction_label: PredictionLabel;
   luad_probability: number | null;
@@ -62,6 +87,7 @@ export interface CaseDetail {
   uploaded_at: string;
   analyzed_at: string | null;
   completed_at: string | null;
+  latest_ai_result: AIAnalysisResult | null;
 }
 
 export interface CaseListParams {
@@ -75,6 +101,12 @@ export interface CaseListParams {
 export interface CreateCasePayload {
   specimen_id: string;
   slide_gcs_path: string;
+  patient_id: string;
+}
+
+export interface PatientOption {
+  id: string;
+  name: string;
 }
 
 export interface UploadUrlPayload {
@@ -91,9 +123,6 @@ export interface ReviewPayload {
   reviewer_note?: string;
   final_diagnosis?: "LUAD" | "LUSC";
 }
-
-// ----------------------------- 대시보드 UI용 타입/상수 -----------------------------
-export type ModalType = "heatmap" | "summary" | "nucleus";
 
 export interface Metrics {
   total: number;
@@ -113,6 +142,8 @@ export const STATUS_LABELS: Record<CaseStatus, string> = {
   uploaded: "업로드됨",
   processing: "분석 중",
   completed: "분석 완료",
+  pending_review: "검토 대기",
+  confirmed: "확정",
   failed: "실패",
 };
 
@@ -120,6 +151,8 @@ export const STATUS_CLS: Record<CaseStatus, string> = {
   uploaded: "bg-gray-100 text-gray-600",
   processing: "bg-blue-100 text-blue-700",
   completed: "bg-green-100 text-green-700",
+  pending_review: "bg-amber-100 text-amber-700",
+  confirmed: "bg-green-100 text-green-700",
   failed: "bg-rose-100 text-rose-700",
 };
 

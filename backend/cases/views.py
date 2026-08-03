@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
@@ -8,7 +9,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from accounts.models import User
 from accounts.permissions import IsDoctor, IsPathologist
+from communication.services import notify
 from rag.exceptions import RAGServiceError
 from rag.rag_service import generate_treatment_note
 
@@ -34,6 +37,40 @@ from .services import call_mosec_predict, call_mosec_thumbnail
 from core.responses import error_response, validation_error_response
 
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
+
+
+def _notify_analysis_outcome(case, succeeded):
+    """분석 결과를 웹 알림으로 남긴다. 알림 실패가 분석 응답을 막지는 않는다."""
+    try:
+        if case.uploaded_by_id:
+            notify(
+                recipient_id=case.uploaded_by_id,
+                category="case_review",
+                title="AI 분석 완료" if succeeded else "AI 분석 실패",
+                body=(
+                    f"{case.specimen_id} 분석이 완료되었습니다. 결과를 확인해 주세요."
+                    if succeeded
+                    else f"{case.specimen_id} 분석에 실패했습니다. 다시 처리해 주세요."
+                ),
+                deep_link=(
+                    f"/cases/{case.id}/result"
+                    if succeeded
+                    else f"/analysis/{case.id}"
+                ),
+            )
+
+        if succeeded:
+            doctor_ids = User.objects.filter(role=User.Role.DOCTOR, is_active=True).values_list("id", flat=True)
+            for doctor_id in doctor_ids:
+                notify(
+                    recipient_id=doctor_id,
+                    category="case_review",
+                    title="검토 대기 케이스",
+                    body=f"{case.specimen_id} AI 분석이 완료되어 의료진 검토를 기다리고 있습니다.",
+                    deep_link=f"/doctor-dashboard/cases/{case.id}",
+                )
+    except Exception as exc:
+        print(f"케이스 알림 생성 실패 (case_id={case.id}): {exc}")
 
 
 @extend_schema(
@@ -163,7 +200,16 @@ def predict_case(request, case_id):
         return error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     if case.status == Case.Status.PROCESSING:
-        return error_response("이미 분석이 진행 중입니다", status_code=status.HTTP_409_CONFLICT)
+        stale_before = timezone.now() - timedelta(minutes=20)
+        is_stale = case.analyzed_at and case.analyzed_at < stale_before
+
+        if not is_stale:
+            return error_response("이미 분석이 진행 중입니다", status_code=status.HTTP_409_CONFLICT)
+
+        print(
+            f"오래된 분석을 재시도합니다 "
+            f"(case_id={case.id}, analyzed_at={case.analyzed_at})"
+        )
 
     case.status = Case.Status.PROCESSING
     case.analyzed_at = timezone.now()
@@ -174,6 +220,7 @@ def predict_case(request, case_id):
     except Exception as e:
         case.status = Case.Status.FAILED
         case.save(update_fields=["status"])
+        _notify_analysis_outcome(case, succeeded=False)
         return error_response(str(e), status_code=status.HTTP_502_BAD_GATEWAY)
 
     if not case.slide_thumbnail_gcs_path:
@@ -223,6 +270,8 @@ def predict_case(request, case_id):
         case.status = Case.Status.PENDING_REVIEW
         case.completed_at = timezone.now()
         case.save(update_fields=["status", "completed_at", "slide_thumbnail_gcs_path"])
+
+    _notify_analysis_outcome(case, succeeded=True)
 
     serializer = CaseDetailSerializer(case, context={"request": request})
     return Response(serializer.data)
