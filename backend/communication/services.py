@@ -1,11 +1,16 @@
 """
-알림 발송 공통 지점. Notification 레코드는 항상 남기고, FCM 실발송은
-firebase-admin 연동 전까지 print 스텁으로 대체.
+알림 발송 공통 지점. Notification 레코드는 항상 남기고, FCM은 실제
+firebase-admin으로 발송한다.
 
 NotificationPreference가 꺼져있으면 발송 자체를 스킵한다 (설정 화면 정책).
+FCM 발송 실패는 notify() 자체를 실패시키지 않는다.
 """
 
+import logging
+
 from .models import Notification
+
+logger = logging.getLogger(__name__)
 
 
 def notify(recipient_id, category, title, body, deep_link=None):
@@ -25,7 +30,30 @@ def notify(recipient_id, category, title, body, deep_link=None):
 def _send_fcm(recipient_id, title, body, deep_link):
     from accounts.models import DeviceToken
 
-    tokens = DeviceToken.objects.filter(user_id=recipient_id).values_list("fcm_token", "app_type")
-    for token, app_type in tokens:
-        # TODO: firebase-admin 연동. 지금은 콘솔 로그로만 확인.
-        print(f"[FCM:{app_type}] token={token[:8]}... title={title!r} body={body!r} link={deep_link}")
+    tokens = list(DeviceToken.objects.filter(user_id=recipient_id))
+    if not tokens:
+        return
+
+    try:
+        from firebase_admin import messaging
+
+        from .firebase import get_firebase_app
+        app = get_firebase_app()
+    except Exception as e:
+        logger.warning("FCM 초기화 실패, 발송 스킵: %s", e)
+        for t in tokens:
+            print(f"[FCM:{t.app_type}] (미발송) token={t.fcm_token[:8]}... title={title!r} body={body!r}")
+        return
+
+    for device in tokens:
+        message = messaging.Message(
+            notification=messaging.Notification(title=title, body=body),
+            data={"deep_link": deep_link or "", "category": ""},
+            token=device.fcm_token,
+        )
+        try:
+            messaging.send(message, app=app)
+        except messaging.UnregisteredError:
+            device.delete()
+        except Exception as e:
+            logger.warning("FCM 발송 실패 (user=%s, app=%s): %s", recipient_id, device.app_type, e)

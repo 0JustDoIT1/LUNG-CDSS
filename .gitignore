@@ -65,3 +65,4 @@ lerna-debug.log*
 infra/nginx/ssl/
 
 *.svs
+backend/*firebase-adminsdk*.json
