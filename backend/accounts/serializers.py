@@ -114,17 +114,15 @@ class SocialLoginSerializer(serializers.Serializer):
     token = serializers.CharField()
 
 
-class PhoneVerifyRequestSerializer(serializers.Serializer):
-    phone_number = serializers.RegexField(regex=r'^01[0-9]-?\d{3,4}-?\d{4}$')
-
-
-class PhoneVerifyConfirmSerializer(serializers.Serializer):
-    phone_number = serializers.CharField()
-    code = serializers.RegexField(regex=r'^\d{6}$')
-    # 회원가입 완료를 위한 임시 세션 식별자 (소셜검증 직후 발급, 캐시에 저장)
+class PatientRegisterSerializer(serializers.Serializer):
+    """
+    SMS 인증코드 확인 단계만 없앴다 — 번호 입력 자체는 여전히 필수.
+    소셜로그인 직후 이 정보만으로 바로 가입을 완료한다.
+    """
     signup_token = serializers.CharField()
     birth_date = serializers.DateField()
     hospital_id = serializers.UUIDField()
+    phone_number = serializers.RegexField(regex=r'^01[0-9]-?\d{3,4}-?\d{4}$')
 
 
 class PatientProfileSerializer(serializers.ModelSerializer):

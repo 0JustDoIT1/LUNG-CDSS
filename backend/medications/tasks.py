@@ -3,6 +3,8 @@ from datetime import timedelta
 from celery import shared_task
 from django.utils import timezone
 
+from communication.services import notify
+
 from .models import MedicationLog
 
 
@@ -21,5 +23,10 @@ def check_medication_compliance():
 
 
 def _notify_patient(log):
-    # TODO: communication.services.send_fcm 연동
-    print(f"[medication-escalation] {log.schedule.patient.name} · {log.schedule.drug_name} 미복용")
+    notify(
+        recipient_id=log.schedule.patient_id,
+        category="medication",
+        title="복약 확인이 필요합니다",
+        body=f"{log.schedule.drug_name} {log.schedule.dosage} 복용을 확인해주세요.",
+        deep_link=f"/medications/logs/{log.id}",
+    )

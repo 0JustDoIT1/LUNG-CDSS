@@ -110,8 +110,11 @@ class PatientAuth(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="patient_auth")
     social_provider = models.CharField(max_length=10, choices=SocialProvider.choices)
     social_uid = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=20, unique=True)
-    phone_verified_at = models.DateTimeField()
+    phone_number = models.CharField(max_length=20, unique=True)  # 입력은 필수, 다만 SMS 인증은 안 함
+    # SMS 실발송이 발신번호 사전등록(전기통신사업법 제84조) 심사 문제로 당장
+    # 불가능해서, 인증 단계만 뺐다 — 번호 자체는 계속 필수로 받는다.
+    # 나중에 SMS 연동 재개하면 이 필드에 실제 인증시각을 채우면 됨.
+    phone_verified_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [

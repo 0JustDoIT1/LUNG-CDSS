@@ -3,6 +3,8 @@ from datetime import timedelta
 from celery import shared_task
 from django.utils import timezone
 
+from communication.services import notify
+
 from .models import Appointment
 
 
@@ -30,5 +32,11 @@ def send_appointment_reminders():
 
 
 def _send_reminder(appointment, kind):
-    # TODO: communication.services.send_fcm 연동 (FCM 발송 로직 완성 시 교체)
-    print(f"[appointment-reminder:{kind}] {appointment.patient.name} · {appointment.confirmed_slot}")
+    label = "7일 전" if kind == "d7" else "내일"
+    notify(
+        recipient_id=appointment.patient_id,
+        category="appointment",
+        title=f"예약 {label} 알림",
+        body=f"{appointment.confirmed_slot.strftime('%m월 %d일 %H:%M')} {appointment.department} 예약이 있습니다.",
+        deep_link=f"/appointments/{appointment.id}",
+    )

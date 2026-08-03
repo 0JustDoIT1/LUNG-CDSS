@@ -1,4 +1,3 @@
-import random
 import uuid
 
 from django.core.cache import cache
@@ -22,8 +21,7 @@ from .serializers import (
     HospitalSerializer,
     NotificationPreferenceSerializer,
     PatientProfileSerializer,
-    PhoneVerifyConfirmSerializer,
-    PhoneVerifyRequestSerializer,
+    PatientRegisterSerializer,
     SocialLoginSerializer,
     StaffLoginSerializer,
     StaffSignupSerializer,
@@ -32,7 +30,6 @@ from .permissions import IsDoctor
 from .services import SocialTokenError, verify_social_token
 from core.responses import error_response, validation_error_response
 
-SMS_CODE_TTL = 180  # 3분
 SIGNUP_SESSION_TTL = 600  # 10분
 
 
@@ -116,46 +113,24 @@ def social_login(request):
     return Response({"is_new_user": True, "signup_token": signup_token})
 
 
-@extend_schema(tags=["accounts"], request=PhoneVerifyRequestSerializer,
-                responses={200: OpenApiResponse(description="SMS 발송됨, expires_in 반환")})
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def phone_verify_request(request):
-    serializer = PhoneVerifyRequestSerializer(data=request.data)
-    if not serializer.is_valid():
-        return validation_error_response(serializer.errors)
-
-    phone_number = serializer.validated_data["phone_number"]
-
-    if PatientAuth.objects.filter(phone_number=phone_number).exists():
-        return error_response("이미 등록된 번호입니다", status_code=status.HTTP_409_CONFLICT)
-
-    code = f"{random.randint(0, 999999):06d}"
-    cache.set(f"sms_code:{phone_number}", code, timeout=SMS_CODE_TTL)
-
-    # TODO: 실제 SMS 발송 연동 (NHN Cloud / 알리고 등). 지금은 로그로만 확인.
-    print(f"[SMS] {phone_number} 인증번호: {code}")
-
-    return Response({"expires_in": SMS_CODE_TTL})
-
-
-@extend_schema(tags=["accounts"], request=PhoneVerifyConfirmSerializer,
+@extend_schema(tags=["accounts"], request=PatientRegisterSerializer,
                 responses={201: OpenApiResponse(description="가입 완료, JWT 발급")})
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def phone_verify_confirm(request):
-    serializer = PhoneVerifyConfirmSerializer(data=request.data)
+def patient_register(request):
+    """
+    SMS 인증코드 확인 단계는 뺐다(발신번호 사전등록 심사 문제로 당장 불가) —
+    번호는 여전히 필수로 받되, 실제 본인확인 없이 바로 가입을 완료한다.
+    """
+    serializer = PatientRegisterSerializer(data=request.data)
     if not serializer.is_valid():
         return validation_error_response(serializer.errors)
 
     data = serializer.validated_data
     phone_number = data["phone_number"]
 
-    cached_code = cache.get(f"sms_code:{phone_number}")
-    if cached_code is None:
-        return error_response("인증번호가 만료되었습니다. 재전송해주세요", status_code=status.HTTP_400_BAD_REQUEST)
-    if cached_code != data["code"]:
-        return error_response("인증번호가 일치하지 않습니다", status_code=status.HTTP_400_BAD_REQUEST)
+    if PatientAuth.objects.filter(phone_number=phone_number).exists():
+        return error_response("이미 등록된 번호입니다", status_code=status.HTTP_409_CONFLICT)
 
     session = cache.get(f"signup_session:{data['signup_token']}")
     if session is None:
@@ -172,14 +147,14 @@ def phone_verify_confirm(request):
         social_provider=session["provider"],
         social_uid=session["social_uid"],
         phone_number=phone_number,
-        phone_verified_at=timezone.now(),
+        phone_verified_at=None,  # 실제 인증 안 함 — SMS 연동 재개 시 이 자리에서 채우면 됨
     )
 
-    # TODO: 실명+생년월일+전화번호 기준 병원 환자DB 자동매칭 로직 연동.
-    # 매칭 안 되면 프론트에서 초대코드 입력 화면으로 유도.
+    # 병원 기존 환자DB와의 자동매칭 로직 없음(의도적) — 서비스 시작 시점부터
+    # 모든 환자가 이 시스템으로 신규가입하는 전제라, 연결할 "과거 기록" 자체가
+    # 존재하지 않음. 추후 기존 시스템에서 데이터 이관이 필요해지면 그때 재검토.
     PatientProfile.objects.create(user=user, birth_date=data["birth_date"], hospital=hospital)
 
-    cache.delete(f"sms_code:{phone_number}")
     cache.delete(f"signup_session:{data['signup_token']}")
 
     tokens = _issue_tokens(user)

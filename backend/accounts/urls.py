@@ -10,8 +10,7 @@ urlpatterns = [
 
     # 환자
     path("patient/social-login/", views.social_login, name="patient-social-login"),
-    path("patient/phone/request/", views.phone_verify_request, name="patient-phone-request"),
-    path("patient/phone/confirm/", views.phone_verify_confirm, name="patient-phone-confirm"),
+    path("patient/register/", views.patient_register, name="patient-register"),
     path("patient/profile/", views.patient_profile, name="patient-profile"),
     path("doctor/profile/", views.doctor_profile, name="doctor-profile"),
     path("hospital/", views.hospital_info, name="hospital-info"),
