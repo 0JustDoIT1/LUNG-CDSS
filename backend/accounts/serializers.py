@@ -57,14 +57,16 @@ class StaffSignupSerializer(serializers.Serializer):
             if DoctorProfile.objects.filter(license_number=license_number).exists():
                 raise serializers.ValidationError({"license_number": "이미 등록된 면허번호입니다."})
             try:
-                verified = verify_doctor_license(license_number)
+                valid_format = verify_doctor_license(license_number)
             except LicenseVerificationError as e:
                 raise serializers.ValidationError({"license_number": str(e)})
-            if not verified:
+            if not valid_format:
                 raise serializers.ValidationError(
                     {"license_number": "입력하신 면허번호를 확인할 수 없습니다, 다시 확인해주세요."}
                 )
-            attrs["_license_verified"] = True
+            # 실제 발급기관 검증API는 아직 미연동 — 형식만 맞으면 가입은 허용한다.
+            # DoctorProfile엔 "검증여부" 필드 자체가 없음(오해방지 위해 제거함,
+            # accounts/models.py 참고) — 나중에 실제 API 붙일 때 필드도 같이 추가.
 
         try:
             attrs["_hospital"] = Hospital.objects.get(id=attrs["hospital_id"])
@@ -88,7 +90,6 @@ class StaffSignupSerializer(serializers.Serializer):
             DoctorProfile.objects.create(
                 user=user,
                 license_number=validated_data["license_number"],
-                license_verified=validated_data.get("_license_verified", False),
                 department=validated_data["department"],
                 hospital=hospital,
             )

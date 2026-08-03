@@ -36,6 +36,15 @@ def verify_social_token(provider: str, token: str) -> dict:
         if resp.status_code != 200:
             raise SocialTokenError("구글 토큰 검증에 실패했습니다")
         data = resp.json()
+
+        # aud(토큰이 어느 클라이언트용으로 발급됐는지) 검증 필수 —
+        # 이거 없으면 "유효하기만 한" 아무 구글앱 토큰으로도 로그인 우회 가능함.
+        expected_client_ids = [
+            c for c in os.environ.get("GOOGLE_OAUTH_CLIENT_IDS", "").split(",") if c
+        ]
+        if expected_client_ids and data.get("aud") not in expected_client_ids:
+            raise SocialTokenError("이 앱에서 발급되지 않은 토큰입니다")
+
         return {"social_uid": data["sub"], "name": data.get("name")}
 
     if provider == "kakao":

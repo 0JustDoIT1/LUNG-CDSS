@@ -40,7 +40,7 @@ class StaffAuthAdmin(admin.ModelAdmin):
 
 @admin.register(PatientAuth)
 class PatientAuthAdmin(admin.ModelAdmin):
-    list_display = ("user", "social_provider", "phone_number", "phone_verified_at")
+    list_display = ("user", "social_provider", "phone_number")
     search_fields = ("phone_number", "user__name")
 
 
@@ -53,8 +53,8 @@ class PatientProfileAdmin(admin.ModelAdmin):
 
 @admin.register(DoctorProfile)
 class DoctorProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "license_number", "license_verified", "department", "hospital")
-    list_filter = ("department", "license_verified")
+    list_display = ("user", "license_number", "department", "hospital")
+    list_filter = ("department",)
     search_fields = ("license_number", "user__name")
 
 

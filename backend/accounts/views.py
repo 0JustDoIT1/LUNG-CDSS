@@ -147,7 +147,6 @@ def patient_register(request):
         social_provider=session["provider"],
         social_uid=session["social_uid"],
         phone_number=phone_number,
-        phone_verified_at=None,  # 실제 인증 안 함 — SMS 연동 재개 시 이 자리에서 채우면 됨
     )
 
     # 병원 기존 환자DB와의 자동매칭 로직 없음(의도적) — 서비스 시작 시점부터

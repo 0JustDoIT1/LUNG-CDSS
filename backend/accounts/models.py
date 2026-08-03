@@ -110,11 +110,10 @@ class PatientAuth(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="patient_auth")
     social_provider = models.CharField(max_length=10, choices=SocialProvider.choices)
     social_uid = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=20, unique=True)  # 입력은 필수, 다만 SMS 인증은 안 함
-    # SMS 실발송이 발신번호 사전등록(전기통신사업법 제84조) 심사 문제로 당장
-    # 불가능해서, 인증 단계만 뺐다 — 번호 자체는 계속 필수로 받는다.
-    # 나중에 SMS 연동 재개하면 이 필드에 실제 인증시각을 채우면 됨.
-    phone_verified_at = models.DateTimeField(null=True, blank=True)
+    # 입력은 필수, 다만 SMS 인증(발신번호 사전등록 심사 문제로 당장 불가)은 안 함.
+    # 실제 인증을 안 하는데 "인증시각" 필드를 남겨두는 게 오히려 오해를 살 수
+    # 있어서 필드 자체를 제거함 — 나중에 SMS 연동 재개하면 다시 추가하면 됨.
+    phone_number = models.CharField(max_length=20, unique=True)
 
     class Meta:
         constraints = [
@@ -185,8 +184,9 @@ class PatientProfile(models.Model):
 class DoctorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="doctor_profile")
     license_number = models.CharField(max_length=30, unique=True)
-    license_verified = models.BooleanField(default=False)
-    license_verified_at = models.DateTimeField(blank=True, null=True)
+    # license_verified/license_verified_at 필드 제거함 — 실제 발급기관 검증API
+    # 미연동이라 항상 미사용 상태였고, 형식체크(6자리)만으로 "검증완료"라 표시하는
+    # 게 오해를 살 수 있어서 뺌. 나중에 실제 API 붙이면 그때 다시 추가.
     department = models.CharField(max_length=50)
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
     photo_url = models.URLField(blank=True, null=True)
