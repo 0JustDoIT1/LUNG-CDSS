@@ -1,4 +1,4 @@
-from medgemma_client import call_medgemma
+from rag.medgemma_client import call_medgemma
 
 
 def main():
