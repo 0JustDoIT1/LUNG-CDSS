@@ -346,8 +346,11 @@ export default function Dashboard(): React.JSX.Element {
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
   const modalTypeRef = useRef<ModalType | null>(null);
   const selectedIdRef = useRef<string | null>(null);
-  modalTypeRef.current = modalType;
-  selectedIdRef.current = selectedId;
+
+  useEffect(() => {
+    modalTypeRef.current = modalType;
+    selectedIdRef.current = selectedId;
+  }, [modalType, selectedId]);
 
   useEffect(() => {
     let active = true;
@@ -468,6 +471,8 @@ export default function Dashboard(): React.JSX.Element {
 
   useEffect(() => {
     if (filtered.length === 0) {
+      // Reconcile keyboard selection after filters change.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedId(null);
       return;
     }

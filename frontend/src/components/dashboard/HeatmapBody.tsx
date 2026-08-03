@@ -81,7 +81,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const isDrawing = useRef<boolean>(false);
   const currentPoints = useRef<{ x: number; y: number }[]>([]);
-  const [drawTick, setDrawTick] = useState(0); // 그리는 동안 중간 렌더 트리거
+  const [previewPoints, setPreviewPoints] = useState<{ x: number; y: number }[]>([]);
 
   const [stageSize, setStageSize] = useState<{ w: number; h: number }>({ w: 1200, h: 560 });
 
@@ -108,12 +108,16 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
   // ---------------- 탭(모드) 전환 시 줌/팬 초기화 ----------------
   useEffect(() => {
     transformRef.current?.resetTransform();
+    // Reset the UI state whenever the viewer mode changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setZoomPct(1);
   }, [mode]);
 
   // 소견기록 탭 진입 시 최신 항목 자동 선택
   useEffect(() => {
     if (mode === "findings") {
+      // Keep an existing selection, or select the newest finding on entry.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedFindingId((prev) => prev ?? findings[0]?.id ?? null);
     }
   }, [mode, findings]);
@@ -137,14 +141,14 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
     if (!canDraw || tool === "move") return;
     isDrawing.current = true;
     currentPoints.current = [toStagePoint(e.target.getStage() as Konva.Stage)];
-    setDrawTick((t) => t + 1);
+    setPreviewPoints(currentPoints.current);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function handleStageMove(e: Konva.KonvaEventObject<any>) {
     if (!isDrawing.current) return;
     currentPoints.current = [...currentPoints.current, toStagePoint(e.target.getStage() as Konva.Stage)];
-    setDrawTick((t) => t + 1);
+    setPreviewPoints(currentPoints.current);
   }
 
   function handleStageUp() {
@@ -163,7 +167,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
       }));
     }
     currentPoints.current = [];
-    setDrawTick((t) => t + 1);
+    setPreviewPoints([]);
   }
   // ---------------- 액션 ----------------
   function undo() {
@@ -585,9 +589,9 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
                             globalCompositeOperation={s.composite ?? "source-over"}
                           />
                         ))}
-                        {isDrawing.current && currentPoints.current.length > 1 && drawTick >= 0 && (
+                        {previewPoints.length > 1 && (
                           <Line
-                            points={currentPoints.current.flatMap((p) => [p.x, p.y])}
+                            points={previewPoints.flatMap((p) => [p.x, p.y])}
                             stroke={tool === "eraser" ? "#000000" : color}
                             strokeWidth={tool === "eraser" ? brushSize * 6 : brushSize}
                             lineCap="round"

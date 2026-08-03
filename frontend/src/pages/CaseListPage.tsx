@@ -43,6 +43,12 @@ export default function CaseListPage(): React.JSX.Element {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(0);
+  const [metrics, setMetrics] = useState({
+    total: 0,
+    uploaded: 0,
+    completed: 0,
+    failed: 0,
+  });
 
   const [modalCase, setModalCase] = useState<CaseDetail | CaseListItem | null>(null);
   const [detailLoading, setDetailLoading] = useState<boolean>(false);
@@ -73,15 +79,10 @@ export default function CaseListPage(): React.JSX.Element {
   }, [currentPage, statusFilter, search]);
 
   useEffect(() => {
+    // Fetching on query changes is the synchronization boundary for this page.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCases();
   }, [fetchCases]);
-
-  const [metrics, setMetrics] = useState({
-  total: 0,
-  uploaded: 0,
-  completed: 0,
-  failed: 0,
-});
 
 
   const openModal = useCallback(async (c: CaseListItem): Promise<void> => {
@@ -107,6 +108,8 @@ export default function CaseListPage(): React.JSX.Element {
       const target = cases.find((c) => c.id === openCaseId);
       if (target) {
         openedFromStateRef.current = true;
+        // Navigation state intentionally opens the requested modal once.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         openModal(target);
         window.history.replaceState({}, document.title);
       }

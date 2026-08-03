@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- confidence helpers are part of this component module's public API */
 // src/components/dashboard/ConfidenceIndicator.tsx
 // 의사용 신뢰도 시각화 컴포넌트
 //

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { predictCase, getCase } from '../api/cases';
+import { isAxiosError } from 'axios';
 import type { CaseStep } from '../types/case';
 
 const ANALYSIS_STEPS: {
@@ -101,10 +102,10 @@ export default function AnalysisPage() {
 
     let cancelled = false;
 
-    predictCase(id).catch((e: any) => {
+    predictCase(id).catch((e: unknown) => {
       if (cancelled) return;
       // 409(이미 분석 중)는 정상 케이스로 간주 — 폴링이 어차피 진행 상황을 알려줌
-      if (e?.response?.status !== 409) {
+      if (!isAxiosError(e) || e.response?.status !== 409) {
         setError('분석 요청에 실패했습니다.');
         setStatus('failed');
       }

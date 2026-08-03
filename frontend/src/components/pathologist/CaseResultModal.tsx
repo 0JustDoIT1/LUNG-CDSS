@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Loader2, Dna } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { retryCase } from "../../api/cases";
+import { isAxiosError } from "axios";
 import type { CaseDetail, CaseListItem } from "../../types/case";
 
 interface CaseResultModalProps {
@@ -26,8 +27,8 @@ export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalP
     try {
       await retryCase(caseData.id);
       navigate(`/analysis/${caseData.id}`);
-    } catch (err: any) {
-      const message = err?.response?.data?.error;
+    } catch (err: unknown) {
+      const message = isAxiosError<{ error?: string }>(err) ? err.response?.data?.error : undefined;
       setRetryError(message || "재처리 요청에 실패했습니다.");
       setRetrying(false);
     }

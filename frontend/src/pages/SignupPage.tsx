@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "../components/auth/AuthLayout";
 import { signup } from "../api/auth";
 import { PASSWORD_REGEX } from "../utils/validation";
 import type { DepartmentCode, SignupPayload, UserRole } from "../types/auth";
+import { isAxiosError } from "axios";
 
 const DEPARTMENT_OPTIONS: { value: DepartmentCode; label: string }[] = [
   { value: "pulmonology", label: "호흡기내과" },
@@ -28,7 +29,7 @@ export default function SignupPage() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormValues>({
@@ -38,16 +39,24 @@ export default function SignupPage() {
     },
   });
 
-  const password = watch("password");
+  const password = useWatch({ control, name: "password" });
+  const department = useWatch({ control, name: "department" });
+  const role = useWatch({ control, name: "role" });
 
   async function onSubmit(data: SignupFormValues) {
     setServerError(null);
-    const { password_confirm: _passwordConfirm, ...payload } = data;
+    const payload: SignupPayload = {
+      hospital_code: data.hospital_code,
+      name: data.name,
+      department: data.department,
+      role: data.role,
+      password: data.password,
+    };
     try {
       await signup(payload);
       navigate("/login", { state: { signupSuccess: true } });
     } catch (err) {
-      const responseData = (err as any)?.response?.data;
+      const responseData = isAxiosError<Record<string, unknown>>(err) ? err.response?.data : undefined;
       if (responseData && typeof responseData === "object") {
         let hasFieldError = false;
         Object.entries(responseData).forEach(([field, messages]) => {
@@ -119,7 +128,7 @@ export default function SignupPage() {
               id="signup-department"
               {...register("department", { required: "진료과코드를 선택해주세요." })}
               className={`w-full appearance-none px-3.5 py-2.5 pr-9 rounded-xl border text-sm outline-none focus:ring-1 transition bg-white ${
-                watch("department") ? "text-gray-900" : "text-gray-400"
+                department ? "text-gray-900" : "text-gray-400"
               } ${
                 errors.department
                   ? "border-red-300 focus:border-red-400 focus:ring-red-100"
@@ -150,7 +159,7 @@ export default function SignupPage() {
               id="signup-role"
               {...register("role", { required: "직무를 선택해주세요." })}
               className={`w-full appearance-none px-3.5 py-2.5 pr-9 rounded-xl border text-sm outline-none focus:ring-1 transition bg-white ${
-                watch("role") ? "text-gray-900" : "text-gray-400"
+                role ? "text-gray-900" : "text-gray-400"
               } ${
                 errors.role
                   ? "border-red-300 focus:border-red-400 focus:ring-red-100"

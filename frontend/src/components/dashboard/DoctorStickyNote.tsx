@@ -25,17 +25,15 @@ function getTodayKey(): string {
 
 export function DoctorStickyNote(): React.JSX.Element {
   const storageKey = getTodayKey();
-  const [todos, setTodos] = useState<StickyTodo[]>([]);
-  const [input, setInput] = useState("");
-
-  useEffect(() => {
+  const [todos, setTodos] = useState<StickyTodo[]>(() => {
     try {
       const raw = localStorage.getItem(storageKey);
-      setTodos(raw ? (JSON.parse(raw) as StickyTodo[]) : []);
+      return raw ? (JSON.parse(raw) as StickyTodo[]) : [];
     } catch {
-      setTodos([]);
+      return [];
     }
-  }, [storageKey]);
+  });
+  const [input, setInput] = useState("");
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(todos));

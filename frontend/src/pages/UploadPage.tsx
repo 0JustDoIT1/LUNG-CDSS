@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Upload } from "lucide-react";
 import { getUploadUrl, uploadFileToGcs, createCase } from "../api/cases";
 import { createSvsPreview } from "../utils/createSvsPreview";
+import { isAxiosError } from "axios";
 
 const ALLOWED_EXT = ["svs", "ndpi", "tiff", "tif", "png", "jpg", "jpeg"];
 const PREVIEWABLE_EXT = ["png", "jpg", "jpeg"];
@@ -158,8 +159,8 @@ export default function UploadPage() {
       setGlobalProgress(100);
       setStepIndex(2);
       setStage("complete");
-    } catch (err: any) {
-      const responseData = err?.response?.data;
+    } catch (err: unknown) {
+      const responseData = isAxiosError<{ error?: string }>(err) ? err.response?.data : undefined;
       const message = responseData?.error;
       if (message) {
         setSubmitError(message);
