@@ -61,7 +61,7 @@ export function PrintableReport({ caseData }: PrintableReportProps): React.JSX.E
               <td style={{ padding: "4px 8px" }}>{formatDateTime(caseData.completed_at)}</td>
               <td style={{ padding: "4px 8px", fontWeight: 600, background: "#f3f4f6" }}>검토 상태</td>
               <td style={{ padding: "4px 8px" }}>
-                {caseData.review_status === "confirmed" ? "승인" : caseData.review_status === "rejected" ? "미승인" : "대기"}
+                {caseData.status === "confirmed" ? "확정" : "검토 대기"}
               </td>
             </tr>
           </tbody>

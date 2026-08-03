@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import type { AxiosError } from "axios";
 import { X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { retryCase } from "../../api/cases";
+import { predictCase } from "../../api/cases";
 import type { CaseDetail, CaseListItem } from "../../types/case";
 import { UnifiedCaseResultSections } from "../dashboard/UnifiedCaseResultSections";
 
@@ -15,7 +15,7 @@ interface CaseResultModalProps {
 export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalProps): React.JSX.Element {
   const navigate = useNavigate();
   const detail = caseData as CaseDetail;
-  const isCompleted = ["completed", "pending_review", "confirmed"].includes(caseData.status);
+  const isCompleted = ["pending_review", "confirmed"].includes(caseData.status);
 
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export function CaseResultModal({ caseData, loading, onClose }: CaseResultModalP
     setRetrying(true);
     setRetryError(null);
     try {
-      await retryCase(caseData.id);
+      await predictCase(caseData.id);
       navigate(`/analysis/${caseData.id}`);
     } catch (err: unknown) {
       const errorPayload = (err as AxiosError<{ error?: string | { message?: string } }>).response?.data?.error;

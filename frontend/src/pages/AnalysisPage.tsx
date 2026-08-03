@@ -154,7 +154,6 @@ export default function AnalysisPage() {
         }
 
         if (
-          detail.status === 'completed' ||
           detail.status === 'pending_review' ||
           detail.status === 'confirmed'
         ) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Loader2, Layers, UploadCloud, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { Search, Loader2, Layers, ClipboardCheck, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import type { CaseStatus, CaseListItem } from "../types/case";
 import { Th, MetricCard } from "../components/dashboard/shared";
 import { getCases, deleteCase } from "../api/cases";
@@ -8,7 +8,6 @@ import { getCases, deleteCase } from "../api/cases";
 const STATUS_LABELS_SIMPLE: Record<string, string> = {
   uploaded: "분석 대기",
   processing: "분석 중",
-  completed: "분석 완료",
   pending_review: "검토 대기",
   confirmed: "진단 확정",
   failed: "분석 실패",
@@ -17,7 +16,6 @@ const STATUS_LABELS_SIMPLE: Record<string, string> = {
 const STATUS_CLS_SIMPLE: Record<string, string> = {
   uploaded: "bg-orange-100 text-orange-700",
   processing: "bg-blue-100 text-blue-700",
-  completed: "bg-green-100 text-green-700",
   pending_review: "bg-amber-100 text-amber-700",
   confirmed: "bg-teal-100 text-teal-700",
   failed: "bg-rose-100 text-rose-700",
@@ -47,8 +45,8 @@ export default function CaseListPage(): React.JSX.Element {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [metrics, setMetrics] = useState({
     total: 0,
-    uploaded: 0,
-    completed: 0,
+    pending_review: 0,
+    confirmed: 0,
     failed: 0,
   });
 
@@ -162,8 +160,8 @@ export default function CaseListPage(): React.JSX.Element {
 
   const statusFilters: { v: CaseStatus | ""; l: string }[] = [
     { v: "", l: "전체" },
-    { v: "uploaded", l: "분석 대기" },
-    { v: "completed", l: "분석 완료" },
+    { v: "pending_review", l: "검토 대기" },
+    { v: "confirmed", l: "진단 확정" },
     { v: "failed", l: "분석 실패" },
   ];
 
@@ -185,21 +183,21 @@ export default function CaseListPage(): React.JSX.Element {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard label="총 케이스" value={metrics.total} icon={Layers} />
-        <MetricCard label="업로드됨" value={metrics.uploaded} tone="orange" icon={UploadCloud} />
-        <MetricCard label="분석 완료" value={metrics.completed} tone="teal" icon={CheckCircle2} />
+        <MetricCard label="검토 대기" value={metrics.pending_review} tone="orange" icon={ClipboardCheck} />
+        <MetricCard label="진단 확정" value={metrics.confirmed} tone="teal" icon={CheckCircle2} />
         <MetricCard label="분석 실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5">
           {statusFilters.map((s) => {
-            const count = s.v === "" ? metrics.total : metrics[s.v as "uploaded" | "completed" | "failed"];
+            const count = s.v === "" ? metrics.total : metrics[s.v as "pending_review" | "confirmed" | "failed"];
             const active = statusFilter === s.v;
           
             const activeColors: Record<string, string> = {
               "": "bg-gray-900 text-white",
-              uploaded: "bg-orange-100 text-orange-700",
-              completed: "bg-green-100 text-green-700",
+              pending_review: "bg-amber-100 text-amber-700",
+              confirmed: "bg-green-100 text-green-700",
               failed: "bg-rose-100 text-rose-700",
             };
           

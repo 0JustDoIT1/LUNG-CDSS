@@ -19,7 +19,7 @@ import type {
   CaseListItem,
   Metrics,
 } from "../types/case";
-import { STATUS_LABELS, REVIEW_LABELS, REVIEW_CLS } from "../types/case";
+import { STATUS_LABELS } from "../types/case";
 import { Th, MetricCard } from "../components/dashboard/shared";
 import { ReviewActionCell } from "../components/dashboard/ReviewActionCell";
 import { ConfidenceCompact } from "../components/dashboard/ConfidenceIndicator";
@@ -27,12 +27,12 @@ import { CompareModal } from "../components/dashboard/CompareModal";
 import { DoctorStickyNote } from "../components/dashboard/DoctorStickyNote";
 import Header from "../components/Shared/Header";
 import apiClient from "../api/client";
+import { getAllCases } from "../api/cases";
 import { getStoredItem, setStoredItem } from "../utils/storage";
 
 const STATUS_DOT: Record<CaseStatus, string> = {
   uploaded: "bg-gray-400",
   processing: "bg-blue-500",
-  completed: "bg-green-500",
   pending_review: "bg-amber-500",
   confirmed: "bg-green-700",
   failed: "bg-rose-500",
@@ -116,14 +116,6 @@ function AccessibilityControls({
   );
 }
 
-function normalizeCases(data: unknown): CaseListItem[] {
-  if (Array.isArray(data)) return data as CaseListItem[];
-  if (data && typeof data === "object" && Array.isArray((data as { results?: unknown }).results)) {
-    return (data as { results: CaseListItem[] }).results;
-  }
-  return [];
-}
-
 function getConfidence(c: CaseListItem): number | null {
   if (c.luad_probability == null && c.lusc_probability == null) return null;
   return Math.max(c.luad_probability ?? 0, c.lusc_probability ?? 0);
@@ -131,7 +123,7 @@ function getConfidence(c: CaseListItem): number | null {
 
 // 긴급 케이스 판정: 완료됐지만 신뢰도가 낮은 경우(재검 권장 구간)
 function isUrgentCase(c: CaseListItem): boolean {
-  if (c.status !== "completed") return false;
+  if (c.status !== "pending_review") return false;
   const conf = getConfidence(c);
   return conf != null && conf > 0 && conf < 0.7;
 }
@@ -318,8 +310,8 @@ export default function Dashboard(): React.JSX.Element {
     let active = true;
     (async () => {
       try {
-        const res = await apiClient.get<unknown>("/cases/");
-        if (active) setCases(normalizeCases(res.data));
+        const allCases = await getAllCases();
+        if (active) setCases(allCases);
       } catch (e) {
         if (active) setError(e instanceof Error ? e.message : String(e));
       } finally {
@@ -369,16 +361,16 @@ export default function Dashboard(): React.JSX.Element {
   const toggleHighContrast = useCallback(() => setHighContrast((v) => !v), []);
 
   const metrics: Metrics = useMemo(() => {
-    const completed = cases.filter((c) => c.status === "completed").length;
+    const completed = cases.filter((c) => c.status === "pending_review" || c.status === "confirmed").length;
     const failed = cases.filter((c) => c.status === "failed").length;
-    const review = cases.filter((c) => c.review_status === "pending").length;
+    const review = cases.filter((c) => c.status === "pending_review").length;
     return { total: cases.length, completed, failed, review };
   }, [cases]);
 
   const urgent = useMemo(
     () =>
       cases.filter((c) => {
-        if (c.status !== "completed") return false;
+        if (c.status !== "pending_review") return false;
         const conf = getConfidence(c);
         return conf != null && conf > 0 && conf < 0.7;
       }),
@@ -386,7 +378,7 @@ export default function Dashboard(): React.JSX.Element {
   );
 
   const reviewPending = useMemo(
-    () => cases.filter((c) => c.status === "completed" && c.review_status === "pending"),
+    () => cases.filter((c) => c.status === "pending_review"),
     [cases]
   );
 
@@ -422,8 +414,8 @@ export default function Dashboard(): React.JSX.Element {
       });
     } else if (sortMode === "review") {
       sortedRest = [...rest].sort((a, b) => {
-        const pa = a.review_status === "pending" ? 0 : 1;
-        const pb = b.review_status === "pending" ? 0 : 1;
+        const pa = a.status === "pending_review" ? 0 : 1;
+        const pb = b.status === "pending_review" ? 0 : 1;
         return pa - pb;
       });
     }
@@ -463,8 +455,10 @@ export default function Dashboard(): React.JSX.Element {
     }
   }, []);
 
-  const handleReviewed = useCallback((updated: CaseListItem) => {
-    setCases((prev) => prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
+  const handleReviewed = useCallback((caseId: string) => {
+    setCases((prev) =>
+      prev.map((c) => (c.id === caseId ? { ...c, status: "confirmed", is_confirmed: true } : c))
+    );
   }, []);
 
   const moveSelection = useCallback(
@@ -525,7 +519,8 @@ export default function Dashboard(): React.JSX.Element {
     { v: "", l: "전체" },
     { v: "uploaded", l: STATUS_LABELS.uploaded },
     { v: "processing", l: STATUS_LABELS.processing },
-    { v: "completed", l: STATUS_LABELS.completed },
+    { v: "pending_review", l: STATUS_LABELS.pending_review },
+    { v: "confirmed", l: STATUS_LABELS.confirmed },
     { v: "failed", l: STATUS_LABELS.failed },
   ];
 
@@ -785,9 +780,13 @@ export default function Dashboard(): React.JSX.Element {
                         />
                       </td>
                       <td className="px-4 py-3">
-                        {c.review_status ? (
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${REVIEW_CLS[c.review_status] ?? ""}`}>
-                            {REVIEW_LABELS[c.review_status] ?? c.review_status}
+                        {c.status === "pending_review" ? (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                            대기
+                          </span>
+                        ) : c.status === "confirmed" || c.is_confirmed ? (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-700">
+                            확정
                           </span>
                         ) : (
                           <span className="text-xs text-gray-400">—</span>
@@ -801,7 +800,6 @@ export default function Dashboard(): React.JSX.Element {
                             <ReviewActionCell
                               caseId={c.id}
                               status={c.status}
-                              reviewStatus={c.review_status}
                               onReviewed={handleReviewed}
                             />
                           </div>

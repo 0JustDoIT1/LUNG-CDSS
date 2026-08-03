@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
@@ -200,16 +199,7 @@ def predict_case(request, case_id):
         return error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
     if case.status == Case.Status.PROCESSING:
-        stale_before = timezone.now() - timedelta(minutes=20)
-        is_stale = case.analyzed_at and case.analyzed_at < stale_before
-
-        if not is_stale:
-            return error_response("이미 분석이 진행 중입니다", status_code=status.HTTP_409_CONFLICT)
-
-        print(
-            f"오래된 분석을 재시도합니다 "
-            f"(case_id={case.id}, analyzed_at={case.analyzed_at})"
-        )
+        return error_response("이미 분석이 진행 중입니다", status_code=status.HTTP_409_CONFLICT)
 
     case.status = Case.Status.PROCESSING
     case.analyzed_at = timezone.now()

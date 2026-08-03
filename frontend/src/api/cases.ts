@@ -19,8 +19,8 @@ export interface PaginatedCaseResponse {
   previous: string | null;
   summary: {
     total: number;
-    uploaded: number;
-    completed: number;
+    pending_review: number;
+    confirmed: number;
     failed: number;
   };
   results: CaseListItem[];
@@ -47,6 +47,21 @@ export async function getCases(params?: CaseListParams) {
   return data;
 }
 
+export async function getAllCases(
+  params?: Omit<CaseListParams, "page" | "page_size">,
+) {
+  const pageSize = 100;
+  const firstPage = await getCases({ ...params, page: 1, page_size: pageSize });
+  const results = [...firstPage.results];
+
+  for (let page = 2; page <= firstPage.total_pages; page += 1) {
+    const nextPage = await getCases({ ...params, page, page_size: pageSize });
+    results.push(...nextPage.results);
+  }
+
+  return results;
+}
+
 export async function getCase(id: string) {
   const { data } = await apiClient.get<CaseDetail>(`/cases/${id}/`);
   const { latest_ai_result, ...caseData } = data;
@@ -69,11 +84,6 @@ export async function deleteCase(id: string) {
 
 export async function predictCase(id: string) {
   const { data } = await apiClient.post(`/cases/${id}/predict/`);
-  return data;
-}
-
-export async function retryCase(id: string) {
-  const { data } = await apiClient.post(`/cases/${id}/retry/`);
   return data;
 }
 

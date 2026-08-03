@@ -99,7 +99,7 @@ function ResultContent(): React.JSX.Element {
     );
   }
 
-  const hasResult = ["completed", "pending_review", "confirmed"].includes(caseData.status);
+  const hasResult = ["pending_review", "confirmed"].includes(caseData.status);
 
   return (
     <div className="space-y-5">

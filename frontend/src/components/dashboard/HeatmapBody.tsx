@@ -106,7 +106,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
     return () => ro.disconnect();
   }, []);
 
-  if (!["completed", "pending_review", "confirmed"].includes(caseData.status) || (!hasHeatmap && !hasOriginal)) {
+  if (!["pending_review", "confirmed"].includes(caseData.status) || (!hasHeatmap && !hasOriginal)) {
     return (
       <AnalysisStatusNote status={caseData.status} fallbackText="히트맵이 아직 생성되지 않았습니다." />
     );

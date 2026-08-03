@@ -74,7 +74,7 @@ export function NucleusBody({ caseData }: { caseData: CaseDetail }): React.JSX.E
   const patches: NucleiPatch[] = caseData.nuclei_patches ?? [];
   const [selected, setSelected] = useState<NucleiPatch | null>(patches[0] ?? null);
 
-  if (!["completed", "pending_review", "confirmed"].includes(caseData.status)) {
+  if (!["pending_review", "confirmed"].includes(caseData.status)) {
     return <AnalysisStatusNote status={caseData.status} fallbackText="핵형태 분석 데이터가 없습니다." />;
   }
 

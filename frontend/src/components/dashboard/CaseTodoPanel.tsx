@@ -45,7 +45,7 @@ function getConfidence(c: CaseListItem): number | null {
 }
 
 function isUrgent(c: CaseListItem): boolean {
-  if (c.status !== "completed") return false;
+  if (c.status !== "pending_review") return false;
   const conf = getConfidence(c);
   return conf != null && conf > 0 && conf < 0.7;
 }
@@ -99,7 +99,7 @@ export function CaseTodoPanel({ cases, onOpenCase }: CaseTodoPanelProps): React.
 
     for (const c of cases) {
       // 1) 검토 대기
-      if (c.status === "completed" && c.review_status === "pending") {
+      if (c.status === "pending_review") {
         result.push({
           id: `review:${c.id}`,
           caseId: c.id,

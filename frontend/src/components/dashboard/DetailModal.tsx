@@ -11,7 +11,7 @@ interface DetailModalProps {
 }
 
 export function DetailModal({ caseData, loading, onClose }: DetailModalProps): React.JSX.Element {
-  const isCompleted = ["completed", "pending_review", "confirmed"].includes(caseData.status);
+  const isCompleted = ["pending_review", "confirmed"].includes(caseData.status);
   const detail = caseData as CaseDetail;
 
   return (
