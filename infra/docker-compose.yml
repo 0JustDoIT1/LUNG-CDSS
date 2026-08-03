@@ -25,6 +25,7 @@ services:
       - ../backend/.env
     volumes:
       - ./gcs-key.json:/app/gcs-key.json:ro
+      - ../backend/lung-cdss-firebase-adminsdk-fbsvc-f0ba31f18e.json:/app/lung-cdss-firebase-adminsdk-fbsvc-f0ba31f18e.json:ro
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/gcs-key.json
     expose:
@@ -64,6 +65,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
     volumes:
       - ./gcs-key.json:/app/gcs-key.json:ro
+      - ../backend/lung-cdss-firebase-adminsdk-fbsvc-f0ba31f18e.json:/app/lung-cdss-firebase-adminsdk-fbsvc-f0ba31f18e.json:ro
     depends_on:
       - redis
     restart: unless-stopped
@@ -79,6 +81,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
     volumes:
       - ./gcs-key.json:/app/gcs-key.json:ro
+      - ../backend/lung-cdss-firebase-adminsdk-fbsvc-f0ba31f18e.json:/app/lung-cdss-firebase-adminsdk-fbsvc-f0ba31f18e.json:ro
     depends_on:
       - redis
     restart: unless-stopped
