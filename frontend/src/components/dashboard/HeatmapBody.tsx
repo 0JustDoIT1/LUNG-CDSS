@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import {
   Layers,
   Eye,
@@ -20,6 +20,7 @@ import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from 
 import { Stage, Layer, Line } from "react-konva";
 import type Konva from "konva";
 import type { CaseDetail, Stroke } from "../../types/case";
+import { createCaseFinding, deleteCaseFinding, getCaseFindings } from "../../api/cases";
 import { AnalysisStatusNote } from "./shared";
 import { getStoredItem, setStoredItem } from "../../utils/storage";
 
@@ -62,6 +63,7 @@ function persistFindings(caseId: string, findings: SavedFinding[]) {
 }
 
 export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
+  const usesServerFindings = getStoredItem("user_role") === "doctor";
   const [mode, setMode] = useState<ViewMode>("split");
   const [overlayOpacity, setOverlayOpacity] = useState<number>(0.55);
   const [tool, setTool] = useState<Tool>("move");
@@ -75,8 +77,13 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
   const [zoomPct, setZoomPct] = useState<number>(1);
   const [saveFlash, setSaveFlash] = useState<boolean>(false);
-  const [findings, setFindings] = useState<SavedFinding[]>(() => loadFindings(caseData.id));
+  const [findings, setFindings] = useState<SavedFinding[]>(() =>
+    usesServerFindings ? [] : loadFindings(caseData.id)
+  );
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
+  const [findingsLoading, setFindingsLoading] = useState(usesServerFindings);
+  const [findingSaving, setFindingSaving] = useState(false);
+  const [findingError, setFindingError] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
@@ -105,6 +112,35 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!usesServerFindings) return;
+    let active = true;
+
+    void getCaseFindings(caseData.id)
+      .then((data) => {
+        if (!active) return;
+        const loaded = data.map((finding) => ({
+          id: finding.id,
+          mode: finding.mode,
+          strokes: finding.strokes,
+          savedAt: finding.created_at,
+        }));
+        setFindings(loaded);
+        setSelectedFindingId((current) => current ?? loaded[0]?.id ?? null);
+        setFindingError(null);
+      })
+      .catch(() => {
+        if (active) setFindingError("소견 기록을 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (active) setFindingsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [caseData.id, usesServerFindings]);
 
   if (!["pending_review", "confirmed"].includes(caseData.status) || (!hasHeatmap && !hasOriginal)) {
     return (
@@ -167,25 +203,57 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
     if (!canDraw) return;
     setStrokesByMode((prev) => ({ ...prev, [mode as DrawableMode]: [] }));
   }
-  function saveFinding() {
-    if (!canDraw || strokes.length === 0) return;
-    const entry: SavedFinding = {
-      id: `${Date.now()}`,
-      mode: mode as DrawableMode,
-      strokes,
-      savedAt: new Date().toISOString(),
-    };
-    const next = [entry, ...findings];
-    setFindings(next);
-    persistFindings(caseData.id, next);
-    setSaveFlash(true);
-    setTimeout(() => setSaveFlash(false), 1600);
+  async function saveFinding() {
+    if (!canDraw || strokes.length === 0 || findingSaving) return;
+    setFindingSaving(true);
+    setFindingError(null);
+
+    try {
+      let entry: SavedFinding;
+      if (usesServerFindings) {
+        const saved = await createCaseFinding(caseData.id, {
+          mode: mode as DrawableMode,
+          strokes,
+        });
+        entry = {
+          id: saved.id,
+          mode: saved.mode,
+          strokes: saved.strokes,
+          savedAt: saved.created_at,
+        };
+      } else {
+        entry = {
+          id: `${Date.now()}`,
+          mode: mode as DrawableMode,
+          strokes,
+          savedAt: new Date().toISOString(),
+        };
+      }
+
+      const next = [entry, ...findings];
+      setFindings(next);
+      setSelectedFindingId(entry.id);
+      if (!usesServerFindings) persistFindings(caseData.id, next);
+      setSaveFlash(true);
+      setTimeout(() => setSaveFlash(false), 1600);
+    } catch {
+      setFindingError("소견을 저장하지 못했습니다.");
+    } finally {
+      setFindingSaving(false);
+    }
   }
-  function deleteFinding(id: string) {
-    const next = findings.filter((f) => f.id !== id);
-    setFindings(next);
-    persistFindings(caseData.id, next);
-    if (selectedFindingId === id) setSelectedFindingId(next[0]?.id ?? null);
+
+  async function deleteFinding(id: string) {
+    setFindingError(null);
+    try {
+      if (usesServerFindings) await deleteCaseFinding(caseData.id, id);
+      const next = findings.filter((f) => f.id !== id);
+      setFindings(next);
+      if (!usesServerFindings) persistFindings(caseData.id, next);
+      if (selectedFindingId === id) setSelectedFindingId(next[0]?.id ?? null);
+    } catch {
+      setFindingError("소견을 삭제하지 못했습니다.");
+    }
   }
 
   const colors = ["#e11d48", "#2563eb", "#16a34a", "#f59e0b", "#111827"];
@@ -372,22 +440,28 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
 
           <button
             onClick={saveFinding}
-            disabled={strokes.length === 0}
+            disabled={strokes.length === 0 || findingSaving}
             className={`ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
               saveFlash ? "bg-teal-600 text-white" : "bg-gray-900 text-white hover:bg-gray-800"
             }`}
           >
             <Save className="w-3.5 h-3.5" />
-            {saveFlash ? "저장됨" : "소견 저장"}
+            {findingSaving ? "저장 중..." : saveFlash ? "저장됨" : "소견 저장"}
           </button>
         </div>
       )}
+
+      {findingError ? (
+        <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-600">{findingError}</p>
+      ) : null}
 
       {/* ---------------- 소견기록 탭 ---------------- */}
       {mode === "findings" ? (
         <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-3">
           <div className="border border-gray-200 rounded-xl bg-white overflow-hidden max-h-[560px] overflow-y-auto">
-            {findings.length === 0 ? (
+            {findingsLoading ? (
+              <p className="text-xs text-gray-400 text-center p-6">소견 기록을 불러오는 중입니다.</p>
+            ) : findings.length === 0 ? (
               <p className="text-xs text-gray-400 text-center p-6">저장된 소견이 없습니다.</p>
             ) : (
               findings.map((f) => (

@@ -14,3 +14,8 @@ export interface NotificationItem {
   is_read: boolean;
   created_at: string;
 }
+
+export interface NotificationPreference {
+  category: NotificationCategory;
+  enabled: boolean;
+}

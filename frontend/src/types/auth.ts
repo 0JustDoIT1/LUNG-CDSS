@@ -33,3 +33,8 @@ export interface Hospital {
   id: string;
   name: string;
 }
+
+export interface DoctorProfile {
+  photo_url: string | null;
+  specialty_tags: string[];
+}

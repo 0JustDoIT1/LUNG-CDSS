@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../api/auth";
 import { getStoredItem } from "../../utils/storage";
 import NotificationCenter from "./NotificationCenter";
@@ -14,6 +14,7 @@ export default function Header() {
 
   const userName = getStoredItem("user_name");
   const userDepartment = getStoredItem("user_department");
+  const userRole = getStoredItem("user_role");
 
   function handleLogout() {
     logout();
@@ -29,6 +30,29 @@ export default function Header() {
         <span className="font-black text-gray-1000 text-xl">OncoLensAI</span>
         <div className="w-px h-4 bg-gray-200" />
         <span className="text-xs text-gray-400">병리 슬라이드 AI 진단 플랫폼</span>
+        {userRole === "doctor" ? (
+          <nav className="ml-3 hidden items-center gap-1 lg:flex" aria-label="의사 메뉴">
+            {[
+              ["/doctor-dashboard", "대시보드"],
+              ["/doctor-dashboard/chat", "의료진 채팅"],
+              ["/doctor-dashboard/schedule", "진료 일정"],
+              ["/doctor-dashboard/profile", "내 프로필"],
+            ].map(([to, label]) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={to === "/doctor-dashboard"}
+                className={({ isActive }) =>
+                  `rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                    isActive ? "bg-teal-50 text-teal-700" : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-3">

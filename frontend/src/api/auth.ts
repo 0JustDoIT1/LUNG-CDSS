@@ -1,5 +1,5 @@
 import apiClient, { setTokens, clearTokens } from "./client";
-import type { Hospital, SignupPayload, LoginPayload, LoginResponse } from "../types/auth";
+import type { DoctorProfile, Hospital, SignupPayload, LoginPayload, LoginResponse } from "../types/auth";
 import { removeStoredItem, setStoredItem } from "../utils/storage";
 
 export async function signup(payload: SignupPayload) {
@@ -25,5 +25,15 @@ export function logout() {
 
 export async function getSignupHospital() {
   const { data } = await apiClient.get<Hospital>("/auth/hospital/");
+  return data;
+}
+
+export async function getDoctorProfile() {
+  const { data } = await apiClient.get<DoctorProfile>("/auth/doctor/profile/");
+  return data;
+}
+
+export async function updateDoctorProfile(payload: DoctorProfile) {
+  const { data } = await apiClient.put<DoctorProfile>("/auth/doctor/profile/", payload);
   return data;
 }

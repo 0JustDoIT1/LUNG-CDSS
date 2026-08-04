@@ -45,6 +45,7 @@ const FONT_SCALE_STORAGE_KEY = "dashboard_a11y_font_scale";
 const HIGH_CONTRAST_STORAGE_KEY = "dashboard_a11y_high_contrast";
 const FONT_SCALE_STEPS = [0.875, 1, 1.125, 1.25] as const;
 const BASE_ROOT_FONT_PX = 16;
+const CASE_REFRESH_INTERVAL_MS = 30_000;
 
 function readStoredFontScale(): number {
   if (typeof window === "undefined") return 1;
@@ -304,22 +305,32 @@ export default function Dashboard(): React.JSX.Element {
   // 키보드 네비게이션용 선택 상태
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [now, setNow] = useState<Date>(new Date());
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map());
 
   useEffect(() => {
     let active = true;
-    (async () => {
+
+    async function loadCases(isInitial: boolean): Promise<void> {
       try {
         const allCases = await getAllCases();
-        if (active) setCases(allCases);
+        if (!active) return;
+        setCases(allCases);
+        setLastRefreshedAt(new Date());
+        if (isInitial) setError(null);
       } catch (e) {
-        if (active) setError(e instanceof Error ? e.message : String(e));
+        if (active && isInitial) setError(e instanceof Error ? e.message : String(e));
       } finally {
-        if (active) setLoading(false);
+        if (active && isInitial) setLoading(false);
       }
-    })();
+    }
+
+    void loadCases(true);
+    const refreshTimer = window.setInterval(() => void loadCases(false), CASE_REFRESH_INTERVAL_MS);
+
     return () => {
       active = false;
+      window.clearInterval(refreshTimer);
     };
   }, []);
 
@@ -390,6 +401,7 @@ export default function Dashboard(): React.JSX.Element {
         (!favoritesOnly || c.is_favorite) &&
         (!q ||
           (c.specimen_id ?? "").toLowerCase().includes(q) ||
+          (c.patient_name ?? "").toLowerCase().includes(q) ||
           (c.prediction_label ?? "").toLowerCase().includes(q))
     );
   }, [cases, statusFilter, search, favoritesOnly]);
@@ -614,6 +626,13 @@ export default function Dashboard(): React.JSX.Element {
                 <p className="text-sm font-semibold text-gray-700 tabular-nums">
                   {now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
                 </p>
+                <p
+                  className="flex items-center gap-1.5 text-[11px] text-gray-400"
+                  title={lastRefreshedAt ? `마지막 갱신 ${lastRefreshedAt.toLocaleTimeString("ko-KR")}` : undefined}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
+                  {lastRefreshedAt ? "자동 갱신됨" : "데이터 연결 중"}
+                </p>
                 <p className="text-[11px] text-gray-400">
                   <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">J</kbd>/
                   <kbd className="px-1 py-0.5 rounded border border-gray-200 bg-white">K</kbd> 이동 ·{" "}
@@ -665,7 +684,7 @@ export default function Dashboard(): React.JSX.Element {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="specimen_id / 진단 검색..."
+                placeholder="검체 ID / 환자명 / 진단 검색..."
                 className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-teal-400"
               />
             </div>
@@ -694,11 +713,12 @@ export default function Dashboard(): React.JSX.Element {
                 <tr>
                   <Th>{null}</Th>
                   <Th>{null}</Th>
-                  <Th>환자 ID</Th>
+                  <Th>검체 ID</Th>
+                  <Th>환자명</Th>
                   <Th>상태</Th>
                   <Th>진단 / 신뢰도</Th>
-                  <Th>진행상황</Th>
-                  <Th>업로드</Th>
+                  <Th className="hidden lg:table-cell">진행상황</Th>
+                  <Th className="hidden xl:table-cell">업로드</Th>
                   <Th>액션</Th>
                 </tr>
               </thead>
@@ -765,6 +785,9 @@ export default function Dashboard(): React.JSX.Element {
                           </span>
                         )}
                       </td>
+                      <td className="px-4 py-3 text-xs font-medium text-gray-700">
+                        {c.patient_name || "-"}
+                      </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1.5 text-xs text-gray-600">
                           <span className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[c.status]}`} />
@@ -779,7 +802,7 @@ export default function Dashboard(): React.JSX.Element {
                           luscProbability={c.lusc_probability}
                         />
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 lg:table-cell">
                         {c.status === "pending_review" ? (
                           <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
                             대기
@@ -792,7 +815,7 @@ export default function Dashboard(): React.JSX.Element {
                           <span className="text-xs text-gray-400">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">
+                      <td className="hidden px-4 py-3 text-gray-400 text-xs tabular-nums xl:table-cell">
                         {c.uploaded_at ? `${c.uploaded_at.slice(0, 10)} ${c.uploaded_at.slice(11, 16)}` : "—"}
                       </td>
                       <td className="px-4 py-3 relative">
@@ -809,7 +832,7 @@ export default function Dashboard(): React.JSX.Element {
                 })}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-sm text-gray-400">
+                    <td colSpan={9} className="px-4 py-12 text-center text-sm text-gray-400">
                       조건에 맞는 케이스가 없습니다
                     </td>
                   </tr>

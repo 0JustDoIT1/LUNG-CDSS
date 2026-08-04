@@ -209,7 +209,7 @@ export function ReviewActionCell({
           type="button"
           onClick={() => openForm("confirm")}
           disabled={submitting}
-          className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-teal-200 bg-white px-2.5 py-1.5 text-xs font-medium text-teal-700 transition-colors hover:bg-teal-50 disabled:opacity-40"
+          className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-teal-600 bg-teal-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:border-teal-700 hover:bg-teal-700 disabled:opacity-40"
         >
           <CheckCircle2 className="h-3.5 w-3.5" /> 승인
         </button>
@@ -217,7 +217,7 @@ export function ReviewActionCell({
           type="button"
           onClick={() => openForm("edit")}
           disabled={submitting}
-          className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-rose-200 bg-white px-2.5 py-1.5 text-xs font-medium text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-40"
+          className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-40"
         >
           <Pencil className="h-3.5 w-3.5" /> 수정
         </button>

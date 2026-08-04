@@ -83,9 +83,9 @@ export function LoadingSkeleton({ label = "불러오는 중..." }: { label?: str
   );
 }
 
-export function Th({ children }: { children: React.ReactNode }): React.JSX.Element {
+export function Th({ children, className = "" }: { children: React.ReactNode; className?: string }): React.JSX.Element {
   return (
-    <th className="text-left px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-gray-500">
+    <th className={`text-left px-4 py-3 font-semibold text-[11px] uppercase tracking-wider text-gray-500 ${className}`}>
       {children}
     </th>
   );

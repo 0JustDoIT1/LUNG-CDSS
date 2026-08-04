@@ -9,6 +9,9 @@ import UploadPage from "../pages/UploadPage";
 import AnalysisPage from "../pages/AnalysisPage";
 import CaseResultPage from "../pages/CaseResultPage";
 import Dashboard from "../pages/Doctor_Dashboard";
+import DoctorChatPage from "../pages/DoctorChatPage";
+import DoctorProfilePage from "../pages/DoctorProfilePage";
+import DoctorSchedulePage from "../pages/DoctorSchedulePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ErrorPage from "../pages/ErrorPage";
 
@@ -40,6 +43,11 @@ export const router = createBrowserRouter([
             children: [
               { path: "/doctor-dashboard", element: <Dashboard /> },
               { path: "/doctor-dashboard/cases/:id", element: <CaseResultPage standalone /> },
+              { path: "/doctor-dashboard/chat", element: <DoctorChatPage /> },
+              { path: "/doctor-dashboard/chat/:threadId", element: <DoctorChatPage /> },
+              { path: "/chat/:threadId", element: <DoctorChatPage /> },
+              { path: "/doctor-dashboard/schedule", element: <DoctorSchedulePage /> },
+              { path: "/doctor-dashboard/profile", element: <DoctorProfilePage /> },
             ],
           },
         ],

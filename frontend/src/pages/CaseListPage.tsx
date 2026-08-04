@@ -230,7 +230,7 @@ export default function CaseListPage(): React.JSX.Element {
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="검체 ID / 진단 검색..."
+            placeholder="검체 ID / 환자명 / 진단 검색..."
             className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-teal-400"
           />
         </div>
@@ -249,6 +249,7 @@ export default function CaseListPage(): React.JSX.Element {
           <thead className="bg-gray-50/80 sticky top-0">
             <tr>
               <Th>검체 ID</Th>
+              <Th>환자</Th>
               <Th>업로드일시</Th>
               <Th>분류</Th>
               <Th>정확도</Th>
@@ -276,6 +277,7 @@ export default function CaseListPage(): React.JSX.Element {
                   className="hover:bg-teal-50 hover:shadow-sm transition-all cursor-pointer"
                 >
                   <td className="px-4 py-3 font-mono text-xs text-gray-700">{c.specimen_id}</td>
+                  <td className="px-4 py-3 text-xs text-gray-600">{c.patient_name ?? "-"}</td>
                   <td className="px-4 py-3 text-gray-400 text-xs tabular-nums">
                     {c.uploaded_at ? formatDateNoSeconds(c.uploaded_at) : "-"}
                   </td>
@@ -316,7 +318,7 @@ export default function CaseListPage(): React.JSX.Element {
             })}
             {cases.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-400">
+                <td colSpan={7} className="px-4 py-12 text-center text-sm text-gray-400">
                   케이스가 없습니다
                 </td>
               </tr>

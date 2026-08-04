@@ -1,8 +1,11 @@
 import apiClient from "./client";
 import type {
   CaseDetail,
+  CaseFinding,
   CaseListItem,
   CaseListParams,
+  CaseReviewLog,
+  CreateCaseFindingPayload,
   CreateCasePayload,
   PatientOption,
   ReviewPayload,
@@ -34,11 +37,14 @@ export async function getUploadUrl(payload: UploadUrlPayload) {
 
 // 2. 발급받은 URL로 파일 직접 GCS 업로드
 export async function uploadFileToGcs(uploadUrl: string, file: File) {
-  await fetch(uploadUrl, {
+  const response = await fetch(uploadUrl, {
     method: "PUT",
     body: file,
     headers: { "Content-Type": "application/octet-stream" },
   });
+  if (!response.ok) {
+    throw new Error(`GCS upload failed (${response.status})`);
+  }
 }
 
 // 3. 케이스 목록 조회
@@ -83,13 +89,32 @@ export async function deleteCase(id: string) {
 }
 
 export async function predictCase(id: string) {
-  const { data } = await apiClient.post(`/cases/${id}/predict/`);
+  const { data } = await apiClient.post<CaseDetail>(`/cases/${id}/predict/`);
   return data;
 }
 
 export async function reviewCase(id: string, payload: ReviewPayload) {
   const { data } = await apiClient.post(`/cases/${id}/review/`, payload);
   return data;
+}
+
+export async function getCaseReviewLogs(id: string) {
+  const { data } = await apiClient.get<CaseReviewLog[]>(`/cases/${id}/review-log/`);
+  return data;
+}
+
+export async function getCaseFindings(id: string) {
+  const { data } = await apiClient.get<CaseFinding[]>(`/cases/${id}/findings/`);
+  return data;
+}
+
+export async function createCaseFinding(id: string, payload: CreateCaseFindingPayload) {
+  const { data } = await apiClient.post<CaseFinding>(`/cases/${id}/findings/`, payload);
+  return data;
+}
+
+export async function deleteCaseFinding(caseId: string, findingId: string) {
+  await apiClient.delete(`/cases/${caseId}/findings/${findingId}/`);
 }
 
 export async function getPatients() {

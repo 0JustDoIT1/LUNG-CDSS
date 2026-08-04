@@ -176,12 +176,12 @@ export default function UploadPage() {
       setStepIndex(2);
       setStage("complete");
     } catch (err: unknown) {
-      const responseData = (err as AxiosError<{ error?: { message?: string } }>).response?.data;
-      const message = responseData?.error?.message;
+      const responseData = (err as AxiosError<{ error?: string | { message?: string } }>).response?.data;
+      const message = typeof responseData?.error === "string" ? responseData.error : responseData?.error?.message;
       if (message) {
         setSubmitError(message);
       } else {
-        setSubmitError("업로드 중 문제가 발생했습니다. 다시 시도해주세요.");
+        setSubmitError("업로드 중 문제가 발생했습니다. 파일과 입력값을 확인한 뒤 다시 시도해주세요.");
       }
       setStage("select");
       setFiles((prev) =>

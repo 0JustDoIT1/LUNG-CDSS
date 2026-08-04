@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getCase } from "../api/cases";
 import Header from "../components/Shared/Header";
 import { UnifiedCaseResultSections } from "../components/dashboard/UnifiedCaseResultSections";
+import { CaseReviewHistory } from "../components/dashboard/CaseReviewHistory";
 import { PrintableReport } from "../components/dashboard/PrintableReport";
 import { STATUS_CLS, STATUS_LABELS, type CaseDetail } from "../types/case";
 import { getStoredItem } from "../utils/storage";
@@ -157,6 +158,10 @@ function ResultContent(): React.JSX.Element {
           </p>
         </section>
       )}
+
+      {caseData.status === "confirmed" && getStoredItem("user_role") === "doctor" ? (
+        <CaseReviewHistory caseId={caseData.id} />
+      ) : null}
 
       {hasResult ? <PrintableReport caseData={caseData} /> : null}
     </div>

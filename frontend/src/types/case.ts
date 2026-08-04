@@ -130,6 +130,27 @@ export interface ReviewPayload {
   final_note?: string;
 }
 
+export interface CaseReviewLog {
+  id: string;
+  action: "confirmed" | "edited";
+  subtype_at_time: "LUAD" | "LUSC";
+  note_at_time: string;
+  reviewer_name: string;
+  created_at: string;
+}
+
+export interface CaseFinding {
+  id: string;
+  mode: "heatmap" | "overlay" | "original";
+  strokes: Stroke[];
+  created_at: string;
+}
+
+export interface CreateCaseFindingPayload {
+  mode: CaseFinding["mode"];
+  strokes: Stroke[];
+}
+
 export interface Metrics {
   total: number;
   completed: number;

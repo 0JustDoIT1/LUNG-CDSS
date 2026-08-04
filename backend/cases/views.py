@@ -1,6 +1,8 @@
 import os
 
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import status
@@ -76,7 +78,7 @@ def _notify_analysis_outcome(case, succeeded):
     tags=["cases"],
     parameters=[
         OpenApiParameter("status", str, description="uploaded/processing/pending_review/confirmed/failed"),
-        OpenApiParameter("search", str, description="specimen_id 부분검색"),
+        OpenApiParameter("search", str, description="검체 ID, 환자 이름, AI 진단명 검색"),
         OpenApiParameter("favorite", str, description="'true'면 즐겨찾기만"),
     ],
     responses={200: CaseListSerializer(many=True)},
@@ -99,7 +101,13 @@ def case_list_create(request):
 
         search = request.query_params.get("search")
         if search:
-            queryset = queryset.filter(specimen_id__icontains=search)
+            search = search.strip()
+            queryset = queryset.filter(
+                Q(specimen_id__icontains=search)
+                | Q(patient__name__icontains=search)
+                | Q(ai_results__prediction_label__icontains=search)
+                | Q(confirmed_finding__final_subtype__icontains=search)
+            ).distinct()
 
         favorite_param = request.query_params.get("favorite")
         if favorite_param == "true":
@@ -121,19 +129,46 @@ def case_list_create(request):
     if not IsPathologist().has_permission(request, None):
         return error_response("권한이 없습니다", status_code=status.HTTP_403_FORBIDDEN)
 
-    specimen_id = request.data.get("specimen_id")
-    slide_gcs_path = request.data.get("slide_gcs_path")
+    specimen_id = str(request.data.get("specimen_id", "")).strip()
+    slide_gcs_path = str(request.data.get("slide_gcs_path", "")).strip()
     patient_id = request.data.get("patient_id")
 
     if not specimen_id or not slide_gcs_path or not patient_id:
-        return Response(
-            {"error": "specimen_id, slide_gcs_path, patient_id는 필수입니다"},
-            status=status.HTTP_400_BAD_REQUEST,
+        return error_response(
+            "검체 ID, 슬라이드 파일, 환자는 필수입니다.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            details={
+                "specimen_id": ["필수 항목입니다."] if not specimen_id else [],
+                "slide_gcs_path": ["필수 항목입니다."] if not slide_gcs_path else [],
+                "patient_id": ["필수 항목입니다."] if not patient_id else [],
+            },
+        )
+
+    try:
+        patient = User.objects.filter(
+            id=patient_id,
+            role=User.Role.PATIENT,
+            is_active=True,
+        ).first()
+    except (ValidationError, ValueError):
+        patient = None
+    if patient is None:
+        return error_response(
+            "선택한 환자를 찾을 수 없거나 비활성 상태입니다.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            details={"patient_id": ["유효한 환자를 선택해주세요."]},
+        )
+
+    if Case.objects.filter(specimen_id=specimen_id).exists():
+        return error_response(
+            f"이미 등록된 검체 ID입니다: {specimen_id}",
+            status_code=status.HTTP_409_CONFLICT,
+            details={"specimen_id": ["이미 사용 중인 검체 ID입니다."]},
         )
 
     try:
         case = Case.objects.create(
-            patient_id=patient_id,
+            patient=patient,
             uploaded_by=request.user,
             specimen_id=specimen_id,
             slide_gcs_path=slide_gcs_path,
