@@ -7,6 +7,7 @@ import SignupPage from "../pages/SignupPage";
 import CaseListPage from "../pages/CaseListPage";
 import UploadPage from "../pages/UploadPage";
 import AnalysisPage from "../pages/AnalysisPage";
+import CaseResultPage from "../pages/CaseResultPage";
 import Dashboard from "../pages/Doctor_Dashboard";
 import NotFoundPage from "../pages/NotFoundPage";
 import ErrorPage from "../pages/ErrorPage";
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
                   { path: "/", element: <CaseListPage /> },
                   { path: "/upload", element: <UploadPage /> },
                   { path: "/analysis/:id", element: <AnalysisPage /> },
+                  { path: "/cases/:id/result", element: <CaseResultPage /> },
                 ],
               },
             ],
@@ -37,6 +39,7 @@ export const router = createBrowserRouter([
             element: <RoleRoute allowedRole="doctor" />,
             children: [
               { path: "/doctor-dashboard", element: <Dashboard /> },
+              { path: "/doctor-dashboard/cases/:id", element: <CaseResultPage standalone /> },
             ],
           },
         ],

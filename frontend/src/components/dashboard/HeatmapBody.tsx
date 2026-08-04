@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import {
   Layers,
   Eye,
@@ -21,6 +21,7 @@ import { Stage, Layer, Line } from "react-konva";
 import type Konva from "konva";
 import type { CaseDetail, Stroke } from "../../types/case";
 import { AnalysisStatusNote } from "./shared";
+import { getStoredItem, setStoredItem } from "../../utils/storage";
 
 type ViewMode = "split" | "overlay" | "heatmap" | "original" | "findings";
 type DrawableMode = "heatmap" | "overlay" | "original";
@@ -45,7 +46,7 @@ function findingsStorageKey(caseId: string): string {
 
 function loadFindings(caseId: string): SavedFinding[] {
   try {
-    const raw = localStorage.getItem(findingsStorageKey(caseId));
+    const raw = getStoredItem(findingsStorageKey(caseId));
     return raw ? (JSON.parse(raw) as SavedFinding[]) : [];
   } catch {
     return [];
@@ -54,7 +55,7 @@ function loadFindings(caseId: string): SavedFinding[] {
 
 function persistFindings(caseId: string, findings: SavedFinding[]) {
   try {
-    localStorage.setItem(findingsStorageKey(caseId), JSON.stringify(findings));
+    setStoredItem(findingsStorageKey(caseId), JSON.stringify(findings));
   } catch {
     // 저장 공간 초과 등은 조용히 무시 (필요 시 백엔드 저장 API로 대체)
   }
@@ -81,7 +82,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const isDrawing = useRef<boolean>(false);
   const currentPoints = useRef<{ x: number; y: number }[]>([]);
-  const [previewPoints, setPreviewPoints] = useState<{ x: number; y: number }[]>([]);
+  const [draftPoints, setDraftPoints] = useState<{ x: number; y: number }[]>([]);
 
   const [stageSize, setStageSize] = useState<{ w: number; h: number }>({ w: 1200, h: 560 });
 
@@ -105,24 +106,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
     return () => ro.disconnect();
   }, []);
 
-  // ---------------- 탭(모드) 전환 시 줌/팬 초기화 ----------------
-  useEffect(() => {
-    transformRef.current?.resetTransform();
-    // Reset the UI state whenever the viewer mode changes.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setZoomPct(1);
-  }, [mode]);
-
-  // 소견기록 탭 진입 시 최신 항목 자동 선택
-  useEffect(() => {
-    if (mode === "findings") {
-      // Keep an existing selection, or select the newest finding on entry.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedFindingId((prev) => prev ?? findings[0]?.id ?? null);
-    }
-  }, [mode, findings]);
-
-  if (caseData.status !== "completed" || (!hasHeatmap && !hasOriginal)) {
+  if (!["pending_review", "confirmed"].includes(caseData.status) || (!hasHeatmap && !hasOriginal)) {
     return (
       <AnalysisStatusNote status={caseData.status} fallbackText="히트맵이 아직 생성되지 않았습니다." />
     );
@@ -140,15 +124,17 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
   function handleStageDown(e: Konva.KonvaEventObject<any>) {
     if (!canDraw || tool === "move") return;
     isDrawing.current = true;
-    currentPoints.current = [toStagePoint(e.target.getStage() as Konva.Stage)];
-    setPreviewPoints(currentPoints.current);
+    const points = [toStagePoint(e.target.getStage() as Konva.Stage)];
+    currentPoints.current = points;
+    setDraftPoints(points);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function handleStageMove(e: Konva.KonvaEventObject<any>) {
     if (!isDrawing.current) return;
-    currentPoints.current = [...currentPoints.current, toStagePoint(e.target.getStage() as Konva.Stage)];
-    setPreviewPoints(currentPoints.current);
+    const points = [...currentPoints.current, toStagePoint(e.target.getStage() as Konva.Stage)];
+    currentPoints.current = points;
+    setDraftPoints(points);
   }
 
   function handleStageUp() {
@@ -167,7 +153,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
       }));
     }
     currentPoints.current = [];
-    setPreviewPoints([]);
+    setDraftPoints([]);
   }
   // ---------------- 액션 ----------------
   function undo() {
@@ -214,6 +200,15 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
 
   const selectedFinding = findings.find((f) => f.id === selectedFindingId) ?? null;
 
+  function changeMode(nextMode: ViewMode): void {
+    transformRef.current?.resetTransform();
+    setZoomPct(1);
+    if (nextMode === "findings" && !selectedFindingId) {
+      setSelectedFindingId(findings[0]?.id ?? null);
+    }
+    setMode(nextMode);
+  }
+
   // ---------------- 렌더 ----------------
   return (
     <div className="space-y-3">
@@ -226,7 +221,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
               <button
                 key={b.v}
                 disabled={b.disabled}
-                onClick={() => setMode(b.v)}
+                onClick={() => changeMode(b.v)}
                 className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   mode === b.v
                     ? "bg-teal-600 text-white shadow-sm"
@@ -244,7 +239,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
           {/* 소견기록 — 원본 버튼 바로 옆 */}
           <div className="w-px h-4 bg-gray-200 mx-0.5" />
           <button
-            onClick={() => setMode("findings")}
+            onClick={() => changeMode("findings")}
             className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
               mode === "findings"
                 ? "bg-indigo-600 text-white shadow-sm"
@@ -589,9 +584,9 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
                             globalCompositeOperation={s.composite ?? "source-over"}
                           />
                         ))}
-                        {previewPoints.length > 1 && (
+                        {draftPoints.length > 1 && (
                           <Line
-                            points={previewPoints.flatMap((p) => [p.x, p.y])}
+                            points={draftPoints.flatMap((p) => [p.x, p.y])}
                             stroke={tool === "eraser" ? "#000000" : color}
                             strokeWidth={tool === "eraser" ? brushSize * 6 : brushSize}
                             lineCap="round"

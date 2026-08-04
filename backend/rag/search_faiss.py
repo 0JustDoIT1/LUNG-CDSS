@@ -18,7 +18,24 @@ METADATA_PATH = RAG_DIR / "faiss_metadata.json"
 EMBEDDING_MODEL = "text-embedding-3-small"
 TOP_K = 5
 
-client = OpenAI()
+client = None
+
+
+def get_openai_client():
+    """Create the OpenAI client only when an embedding is requested."""
+    global client
+
+    if client is not None:
+        return client
+
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise EmbeddingError(
+            "OPENAI_API_KEY가 설정되지 않아 검색어 임베딩을 생성할 수 없습니다."
+        )
+
+    client = OpenAI(api_key=api_key)
+    return client
 
 
 def load_resources():
@@ -46,10 +63,13 @@ def load_resources():
 
 def embed_query(query):
     try:
-        response = client.embeddings.create(
+        openai_client = get_openai_client()
+        response = openai_client.embeddings.create(
             model=EMBEDDING_MODEL,
             input=query,
         )
+    except EmbeddingError:
+        raise
     except Exception as error:
         raise EmbeddingError(
             f"검색어 임베딩 생성에 실패했습니다: {error}"

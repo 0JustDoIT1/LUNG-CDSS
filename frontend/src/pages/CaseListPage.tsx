@@ -1,22 +1,23 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Search, Loader2, Layers, UploadCloud, CheckCircle2, XCircle, Trash2 } from "lucide-react";
-import type { CaseStatus, CaseListItem, CaseDetail } from "../types/case";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Loader2, Layers, ClipboardCheck, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import type { CaseStatus, CaseListItem } from "../types/case";
 import { Th, MetricCard } from "../components/dashboard/shared";
-import { CaseResultModal } from "../components/pathologist/CaseResultModal";
-import { getCases, getCase, deleteCase } from "../api/cases";
+import { getCases, deleteCase } from "../api/cases";
 
 const STATUS_LABELS_SIMPLE: Record<string, string> = {
   uploaded: "분석 대기",
   processing: "분석 중",
-  completed: "분석 완료",
+  pending_review: "검토 대기",
+  confirmed: "진단 확정",
   failed: "분석 실패",
 };
 
 const STATUS_CLS_SIMPLE: Record<string, string> = {
   uploaded: "bg-orange-100 text-orange-700",
   processing: "bg-blue-100 text-blue-700",
-  completed: "bg-green-100 text-green-700",
+  pending_review: "bg-amber-100 text-amber-700",
+  confirmed: "bg-teal-100 text-teal-700",
   failed: "bg-rose-100 text-rose-700",
 };
 
@@ -33,7 +34,6 @@ function formatDateNoSeconds(iso: string) {
 
 export default function CaseListPage(): React.JSX.Element {
   const navigate = useNavigate();
-  const location = useLocation();
   const [cases, setCases] = useState<CaseListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,76 +45,51 @@ export default function CaseListPage(): React.JSX.Element {
   const [totalCount, setTotalCount] = useState<number>(0);
   const [metrics, setMetrics] = useState({
     total: 0,
-    uploaded: 0,
-    completed: 0,
+    pending_review: 0,
+    confirmed: 0,
     failed: 0,
   });
 
-  const [modalCase, setModalCase] = useState<CaseDetail | CaseListItem | null>(null);
-  const [detailLoading, setDetailLoading] = useState<boolean>(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const fetchCases = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  useEffect(() => {
+    let active = true;
 
-    try {
-      const data = await getCases({
+    void Promise.resolve()
+      .then(() => {
+        if (active) {
+          setLoading(true);
+          setError(null);
+        }
+        return getCases({
         page: currentPage,
         page_size: 10,
         status: statusFilter || undefined,
         search: search.trim() || undefined,
       });
+      })
+      .then((data) => {
+        if (!active) return;
+        setCases(data.results);
+        setTotalPages(data.total_pages);
+        setTotalCount(data.count);
+        setMetrics(data.summary);
+      })
+      .catch((e: unknown) => {
+        if (active) setError(e instanceof Error ? e.message : "케이스 목록을 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+          setInitialLoading(false);
+        }
+      });
 
-      setCases(data.results);
-      setTotalPages(data.total_pages);
-      setTotalCount(data.count);
-      setMetrics(data.summary);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "케이스 목록을 불러오지 못했습니다.");
-    } finally {
-      setLoading(false);
-      setInitialLoading(false);
-    }
+    return () => {
+      active = false;
+    };
   }, [currentPage, statusFilter, search]);
 
-  useEffect(() => {
-    // Fetching on query changes is the synchronization boundary for this page.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchCases();
-  }, [fetchCases]);
-
-
-  const openModal = useCallback(async (c: CaseListItem): Promise<void> => {
-    setModalCase(c);
-    setDetailLoading(true);
-    try {
-      const detail = await getCase(c.id);
-      setModalCase(detail);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setDetailLoading(false);
-    }
-  }, []);
-
-  const closeModal = (): void => setModalCase(null);
-
-  const openedFromStateRef = useRef(false);
-
-  useEffect(() => {
-    const openCaseId = (location.state as { openCaseId?: string } | null)?.openCaseId;
-    if (openCaseId && cases.length > 0 && !openedFromStateRef.current) {
-      const target = cases.find((c) => c.id === openCaseId);
-      if (target) {
-        openedFromStateRef.current = true;
-        // Navigation state intentionally opens the requested modal once.
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        openModal(target);
-        window.history.replaceState({}, document.title);
-      }
-    }
-  }, [location.state, cases, openModal]);
 
   async function handleDelete(id: string, specimenId: string) {
     const confirmed = window.confirm(`"${specimenId}" 케이스를 삭제하시겠습니까?\n삭제된 슬라이드 및 결과는 복구할 수 없습니다.`);
@@ -185,8 +160,8 @@ export default function CaseListPage(): React.JSX.Element {
 
   const statusFilters: { v: CaseStatus | ""; l: string }[] = [
     { v: "", l: "전체" },
-    { v: "uploaded", l: "분석 대기" },
-    { v: "completed", l: "분석 완료" },
+    { v: "pending_review", l: "검토 대기" },
+    { v: "confirmed", l: "진단 확정" },
     { v: "failed", l: "분석 실패" },
   ];
 
@@ -208,21 +183,21 @@ export default function CaseListPage(): React.JSX.Element {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard label="총 케이스" value={metrics.total} icon={Layers} />
-        <MetricCard label="업로드됨" value={metrics.uploaded} tone="orange" icon={UploadCloud} />
-        <MetricCard label="분석 완료" value={metrics.completed} tone="teal" icon={CheckCircle2} />
+        <MetricCard label="검토 대기" value={metrics.pending_review} tone="orange" icon={ClipboardCheck} />
+        <MetricCard label="진단 확정" value={metrics.confirmed} tone="teal" icon={CheckCircle2} />
         <MetricCard label="분석 실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex items-center rounded-lg border border-gray-200 bg-white p-0.5">
           {statusFilters.map((s) => {
-            const count = s.v === "" ? metrics.total : metrics[s.v as "uploaded" | "completed" | "failed"];
+            const count = s.v === "" ? metrics.total : metrics[s.v as "pending_review" | "confirmed" | "failed"];
             const active = statusFilter === s.v;
           
             const activeColors: Record<string, string> = {
               "": "bg-gray-900 text-white",
-              uploaded: "bg-orange-100 text-orange-700",
-              completed: "bg-green-100 text-green-700",
+              pending_review: "bg-amber-100 text-amber-700",
+              confirmed: "bg-green-100 text-green-700",
               failed: "bg-rose-100 text-rose-700",
             };
           
@@ -289,7 +264,15 @@ export default function CaseListPage(): React.JSX.Element {
               return (
                 <tr
                   key={c.id}
-                  onClick={() => openModal(c)}
+                  onClick={() => navigate(`/cases/${c.id}/result`)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      navigate(`/cases/${c.id}/result`);
+                    }
+                  }}
+                  tabIndex={0}
+                  aria-label={`${c.specimen_id} 결과 화면 열기`}
                   className="hover:bg-teal-50 hover:shadow-sm transition-all cursor-pointer"
                 >
                   <td className="px-4 py-3 font-mono text-xs text-gray-700">{c.specimen_id}</td>
@@ -385,9 +368,6 @@ export default function CaseListPage(): React.JSX.Element {
         </div>
       )}
 
-      {modalCase && (
-        <CaseResultModal caseData={modalCase} loading={detailLoading} onClose={closeModal} />
-      )}
     </div>
   );
 }

@@ -7,8 +7,17 @@ from google.cloud import storage
 from datetime import timedelta
 
 GCS_BUCKET = "shining-lamp-492601-f9-lung-cdss"
-_client = storage.Client()
-_bucket = _client.bucket(GCS_BUCKET)
+_bucket = None
+
+
+def get_bucket():
+    """Create the GCS client only when a storage operation is requested."""
+    global _bucket
+
+    if _bucket is None:
+        _bucket = storage.Client().bucket(GCS_BUCKET)
+
+    return _bucket
 
 
 def gcs_path_to_signed_url(gcs_path: str, expiration_minutes: int = 60) -> str | None:
@@ -20,7 +29,7 @@ def gcs_path_to_signed_url(gcs_path: str, expiration_minutes: int = 60) -> str |
         return None
 
     blob_name = gcs_path.replace(f"gs://{GCS_BUCKET}/", "")
-    blob = _bucket.blob(blob_name)
+    blob = get_bucket().blob(blob_name)
 
     url = blob.generate_signed_url(
         version="v4",
@@ -37,7 +46,7 @@ def delete_case_reports(case_id: str):
     재사용해야 하므로 삭제 대상에서 제외.
     """
     prefix = f"reports/{case_id}/"
-    blobs = _bucket.list_blobs(prefix=prefix)
+    blobs = get_bucket().list_blobs(prefix=prefix)
     for blob in blobs:
         if blob.name == f"{prefix}original.png":
             continue
@@ -49,7 +58,7 @@ def delete_slide_file(gcs_path: str):
     if not gcs_path:
         return
     blob_name = gcs_path.replace(f"gs://{GCS_BUCKET}/", "")
-    blob = _bucket.blob(blob_name)
+    blob = get_bucket().blob(blob_name)
     if blob.exists():
         blob.delete()
 
@@ -57,7 +66,7 @@ def delete_slide_file(gcs_path: str):
 def generate_upload_url(filename: str, expiration_minutes: int = 15) -> dict:
     """PUT용 signed URL 발급 (원본 슬라이드 업로드용)"""
     blob_name = f"uploads/{uuid.uuid4()}_{filename}"
-    blob = _bucket.blob(blob_name)
+    blob = get_bucket().blob(blob_name)
 
     url = blob.generate_signed_url(
         version="v4",

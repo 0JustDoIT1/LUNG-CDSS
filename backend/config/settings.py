@@ -23,7 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-la3ebbh6lr4i*235v&ndo12qazp@ow6&^3+bthoc9^p$)w5h_+'
+# FastAPI(realtime-service)가 같은 값으로 JWT를 검증해야 하므로 .env의
+# DJANGO_SECRET_KEY로 공유한다. 값을 안 주면 기존 하드코딩값을 그대로 씀
+# (기존 배포와 호환).
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-la3ebbh6lr4i*235v&ndo12qazp@ow6&^3+bthoc9^p$)w5h_+')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -42,14 +45,43 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
+    'drf_spectacular',
+    'core',
     'cases',
     'accounts',
+    'symptoms',
+    'medications',
+    'appointments',
+    'intake',
+    'communication',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'LUNG-CDSS API',
+    'DESCRIPTION': (
+        '폐암(LUAD/LUSC) 진단·치료 지원 플랫폼 API. '
+        '인증은 Bearer JWT (accounts 앱의 로그인 엔드포인트에서 발급).'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'TAGS': [
+        {'name': 'accounts', 'description': '의사/간호사/병리사(이메일+비번) · 환자(소셜+SMS) 인증'},
+        {'name': 'cases', 'description': '케이스 검토 — AI결과(불변)/확정본(의사) 3단 분리'},
+        {'name': 'symptoms', 'description': '일일 증상체크, 위험도 룰엔진'},
+        {'name': 'medications', 'description': '복약스케줄/로그/순응도'},
+        {'name': 'appointments', 'description': '예약 신청~확정~체크인'},
+        {'name': 'intake', 'description': '문진표, QR 프로필공유'},
+        {'name': 'communication', 'description': '채팅(REST), 알림'},
+    ],
 }
 
 from datetime import timedelta
@@ -57,6 +89,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=12),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 MIDDLEWARE = [
@@ -108,6 +141,11 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'accounts.User'
+
+# Django Admin 로그인 전용. User.USERNAME_FIELD가 UUID라 기본 ModelBackend는
+# 이메일 문자열을 UUID로 파싱하려다 에러나므로 완전히 대체한다.
+AUTHENTICATION_BACKENDS = ['accounts.backends.StaffEmailBackend']
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -133,7 +171,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
@@ -147,3 +185,32 @@ STATIC_URL = 'static/'
 
 MOSEC_URL = os.environ.get("MOSEC_URL", "https://mosec-serving-369117807590.us-central1.run.app")
 THUMBNAIL_SERVICE_URL = os.environ.get("THUMBNAIL_SERVICE_URL")
+
+
+# ── Celery (예약 D-7/D-1 알림, 복약 재알림, FCM 발송, AI추론 백그라운드 처리) ──
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE  # Asia/Seoul
+
+CELERY_BEAT_SCHEDULE = {
+    "appointment-reminders-d7-d1": {
+        "task": "appointments.tasks.send_appointment_reminders",
+        "schedule": 3600.0,  # 매시 정각 실행, 대상 필터링은 task 내부에서
+    },
+    "medication-escalation-check": {
+        "task": "medications.tasks.check_medication_compliance",
+        "schedule": 3600.0,
+    },
+}
+
+# accounts/views.py의 SMS 인증코드·소셜가입 임시세션이 여러 워커/프로세스에서
+# 공유돼야 하므로 로컬메모리 캐시가 아닌 Redis 캐시를 사용.
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": CELERY_BROKER_URL.replace("/0", "/1"),  # Celery와 DB 번호 분리
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+    }
+}

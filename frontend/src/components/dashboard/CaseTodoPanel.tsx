@@ -2,6 +2,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { ClipboardCheck, AlertTriangle, Star, RotateCcw, Check } from "lucide-react";
 import type { CaseListItem } from "../../types/case";
+import { getStoredItem, setStoredItem } from "../../utils/storage";
 
 // ----------------------------- 타입 -----------------------------
 type TodoKind = "review" | "urgent" | "reprocess" | "favorite";
@@ -44,7 +45,7 @@ function getConfidence(c: CaseListItem): number | null {
 }
 
 function isUrgent(c: CaseListItem): boolean {
-  if (c.status !== "completed") return false;
+  if (c.status !== "pending_review") return false;
   const conf = getConfidence(c);
   return conf != null && conf > 0 && conf < 0.7;
 }
@@ -59,7 +60,7 @@ function todoStorageKey(): string {
 
 function loadCompleted(): Set<string> {
   try {
-    const raw = localStorage.getItem(todoStorageKey());
+    const raw = getStoredItem(todoStorageKey());
     if (!raw) return new Set();
     const arr = JSON.parse(raw) as string[];
     return new Set(arr);
@@ -70,7 +71,7 @@ function loadCompleted(): Set<string> {
 
 function persistCompleted(set: Set<string>): void {
   try {
-    localStorage.setItem(todoStorageKey(), JSON.stringify([...set]));
+    setStoredItem(todoStorageKey(), JSON.stringify([...set]));
   } catch {
     // 저장 공간 초과 등은 무시
   }
@@ -98,7 +99,7 @@ export function CaseTodoPanel({ cases, onOpenCase }: CaseTodoPanelProps): React.
 
     for (const c of cases) {
       // 1) 검토 대기
-      if (c.status === "completed" && c.review_status === "pending") {
+      if (c.status === "pending_review") {
         result.push({
           id: `review:${c.id}`,
           caseId: c.id,

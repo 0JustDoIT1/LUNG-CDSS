@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import type { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import { Upload } from "lucide-react";
-import { getUploadUrl, uploadFileToGcs, createCase } from "../api/cases";
+import { getUploadUrl, uploadFileToGcs, createCase, getPatients } from "../api/cases";
 import { createSvsPreview } from "../utils/createSvsPreview";
-import { isAxiosError } from "axios";
+import type { PatientOption } from "../types/case";
 
 const ALLOWED_EXT = ["svs", "ndpi", "tiff", "tif", "png", "jpg", "jpeg"];
 const PREVIEWABLE_EXT = ["png", "jpg", "jpeg"];
@@ -43,6 +44,8 @@ export default function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [specimenId, setSpecimenId] = useState("");
+  const [patientId, setPatientId] = useState("");
+  const [patients, setPatients] = useState<PatientOption[]>([]);
   const [stage, setStage] = useState<Stage>("select");
   const [stepIndex, setStepIndex] = useState(0);
   const [files, setFiles] = useState<QueuedFile[]>([]);
@@ -54,6 +57,15 @@ export default function UploadPage() {
   const [hourglassRotation, setHourglassRotation] = useState(0);
 
   const hasReadyFile = files.some((f) => f.status === "ready");
+
+  useEffect(() => {
+    getPatients()
+      .then(setPatients)
+      .catch((error) => {
+        const message = error?.response?.data?.error?.message;
+        setSubmitError(message ?? "환자 목록을 불러오지 못했습니다.");
+      });
+  }, []);
 
  const addFiles = useCallback(async (fileList: FileList) => {
   setValMsg(null);
@@ -136,8 +148,8 @@ export default function UploadPage() {
 
   async function handleUpload() {
     const target = files.find((f) => f.status === "ready");
-    if (!target || !specimenId) {
-      setSubmitError("검체 ID와 파일을 확인해주세요.");
+    if (!target || !specimenId || !patientId) {
+      setSubmitError("환자, 검체 ID와 파일을 확인해주세요.");
       return;
     }
 
@@ -154,14 +166,18 @@ export default function UploadPage() {
       setGlobalProgress(70);
       setFiles((prev) => prev.map((f) => (f === target ? { ...f, status: "done", progress: 100 } : f)));
 
-      const created = await createCase({ specimen_id: specimenId, slide_gcs_path: gcs_path });
+      const created = await createCase({
+        specimen_id: specimenId,
+        slide_gcs_path: gcs_path,
+        patient_id: patientId,
+      });
       setCreatedCaseId(created.id);
       setGlobalProgress(100);
       setStepIndex(2);
       setStage("complete");
     } catch (err: unknown) {
-      const responseData = isAxiosError<{ error?: string }>(err) ? err.response?.data : undefined;
-      const message = responseData?.error;
+      const responseData = (err as AxiosError<{ error?: { message?: string } }>).response?.data;
+      const message = responseData?.error?.message;
       if (message) {
         setSubmitError(message);
       } else {
@@ -225,6 +241,20 @@ export default function UploadPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6">
           {/* 검체 ID */}
           <div className="mb-5 max-w-sm">
+            <label htmlFor="patient-id" className="block text-xs font-medium mb-1.5 text-gray-700">
+              환자
+            </label>
+            <select
+              id="patient-id"
+              value={patientId}
+              onChange={(event) => setPatientId(event.target.value)}
+              className="w-full px-3.5 py-2.5 mb-4 rounded-xl border border-gray-200 text-sm outline-none focus:border-teal-500 bg-white"
+            >
+              <option value="">{patients.length ? "환자 선택" : "등록된 환자가 없습니다"}</option>
+              {patients.map((patient) => (
+                <option key={patient.id} value={patient.id}>{patient.name}</option>
+              ))}
+            </select>
             <label htmlFor="specimen-id" className="block text-xs font-medium mb-1.5 text-gray-700">
               검체 ID
             </label>
@@ -356,7 +386,7 @@ export default function UploadPage() {
             <button
               type="button"
               onClick={handleUpload}
-              disabled={!hasReadyFile || !specimenId}
+              disabled={!hasReadyFile || !specimenId || !patientId}
               className="px-4.5 py-2.5 rounded-lg text-[13px] font-semibold bg-teal-600 text-white hover:bg-teal-700 transition" 
             >
               업로드 시작
