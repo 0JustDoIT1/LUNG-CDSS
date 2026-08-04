@@ -10,68 +10,30 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from accounts.models import User
-from accounts.permissions import IsDoctor, IsPathologist
+from accounts.models import PatientProfile, User
+from accounts.permissions import IsDoctor, IsPathologist, IsPatient
 from communication.services import notify
-from rag.exceptions import RAGServiceError
-from rag.rag_service import generate_treatment_note
-
 from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upload_url
 from .models import (
-    AIAnalysisResult,
     Case,
     CaseFavorite,
     CaseFinding,
     CaseReviewLog,
     ConfirmedFinding,
-    GenePrediction,
-    NucleiPatch,
 )
 from .pagination import CasePagination
 from .serializers import (
     CaseDetailSerializer,
     CaseFindingSerializer,
     CaseListSerializer,
+    PatientCaseResultSerializer,
     ReviewActionSerializer,
 )
-from .services import call_mosec_predict, call_mosec_thumbnail
+from .services import call_mosec_thumbnail
+from .tasks import run_case_analysis
 from core.responses import error_response, validation_error_response
 
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
-
-
-def _notify_analysis_outcome(case, succeeded):
-    """분석 결과를 웹 알림으로 남긴다. 알림 실패가 분석 응답을 막지는 않는다."""
-    try:
-        if case.uploaded_by_id:
-            notify(
-                recipient_id=case.uploaded_by_id,
-                category="case_review",
-                title="AI 분석 완료" if succeeded else "AI 분석 실패",
-                body=(
-                    f"{case.specimen_id} 분석이 완료되었습니다. 결과를 확인해 주세요."
-                    if succeeded
-                    else f"{case.specimen_id} 분석에 실패했습니다. 다시 처리해 주세요."
-                ),
-                deep_link=(
-                    f"/cases/{case.id}/result"
-                    if succeeded
-                    else f"/analysis/{case.id}"
-                ),
-            )
-
-        if succeeded:
-            doctor_ids = User.objects.filter(role=User.Role.DOCTOR, is_active=True).values_list("id", flat=True)
-            for doctor_id in doctor_ids:
-                notify(
-                    recipient_id=doctor_id,
-                    category="case_review",
-                    title="검토 대기 케이스",
-                    body=f"{case.specimen_id} AI 분석이 완료되어 의료진 검토를 기다리고 있습니다.",
-                    deep_link=f"/doctor-dashboard/cases/{case.id}",
-                )
-    except Exception as exc:
-        print(f"케이스 알림 생성 실패 (case_id={case.id}): {exc}")
 
 
 @extend_schema(
@@ -91,9 +53,12 @@ def case_list_create(request):
     if request.method == "GET":
         queryset = Case.objects.select_related("patient").prefetch_related("ai_results", "confirmed_finding")
 
-        # 환자는 본인 케이스만, 의료진은 전체(병원 단일 고정 전제) 조회
+        # 환자는 본인에게 공개된 최종 결과만, 의료진은 전체(병원 단일 고정 전제) 조회
         if request.user.role == "patient":
-            queryset = queryset.filter(patient=request.user)
+            queryset = queryset.filter(
+                patient=request.user,
+                confirmed_finding__released_at__isnull=False,
+            )
 
         status_param = request.query_params.get("status")
         if status_param:
@@ -122,7 +87,8 @@ def case_list_create(request):
 
         paginator = CasePagination()
         page = paginator.paginate_queryset(queryset.order_by("-uploaded_at"), request)
-        serializer = CaseListSerializer(page, many=True, context={"request": request})
+        serializer_class = PatientCaseResultSerializer if request.user.role == "patient" else CaseListSerializer
+        serializer = serializer_class(page, many=True, context={"request": request})
         return paginator.get_paginated_response(serializer.data, summary=summary)
 
     # POST: 케이스 생성은 병리사만 (React 웹 업로드 흐름)
@@ -200,11 +166,14 @@ def case_detail(request, case_id):
     if request.user.role == "patient" and case.patient_id != request.user.id:
         return error_response("권한이 없습니다", status_code=status.HTTP_403_FORBIDDEN)
 
-    # 환자는 확정(confirmed)된 케이스만 열람 가능
-    if request.user.role == "patient" and case.status != Case.Status.CONFIRMED:
+    # 환자는 의사가 명시적으로 공개한 확정본만 열람 가능
+    finding = getattr(case, "confirmed_finding", None)
+    if request.user.role == "patient" and (finding is None or finding.released_at is None):
         return error_response("아직 확인할 수 없는 결과입니다", status_code=status.HTTP_403_FORBIDDEN)
 
     if request.method == "GET":
+        if request.user.role == "patient":
+            return Response(PatientCaseResultSerializer(case).data)
         serializer = CaseDetailSerializer(case, context={"request": request})
         return Response(serializer.data)
 
@@ -219,94 +188,93 @@ def case_detail(request, case_id):
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@extend_schema(tags=["cases"])
+def _queue_analysis(case_id, *, retry):
+    now = timezone.now()
+    with transaction.atomic():
+        try:
+            case = Case.objects.select_for_update().get(id=case_id)
+        except Case.DoesNotExist:
+            return None, error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
+
+        if case.status == Case.Status.PROCESSING:
+            return None, error_response("이미 분석이 진행 중입니다", status_code=status.HTTP_409_CONFLICT)
+        if hasattr(case, "confirmed_finding"):
+            return None, error_response("확정된 케이스는 재분석할 수 없습니다", status_code=status.HTTP_409_CONFLICT)
+        if case.status == Case.Status.PENDING_REVIEW:
+            return None, error_response("검토 대기 중인 결과가 있습니다", status_code=status.HTTP_409_CONFLICT)
+        if retry and case.status != Case.Status.FAILED:
+            return None, error_response("실패한 분석만 재시도할 수 있습니다", status_code=status.HTTP_409_CONFLICT)
+        if not retry and case.status not in (Case.Status.UPLOADED, Case.Status.FAILED):
+            return None, error_response("현재 상태에서는 분석을 시작할 수 없습니다", status_code=status.HTTP_409_CONFLICT)
+
+        case.status = Case.Status.PROCESSING
+        case.current_step = Case.Step.UPLOADED
+        case.analyzed_at = now
+        case.completed_at = None
+        case.last_progress_at = now
+        case.analysis_task_id = ""
+        case.analysis_error_code = ""
+        case.analysis_error_message = ""
+        if retry:
+            case.retry_count += 1
+        case.save(update_fields=[
+            "status", "current_step", "analyzed_at", "completed_at", "last_progress_at",
+            "analysis_task_id", "analysis_error_code", "analysis_error_message", "retry_count",
+        ])
+
+    try:
+        async_result = run_case_analysis.delay(str(case.id))
+    except Exception as exc:
+        Case.objects.filter(id=case.id, status=Case.Status.PROCESSING).update(
+            status=Case.Status.FAILED,
+            analysis_error_code="QUEUE_UNAVAILABLE",
+            analysis_error_message=str(exc)[:2000],
+            analysis_task_id="",
+            last_progress_at=timezone.now(),
+        )
+        return None, error_response(
+            "분석 작업을 대기열에 등록하지 못했습니다",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+    Case.objects.filter(id=case.id, status=Case.Status.PROCESSING).update(
+        analysis_task_id=async_result.id,
+    )
+    case.refresh_from_db()
+    return case, None
+
+
+@extend_schema(tags=["cases"], responses={202: CaseDetailSerializer})
 @api_view(["POST"])
 @permission_classes([IsPathologist])
 def predict_case(request, case_id):
-    """
-    AI 추론 실행 → AIAnalysisResult(불변 원본) 생성. 기존 결과를 덮어쓰지 않고
-    항상 새 레코드로 쌓는다 (모델 버전 이력 보존). 재분석(retry) 개념은 없음 —
-    필요하면 이 엔드포인트를 다시 호출해 새 AIAnalysisResult를 쌓을 뿐이다.
-    """
-    try:
-        case = Case.objects.get(id=case_id)
-    except Case.DoesNotExist:
-        return error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
+    case, error = _queue_analysis(case_id, retry=False)
+    if error:
+        return error
+    return Response(
+        CaseDetailSerializer(case, context={"request": request}).data,
+        status=status.HTTP_202_ACCEPTED,
+    )
 
-    if case.status == Case.Status.PROCESSING:
-        return error_response("이미 분석이 진행 중입니다", status_code=status.HTTP_409_CONFLICT)
 
-    case.status = Case.Status.PROCESSING
-    case.analyzed_at = timezone.now()
-    case.save(update_fields=["status", "analyzed_at"])
-
-    try:
-        result = call_mosec_predict(str(case.id), case.slide_gcs_path)
-    except Exception as e:
-        case.status = Case.Status.FAILED
-        case.save(update_fields=["status"])
-        _notify_analysis_outcome(case, succeeded=False)
-        return error_response(str(e), status_code=status.HTTP_502_BAD_GATEWAY)
-
-    if not case.slide_thumbnail_gcs_path:
-        try:
-            thumb_result = call_mosec_thumbnail(str(case.id), case.slide_gcs_path)
-            case.slide_thumbnail_gcs_path = thumb_result["slide_thumbnail_gcs_path"]
-        except Exception as e:
-            print(f"썸네일 폴백 생성 실패 (case_id={case.id}): {e}")
-
-    gene_predictions_dict = {
-        gene["gene_name"]: gene["likelihood"] for gene in result.get("gene_predictions", [])
-    }
-    try:
-        rag_result = generate_treatment_note(predictions=gene_predictions_dict)
-        treatment_note = rag_result["treatment_note"]
-    except RAGServiceError as e:
-        treatment_note = None
-        print(f"RAG 소견 생성 실패 (case_id={case.id}): {e}")
-
-    with transaction.atomic():
-        ai_result = AIAnalysisResult.objects.create(
-            case=case,
-            model_version=result.get("model_version", "unknown"),
-            heatmap_gcs_path=result["heatmap_gcs_path"],
-            nuclei_density_score=result.get("nuclei_density_score"),
-            nuclei_density_level=result.get("nuclei_density_level"),
-            nuclei_irregularity_score=result.get("nuclei_irregularity_score"),
-            nuclei_irregularity_level=result.get("nuclei_irregularity_level"),
-            prediction_label=result["prediction_label"],
-            luad_probability=result["luad_probability"],
-            lusc_probability=result["lusc_probability"],
-            treatment_note=treatment_note,
-        )
-
-        for patch in result.get("nuclei_patches", []):
-            NucleiPatch.objects.create(
-                ai_result=ai_result,
-                original_gcs_path=patch["original_gcs_path"],
-                overlay_gcs_path=patch["overlay_gcs_path"],
-                nuclei_count=patch["nuclei_count"],
-                attention_rank=patch["attention_rank"],
-            )
-
-        for gene_name, likelihood in gene_predictions_dict.items():
-            GenePrediction.objects.create(ai_result=ai_result, gene_name=gene_name, likelihood=likelihood)
-
-        case.status = Case.Status.PENDING_REVIEW
-        case.completed_at = timezone.now()
-        case.save(update_fields=["status", "completed_at", "slide_thumbnail_gcs_path"])
-
-    _notify_analysis_outcome(case, succeeded=True)
-
-    serializer = CaseDetailSerializer(case, context={"request": request})
-    return Response(serializer.data)
+@extend_schema(tags=["cases"], responses={202: CaseDetailSerializer})
+@api_view(["POST"])
+@permission_classes([IsPathologist])
+def retry_case_analysis(request, case_id):
+    case, error = _queue_analysis(case_id, retry=True)
+    if error:
+        return error
+    return Response(
+        CaseDetailSerializer(case, context={"request": request}).data,
+        status=status.HTTP_202_ACCEPTED,
+    )
 
 
 @extend_schema(tags=["cases"])
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def update_case_step(request, case_id):
-    if request.headers.get("X-Internal-Token") != INTERNAL_CALLBACK_TOKEN:
+    if not INTERNAL_CALLBACK_TOKEN or request.headers.get("X-Internal-Token") != INTERNAL_CALLBACK_TOKEN:
         return error_response("unauthorized", status_code=status.HTTP_401_UNAUTHORIZED)
 
     try:
@@ -314,8 +282,15 @@ def update_case_step(request, case_id):
     except Case.DoesNotExist:
         return error_response("not found", status_code=status.HTTP_404_NOT_FOUND)
 
-    case.current_step = request.data.get("step")
-    case.save(update_fields=["current_step"])
+    step = request.data.get("step")
+    if step not in Case.Step.values:
+        return error_response("invalid step", status_code=status.HTTP_400_BAD_REQUEST)
+    if case.status != Case.Status.PROCESSING:
+        return error_response("case is not processing", status_code=status.HTTP_409_CONFLICT)
+
+    case.current_step = step
+    case.last_progress_at = timezone.now()
+    case.save(update_fields=["current_step", "last_progress_at"])
     return Response({"status": "ok"})
 
 
@@ -373,6 +348,62 @@ def review_case(request, case_id):
         case.save(update_fields=["status"])
 
     return Response(CaseDetailSerializer(case, context={"request": request}).data)
+
+
+@extend_schema(tags=["cases"], responses={200: CaseDetailSerializer})
+@api_view(["POST"])
+@permission_classes([IsDoctor])
+def release_case(request, case_id):
+    """의사가 확정한 결과를 환자에게 공개하고 알림을 생성한다."""
+    try:
+        case = Case.objects.select_related("confirmed_finding", "patient").get(id=case_id)
+    except Case.DoesNotExist:
+        return error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
+
+    finding = getattr(case, "confirmed_finding", None)
+    if finding is None:
+        return error_response("확정된 결과가 없습니다", status_code=status.HTTP_409_CONFLICT)
+    if finding.released_at is not None:
+        return error_response("이미 환자에게 공개된 결과입니다", status_code=status.HTTP_409_CONFLICT)
+
+    is_confirmer = finding.confirmed_by_id == request.user.id
+    is_assigned_doctor = PatientProfile.objects.filter(
+        user_id=case.patient_id,
+        assigned_doctor=request.user,
+    ).exists()
+    if not (is_confirmer or is_assigned_doctor):
+        return error_response(
+            "결과를 확정한 의사 또는 환자의 담당 의사만 공개할 수 있습니다",
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
+    finding.released_by = request.user
+    finding.released_at = timezone.now()
+    finding.save(update_fields=["released_by", "released_at"])
+
+    notify(
+        recipient_id=case.patient_id,
+        category="case_review",
+        title="검사 결과가 도착했습니다",
+        body=f"{case.specimen_id} 검사 결과를 확인해 주세요.",
+        deep_link=f"/results/{case.id}",
+    )
+    return Response(CaseDetailSerializer(case, context={"request": request}).data)
+
+
+@extend_schema(tags=["cases"], responses={200: PatientCaseResultSerializer(many=True)})
+@api_view(["GET"])
+@permission_classes([IsPatient])
+def patient_result_list(request):
+    results = (
+        Case.objects.filter(
+            patient=request.user,
+            confirmed_finding__released_at__isnull=False,
+        )
+        .select_related("confirmed_finding")
+        .order_by("-confirmed_finding__released_at")
+    )
+    return Response(PatientCaseResultSerializer(results, many=True).data)
 
 
 @extend_schema(tags=["cases"])

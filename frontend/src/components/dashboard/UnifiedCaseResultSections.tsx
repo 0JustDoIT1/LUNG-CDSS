@@ -72,12 +72,13 @@ export function UnifiedCaseResultSections({ caseData }: { caseData: CaseDetail }
 
   return (
     <div className="space-y-4">
-      <div
-        role="tablist"
-        aria-label="검사 결과 항목"
-        className="grid grid-cols-3 overflow-hidden rounded-2xl border border-gray-200 bg-white p-1.5 shadow-sm"
-      >
-        {RESULT_TABS.map((tab) => {
+      <div className="overflow-x-auto rounded-2xl">
+        <div
+          role="tablist"
+          aria-label="검사 결과 항목"
+          className="grid min-w-[390px] grid-cols-3 overflow-hidden rounded-2xl border border-gray-200 bg-white p-1.5 shadow-sm"
+        >
+          {RESULT_TABS.map((tab) => {
           const active = activeTab === tab.id;
           return (
             <button
@@ -102,7 +103,8 @@ export function UnifiedCaseResultSections({ caseData }: { caseData: CaseDetail }
               </span>
             </button>
           );
-        })}
+          })}
+        </div>
       </div>
 
       {activeTab === "summary" && (
@@ -125,7 +127,7 @@ export function UnifiedCaseResultSections({ caseData }: { caseData: CaseDetail }
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <QuickStat label="검체 ID" value={caseData.specimen_id} />
                   <QuickStat label="환자" value={caseData.patient_name ?? "—"} />
                   <QuickStat label="진단" value={caseData.prediction_label ?? "—"} />

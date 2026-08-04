@@ -25,11 +25,11 @@ def notify(recipient_id, category, title, body, deep_link=None):
     notification = Notification.objects.create(
         recipient_id=recipient_id, category=category, title=title, body=body, deep_link=deep_link or "",
     )
-    _send_fcm(recipient_id, title, body, deep_link)
+    _send_fcm(recipient_id, category, title, body, deep_link)
     return notification
 
 
-def _send_fcm(recipient_id, title, body, deep_link):
+def _send_fcm(recipient_id, category, title, body, deep_link):
     from accounts.models import DeviceToken
 
     tokens = list(DeviceToken.objects.filter(user_id=recipient_id))
@@ -51,7 +51,7 @@ def _send_fcm(recipient_id, title, body, deep_link):
     for device in tokens:
         message = messaging.Message(
             notification=messaging.Notification(title=title, body=body),
-            data={"deep_link": deep_link or "", "category": ""},
+            data={"deep_link": deep_link or "", "category": category},
             token=device.fcm_token,
         )
         try:

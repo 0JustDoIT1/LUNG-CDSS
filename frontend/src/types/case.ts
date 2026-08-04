@@ -54,6 +54,8 @@ export interface ConfirmedFinding {
   final_note: string;
   confirmed_by_name: string;
   confirmed_at: string;
+  released_by_name: string | null;
+  released_at: string | null;
 }
 
 export interface CaseListItem {
@@ -91,6 +93,11 @@ export interface CaseDetail {
   uploaded_at: string;
   analyzed_at: string | null;
   completed_at: string | null;
+  analysis_task_id: string;
+  analysis_error_code: string;
+  analysis_error_message: string;
+  last_progress_at: string | null;
+  retry_count: number;
   latest_ai_result: AIAnalysisResult | null;
   confirmed_finding: ConfirmedFinding | null;
   is_favorite: boolean;

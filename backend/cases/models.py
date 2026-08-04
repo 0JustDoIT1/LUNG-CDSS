@@ -46,6 +46,11 @@ class Case(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     analyzed_at = models.DateTimeField(blank=True, null=True)
     completed_at = models.DateTimeField(blank=True, null=True)
+    analysis_task_id = models.CharField(max_length=255, blank=True)
+    analysis_error_code = models.CharField(max_length=50, blank=True)
+    analysis_error_message = models.TextField(blank=True)
+    last_progress_at = models.DateTimeField(blank=True, null=True)
+    retry_count = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ["-uploaded_at"]
@@ -141,6 +146,15 @@ class ConfirmedFinding(models.Model):
     confirmed_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="confirmed_findings",
                                       limit_choices_to={"role": "doctor"})
     confirmed_at = models.DateTimeField(auto_now_add=True)
+    released_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="released_findings",
+        limit_choices_to={"role": "doctor"},
+        null=True,
+        blank=True,
+    )
+    released_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.case.specimen_id} → {self.final_subtype}"

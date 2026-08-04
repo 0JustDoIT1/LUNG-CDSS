@@ -70,6 +70,10 @@ export async function getAllCases(
 
 export async function getCase(id: string) {
   const { data } = await apiClient.get<CaseDetail>(`/cases/${id}/`);
+  return normalizeCaseDetail(data);
+}
+
+function normalizeCaseDetail(data: CaseDetail) {
   const { latest_ai_result, ...caseData } = data;
 
   return {
@@ -77,6 +81,11 @@ export async function getCase(id: string) {
     ...(latest_ai_result ?? {}),
     latest_ai_result,
   } as CaseDetail;
+}
+
+export async function releaseCase(id: string) {
+  const { data } = await apiClient.post<CaseDetail>(`/cases/${id}/release/`);
+  return normalizeCaseDetail(data);
 }
 
 export async function createCase(payload: CreateCasePayload) {
@@ -90,7 +99,12 @@ export async function deleteCase(id: string) {
 
 export async function predictCase(id: string) {
   const { data } = await apiClient.post<CaseDetail>(`/cases/${id}/predict/`);
-  return data;
+  return normalizeCaseDetail(data);
+}
+
+export async function retryCaseAnalysis(id: string) {
+  const { data } = await apiClient.post<CaseDetail>(`/cases/${id}/retry/`);
+  return normalizeCaseDetail(data);
 }
 
 export async function reviewCase(id: string, payload: ReviewPayload) {

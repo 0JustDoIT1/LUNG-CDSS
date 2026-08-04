@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import type { AxiosError } from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { predictCase, getCase } from '../api/cases';
+import { AlertTriangle, Clock3, List, RotateCcw } from 'lucide-react';
+import { predictCase, getCase, retryCaseAnalysis } from '../api/cases';
 import { UnifiedCaseResultSections } from '../components/dashboard/UnifiedCaseResultSections';
 import { PrintableReport } from '../components/dashboard/PrintableReport';
 import type { CaseDetail, CaseStep } from '../types/case';
@@ -40,6 +41,23 @@ const ANALYSIS_STEPS: {
 ];
 
 const POLL_INTERVAL_MS = 2000;
+const SLOW_PROGRESS_MS = 5 * 60 * 1000;
+
+const ERROR_TITLES: Record<string, string> = {
+  QUEUE_UNAVAILABLE: '분석 대기열에 연결하지 못했습니다.',
+  UPSTREAM_ERROR: 'AI 분석 서버에 연결하지 못했습니다.',
+  PROCESSING_ERROR: '분석 결과를 처리하지 못했습니다.',
+  ANALYSIS_TIMEOUT: '분석 시간이 초과되었습니다.',
+};
+
+function relativeUpdateLabel(value: string | null): string {
+  if (!value) return '업데이트 기록 대기 중';
+  const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
+  if (seconds < 60) return `${seconds}초 전`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}분 전`;
+  return `${Math.floor(minutes / 60)}시간 전`;
+}
 
 export default function AnalysisPage() {
   const { id } = useParams<{ id: string }>();
@@ -54,6 +72,10 @@ export default function AnalysisPage() {
   const [error, setError] = useState<string | null>(null);
   const [analyzedAt, setAnalyzedAt] = useState<string | null>(null);
   const [resultDetail, setResultDetail] = useState<CaseDetail | null>(null);
+  const [initialized, setInitialized] = useState(isPreview);
+  const [retrying, setRetrying] = useState(false);
+  const [lastProgressAt, setLastProgressAt] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string>('');
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -95,24 +117,38 @@ export default function AnalysisPage() {
     return () => clearInterval(mockTimer);
   }, [isPreview]);
 
-  // ---------------- predict 요청 (단발성, 폴링과 완전히 분리) ----------------
-  const predictStartedRef = useRef(false);
-
+  // 서버의 기존 상태를 먼저 복원한 뒤, 신규 케이스만 분석 대기열에 등록한다.
   useEffect(() => {
     if (isPreview || !id) return;
-    if (predictStartedRef.current) return;
-    predictStartedRef.current = true;
-
     let cancelled = false;
 
-    predictCase(id).catch((e: unknown) => {
-      if (cancelled) return;
-      // 409(이미 분석 중)는 정상 케이스로 간주 — 폴링이 어차피 진행 상황을 알려줌
-      if ((e as AxiosError).response?.status !== 409) {
-        setError('분석 요청에 실패했습니다.');
+    void getCase(id)
+      .then(async (detail) => {
+        if (cancelled) return;
+        if (detail.analyzed_at) setAnalyzedAt(detail.analyzed_at);
+        setLastProgressAt(detail.last_progress_at);
+
+        if (detail.status === 'uploaded') {
+          const queued = await predictCase(id);
+          if (!cancelled && queued.analyzed_at) setAnalyzedAt(queued.analyzed_at);
+        } else if (detail.status === 'failed') {
+          setStatus('failed');
+          setErrorCode(detail.analysis_error_code);
+          setError(detail.analysis_error_message || '분석 중 오류가 발생했습니다.');
+        } else if (detail.status === 'pending_review' || detail.status === 'confirmed') {
+          setResultDetail(detail);
+          setStatus('completed');
+        }
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        const payload = (e as AxiosError<{ error?: { message?: string } }>).response?.data;
+        setError(payload?.error?.message || '분석 요청에 실패했습니다.');
         setStatus('failed');
-      }
-    });
+      })
+      .finally(() => {
+        if (!cancelled) setInitialized(true);
+      });
 
     return () => {
       cancelled = true;
@@ -121,7 +157,7 @@ export default function AnalysisPage() {
 
   // ---------------- 폴링 (predict 요청과 무관하게 독립 실행) ----------------
   useEffect(() => {
-    if (isPreview || !id) return;
+    if (isPreview || !id || !initialized) return;
     if (status !== 'running') return;
 
     let cancelled = false;
@@ -152,6 +188,7 @@ export default function AnalysisPage() {
         if (detail.analyzed_at) {
           setAnalyzedAt(detail.analyzed_at);
         }
+        setLastProgressAt(detail.last_progress_at);
 
         if (
           detail.status === 'pending_review' ||
@@ -162,7 +199,8 @@ export default function AnalysisPage() {
           if (pollRef.current) clearInterval(pollRef.current);
         } else if (detail.status === 'failed') {
           setStatus('failed');
-          setError('분석 중 오류가 발생했습니다.');
+          setErrorCode(detail.analysis_error_code);
+          setError(detail.analysis_error_message || '분석 중 오류가 발생했습니다.');
           if (pollRef.current) clearInterval(pollRef.current);
         }
       } catch {
@@ -174,7 +212,28 @@ export default function AnalysisPage() {
       cancelled = true;
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [id, isPreview, status]);
+  }, [id, initialized, isPreview, status]);
+
+  async function handleRetry() {
+    if (!id || retrying) return;
+    setRetrying(true);
+    setError(null);
+    setErrorCode('');
+    try {
+      const queued = await retryCaseAnalysis(id);
+      setAnalyzedAt(queued.analyzed_at);
+      setLastProgressAt(queued.last_progress_at);
+      setElapsedSec(0);
+      setStepIndex(0);
+      setResultDetail(null);
+      setStatus('running');
+    } catch (e: unknown) {
+      const payload = (e as AxiosError<{ error?: { message?: string } }>).response?.data;
+      setError(payload?.error?.message || '분석 재시도 요청에 실패했습니다.');
+    } finally {
+      setRetrying(false);
+    }
+  }
 
   useEffect(() => {
     if (isPreview || !id || status !== 'completed' || resultDetail) return;
@@ -198,6 +257,9 @@ export default function AnalysisPage() {
     ((stepIndex + 0.5) / ANALYSIS_STEPS.length) * 100,
     95
   );
+  const progressAgeMs = lastProgressAt ? Date.now() - new Date(lastProgressAt).getTime() : elapsedSec * 1000;
+  const isSlow = status === 'running' && progressAgeMs >= SLOW_PROGRESS_MS;
+  const friendlyErrorTitle = ERROR_TITLES[errorCode] ?? '분석을 완료하지 못했습니다.';
 
   return (
     <div>
@@ -253,6 +315,11 @@ export default function AnalysisPage() {
               {status === 'completed' ? ANALYSIS_STEPS.length : stepIndex + 1}/
               {ANALYSIS_STEPS.length}
             </span>
+            {status === 'running' ? (
+              <span className="inline-flex items-center gap-1">
+                <Clock3 className="h-3 w-3" /> 마지막 업데이트 {relativeUpdateLabel(lastProgressAt)}
+              </span>
+            ) : null}
           </div>
           <div className="w-full h-1.5 bg-gray-200 rounded-full mt-3 overflow-hidden">
             <div
@@ -262,12 +329,55 @@ export default function AnalysisPage() {
               }}
             />
           </div>
+          {isSlow ? (
+            <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-xs leading-5 text-amber-800">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>평소보다 분석이 오래 걸리고 있습니다. 작업은 서버에서 계속 진행되므로 화면을 닫아도 괜찮습니다.</p>
+            </div>
+          ) : null}
         </div>
       )}
 
       {status === 'failed' && (
-        <div className="border border-red-200 rounded-2xl bg-red-50 px-6 py-5 mb-6">
-          <p className="text-sm font-semibold text-red-700">{error}</p>
+        <div className="mb-6 rounded-2xl border border-rose-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-semibold text-gray-900">{friendlyErrorTitle}</h2>
+                {errorCode ? <span className="rounded-full bg-rose-50 px-2 py-0.5 font-mono text-[10px] text-rose-600">{errorCode}</span> : null}
+              </div>
+              <p className="mt-1 text-sm leading-6 text-gray-600">잠시 후 다시 시도해 주세요. 반복되면 담당자에게 오류 코드를 전달해 주세요.</p>
+            </div>
+          </div>
+          {error ? (
+            <details className="mt-4 rounded-xl bg-gray-50 px-3.5 py-3 text-xs text-gray-600">
+              <summary className="cursor-pointer font-medium text-gray-700">상세 오류 보기</summary>
+              <p className="mt-2 break-words leading-5">{error}</p>
+            </details>
+          ) : null}
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+            {!isPreview ? (
+              <button
+                type="button"
+                onClick={() => void handleRetry()}
+                disabled={retrying}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+              >
+                <RotateCcw className={`h-4 w-4 ${retrying ? 'animate-spin' : ''}`} />
+                {retrying ? '재시도 등록 중...' : '분석 재시도'}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => navigate('/cases')}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto"
+            >
+              <List className="h-4 w-4" /> 케이스 목록으로
+            </button>
+          </div>
         </div>
       )}
 

@@ -14,10 +14,10 @@ const STATUS_LABELS_SIMPLE: Record<string, string> = {
 };
 
 const STATUS_CLS_SIMPLE: Record<string, string> = {
-  uploaded: "bg-orange-100 text-orange-700",
+  uploaded: "bg-gray-100 text-gray-600",
   processing: "bg-blue-100 text-blue-700",
   pending_review: "bg-amber-100 text-amber-700",
-  confirmed: "bg-teal-100 text-teal-700",
+  confirmed: "bg-green-100 text-green-700",
   failed: "bg-rose-100 text-rose-700",
 };
 

@@ -55,10 +55,30 @@ class AIAnalysisResultSerializer(serializers.ModelSerializer):
 
 class ConfirmedFindingSerializer(serializers.ModelSerializer):
     confirmed_by_name = serializers.CharField(source="confirmed_by.name", read_only=True)
+    released_by_name = serializers.CharField(source="released_by.name", read_only=True)
 
     class Meta:
         model = ConfirmedFinding
-        fields = ["final_subtype", "final_note", "confirmed_by_name", "confirmed_at"]
+        fields = [
+            "final_subtype", "final_note", "confirmed_by_name", "confirmed_at",
+            "released_by_name", "released_at",
+        ]
+
+
+class PatientCaseResultSerializer(serializers.ModelSerializer):
+    """환자용 결과. AI 확률/유전자 예측/히트맵 등 내부 자료는 노출하지 않는다."""
+
+    final_subtype = serializers.CharField(source="confirmed_finding.final_subtype", read_only=True)
+    final_note = serializers.CharField(source="confirmed_finding.final_note", read_only=True)
+    confirmed_at = serializers.DateTimeField(source="confirmed_finding.confirmed_at", read_only=True)
+    released_at = serializers.DateTimeField(source="confirmed_finding.released_at", read_only=True)
+
+    class Meta:
+        model = Case
+        fields = [
+            "id", "specimen_id", "final_subtype", "final_note",
+            "confirmed_at", "released_at",
+        ]
 
 
 class CaseReviewLogSerializer(serializers.ModelSerializer):
@@ -132,7 +152,13 @@ class CaseDetailSerializer(serializers.ModelSerializer):
         fields = [
             "id", "specimen_id", "status", "current_step", "patient_name",
             "slide_thumbnail_url", "uploaded_at", "analyzed_at", "completed_at",
+            "analysis_task_id", "analysis_error_code", "analysis_error_message",
+            "last_progress_at", "retry_count",
             "latest_ai_result", "confirmed_finding", "is_favorite",
+        ]
+        read_only_fields = [
+            "analysis_task_id", "analysis_error_code", "analysis_error_message",
+            "last_progress_at", "retry_count",
         ]
 
     def get_latest_ai_result(self, obj):

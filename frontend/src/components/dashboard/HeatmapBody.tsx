@@ -97,6 +97,17 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
   const hasHeatmap = Boolean(caseData.heatmap_url);
   const canDraw = mode === "heatmap" || mode === "overlay" || mode === "original";
 
+  // 선택된 이미지가 없을 때 검은 화면에 머물지 않고 사용 가능한 보기로 이동한다.
+  useEffect(() => {
+    if ((mode === "split" || mode === "overlay") && (!hasOriginal || !hasHeatmap)) {
+      setMode(hasHeatmap ? "heatmap" : "original");
+    } else if (mode === "heatmap" && !hasHeatmap && hasOriginal) {
+      setMode("original");
+    } else if (mode === "original" && !hasOriginal && hasHeatmap) {
+      setMode("heatmap");
+    }
+  }, [hasHeatmap, hasOriginal, mode]);
+
   // ---------------- 컨테이너 실제 픽셀 크기 측정 (줌 전 기준) ----------------
   useLayoutEffect(() => {
     const el = containerRef.current;
@@ -259,11 +270,11 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
   const colors = ["#e11d48", "#2563eb", "#16a34a", "#f59e0b", "#111827"];
 
   // ---------------- 뷰 모드 버튼 ----------------
-  const modeButtons: { v: ViewMode; label: string; icon: typeof SplitSquareHorizontal; disabled?: boolean }[] = [
-    { v: "split", label: "비교", icon: SplitSquareHorizontal, disabled: !hasOriginal || !hasHeatmap },
-    { v: "overlay", label: "오버레이", icon: Layers, disabled: !hasOriginal || !hasHeatmap },
-    { v: "heatmap", label: "히트맵", icon: Eye, disabled: !hasHeatmap },
-    { v: "original", label: "원본", icon: Eye, disabled: !hasOriginal },
+  const modeButtons: { v: ViewMode; label: string; icon: typeof SplitSquareHorizontal; disabled?: boolean; reason?: string }[] = [
+    { v: "split", label: "비교", icon: SplitSquareHorizontal, disabled: !hasOriginal || !hasHeatmap, reason: "원본과 히트맵이 모두 있어야 비교할 수 있습니다." },
+    { v: "overlay", label: "오버레이", icon: Layers, disabled: !hasOriginal || !hasHeatmap, reason: "원본과 히트맵이 모두 있어야 겹쳐 볼 수 있습니다." },
+    { v: "heatmap", label: "히트맵", icon: Eye, disabled: !hasHeatmap, reason: "생성된 히트맵 이미지가 없습니다." },
+    { v: "original", label: "원본", icon: Eye, disabled: !hasOriginal, reason: "원본 썸네일 이미지가 없습니다." },
   ];
 
   const selectedFinding = findings.find((f) => f.id === selectedFindingId) ?? null;
@@ -280,9 +291,21 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
   // ---------------- 렌더 ----------------
   return (
     <div className="space-y-3">
+      {!hasOriginal || !hasHeatmap ? (
+        <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-xs leading-5 text-amber-800">
+          <EyeOff className="mt-0.5 h-4 w-4 shrink-0" />
+          <p>
+            {!hasOriginal && !hasHeatmap
+              ? "원본 썸네일과 히트맵 이미지가 모두 없습니다. 이미지 저장 경로와 생성 상태를 확인해 주세요."
+              : !hasOriginal
+                ? "원본 썸네일이 없어 히트맵만 표시합니다. 비교·오버레이·원본 보기는 사용할 수 없습니다."
+                : "히트맵이 없어 원본만 표시합니다. 비교·오버레이·히트맵 보기는 사용할 수 없습니다."}
+          </p>
+        </div>
+      ) : null}
       {/* 상단 툴바 — 뷰 모드 탭 + 줌 */}
-      <div className="flex items-center gap-2 flex-wrap p-2 bg-white border border-gray-200 rounded-xl">
-        <div className="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 p-0.5">
+      <div className="flex items-center gap-2 overflow-x-auto p-2 bg-white border border-gray-200 rounded-xl sm:flex-wrap">
+        <div className="inline-flex min-w-max items-center rounded-lg border border-gray-200 bg-gray-50 p-0.5">
           {modeButtons.map((b) => {
             const Icon = b.icon;
             return (
@@ -290,6 +313,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
                 key={b.v}
                 disabled={b.disabled}
                 onClick={() => changeMode(b.v)}
+                title={b.disabled ? b.reason : `${b.label} 보기`}
                 className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   mode === b.v
                     ? "bg-teal-600 text-white shadow-sm"
@@ -331,7 +355,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
 
         {/* 줌 컨트롤 */}
         {mode !== "findings" && (
-          <div className="ml-auto inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 p-0.5">
+          <div className="ml-auto inline-flex min-w-max items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 p-0.5">
             <button
               onClick={() => transformRef.current?.zoomOut()}
               className="w-7 h-7 flex items-center justify-center rounded-md text-gray-600 hover:bg-white cursor-pointer"
@@ -483,7 +507,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
             )}
           </div>
 
-          <div className="relative rounded-xl overflow-hidden bg-gray-900 border border-gray-200" style={{ height: 560 }}>
+          <div className="relative h-[360px] overflow-hidden rounded-xl border border-gray-200 bg-gray-900 sm:h-[480px] lg:h-[560px]">
             {selectedFinding ? (
               <>
                 <img
@@ -503,7 +527,7 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
                     style={{ zIndex: -1 }}
                   />
                 )}
-                <Stage width={stageSize.w} height={560} className="absolute inset-0">
+                <Stage width={stageSize.w} height={stageSize.h} className="absolute inset-0">
                   <Layer listening={false}>
                     {selectedFinding.strokes.map((s, i) => (
                       <Line
@@ -543,8 +567,8 @@ export function HeatmapBody({ caseData }: { caseData: CaseDetail }) {
           {/* 이미지 영역 */}
           <div
             ref={containerRef}
-            className="relative rounded-xl overflow-hidden bg-gray-900 border border-gray-200 select-none"
-            style={{ height: 560, cursor: !canDraw || tool === "move" ? "grab" : "crosshair" }}
+            className="relative h-[360px] overflow-hidden rounded-xl border border-gray-200 bg-gray-900 select-none sm:h-[480px] lg:h-[560px]"
+            style={{ cursor: !canDraw || tool === "move" ? "grab" : "crosshair" }}
           >
             <TransformWrapper
               ref={transformRef}

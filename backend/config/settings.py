@@ -203,6 +203,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "medications.tasks.check_medication_compliance",
         "schedule": 3600.0,
     },
+    "stale-case-analysis-check": {
+        "task": "cases.tasks.fail_stale_case_analyses",
+        "schedule": 300.0,
+    },
 }
 
 # accounts/views.py의 SMS 인증코드·소셜가입 임시세션이 여러 워커/프로세스에서
