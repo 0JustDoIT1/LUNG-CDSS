@@ -3,6 +3,39 @@ from rest_framework import serializers
 from .models import Appointment
 
 
+class DepartmentOptionSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    name = serializers.CharField()
+
+
+class WeeklyScheduleSerializer(serializers.Serializer):
+    day_of_week = serializers.ChoiceField(choices=["mon", "tue", "wed", "thu", "fri", "sat", "sun"])
+    period = serializers.ChoiceField(choices=["am", "pm"])
+    available = serializers.BooleanField()
+
+
+class DoctorOptionSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    department = serializers.CharField()
+    photo_url = serializers.URLField(allow_null=True, required=False)
+    specialty_tags = serializers.ListField(child=serializers.CharField())
+    is_assigned = serializers.BooleanField()
+    weekly_schedule = WeeklyScheduleSerializer(many=True)
+
+
+class AppointmentSlotSerializer(serializers.Serializer):
+    time = serializers.CharField()
+    datetime = serializers.DateTimeField()
+    status = serializers.ChoiceField(choices=["available", "closed"])
+
+
+class AppointmentSlotListSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    timezone = serializers.CharField()
+    slots = AppointmentSlotSerializer(many=True)
+
+
 class AppointmentCreateSerializer(serializers.Serializer):
     doctor_id = serializers.UUIDField()
     department = serializers.CharField()

@@ -33,6 +33,13 @@ class Appointment(models.Model):
 
     class Meta:
         ordering = ["requested_at_slot"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["doctor", "requested_at_slot"],
+                condition=models.Q(status__in=["requested", "confirmed", "reminded_d7", "reminded_d1"]),
+                name="uniq_active_doctor_slot",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.patient.name} · {self.department} · {self.status}"

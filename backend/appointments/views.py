@@ -1,9 +1,11 @@
 import datetime
 
+from django.conf import settings
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -13,7 +15,13 @@ from accounts.permissions import IsDoctor, IsNurse, IsPatient
 from communication.services import notify
 
 from .models import Appointment
-from .serializers import AppointmentCreateSerializer, AppointmentSerializer
+from .serializers import (
+    AppointmentCreateSerializer,
+    AppointmentSerializer,
+    AppointmentSlotListSerializer,
+    DepartmentOptionSerializer,
+    DoctorOptionSerializer,
+)
 from core.responses import error_response, validation_error_response
 
 DAY_CODES = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
@@ -21,15 +29,22 @@ SLOTS_AM = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30"]
 SLOTS_PM = ["13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"]
 
 
-@extend_schema(tags=["appointments"])
+@extend_schema(tags=["appointments"], responses={200: DepartmentOptionSerializer(many=True)})
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def department_list(request):
     departments = DoctorProfile.objects.values_list("department", flat=True).distinct()
-    return Response(sorted(set(departments)))
+    return Response([
+        {"code": department, "name": department}
+        for department in sorted(set(departments))
+    ])
 
 
-@extend_schema(tags=["appointments"])
+@extend_schema(
+    tags=["appointments"],
+    parameters=[OpenApiParameter("department", str, OpenApiParameter.QUERY, required=True)],
+    responses={200: DoctorOptionSerializer(many=True)},
+)
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def doctor_list(request):
@@ -45,6 +60,7 @@ def doctor_list(request):
         data.append({
             "id": str(profile.user_id),
             "name": profile.user.name,
+            "department": profile.department,
             "photo_url": profile.photo_url,
             "specialty_tags": profile.specialty_tags,
             "is_assigned": profile.user_id == assigned_doctor_id,
@@ -93,15 +109,43 @@ def _available_slots_for_date(doctor_id, date):
     return [slot for slot in candidates if slot not in taken_str]
 
 
-@extend_schema(tags=["appointments"])
+def _slot_response_for_date(doctor_id, date):
+    available = set(_available_slots_for_date(doctor_id, date))
+    slots = []
+    for time_str in SLOTS_AM + SLOTS_PM:
+        hour, minute = map(int, time_str.split(":"))
+        slot_at = timezone.make_aware(
+            datetime.datetime.combine(date, datetime.time(hour, minute)),
+            timezone.get_current_timezone(),
+        )
+        is_available = time_str in available and slot_at > timezone.now()
+        slots.append({
+            "time": time_str,
+            "datetime": slot_at,
+            "status": "available" if is_available else "closed",
+        })
+    return {"date": date, "timezone": settings.TIME_ZONE, "slots": slots}
+
+
+@extend_schema(
+    tags=["appointments"],
+    parameters=[
+        OpenApiParameter("date", datetime.date, OpenApiParameter.QUERY, required=True),
+    ],
+    responses={200: AppointmentSlotListSerializer},
+)
 @api_view(["GET"])
 @permission_classes([IsPatient])
 def available_slots(request, doctor_id):
     date_str = request.query_params.get("date")
     if not date_str:
         return error_response("date는 필수입니다 (YYYY-MM-DD)", status_code=status.HTTP_400_BAD_REQUEST)
-    date = datetime.date.fromisoformat(date_str)
-    return Response(_available_slots_for_date(doctor_id, date))
+    try:
+        date = datetime.date.fromisoformat(date_str)
+    except ValueError:
+        return error_response("date는 YYYY-MM-DD 형식이어야 합니다.", status_code=status.HTTP_400_BAD_REQUEST)
+    get_object_or_404(User, id=doctor_id, role=User.Role.DOCTOR, is_active=True)
+    return Response(AppointmentSlotListSerializer(_slot_response_for_date(doctor_id, date)).data)
 
 
 @extend_schema(tags=["appointments"], request=AppointmentCreateSerializer, responses={201: AppointmentSerializer})
@@ -120,13 +164,30 @@ def create_appointment(request):
     slot = data["requested_at_slot"]
     doctor = get_object_or_404(User, id=data["doctor_id"], role="doctor")
 
+    if slot <= timezone.now():
+        return error_response("지난 시간에는 예약할 수 없습니다.", status_code=status.HTTP_400_BAD_REQUEST)
+
+    doctor_department = DoctorProfile.objects.filter(user=doctor).values_list("department", flat=True).first()
+    if doctor_department != data["department"]:
+        return error_response("의사의 진료과와 요청한 진료과가 일치하지 않습니다.", status_code=status.HTTP_400_BAD_REQUEST)
+
     available = _available_slots_for_date(doctor.id, slot.date())
     if slot.strftime("%H:%M") not in available:
         return error_response("선택하신 시간은 더 이상 예약할 수 없습니다", status_code=status.HTTP_409_CONFLICT)
 
-    appointment = Appointment.objects.create(
-        patient=request.user, doctor=doctor, department=data["department"], requested_at_slot=slot,
-    )
+    try:
+        with transaction.atomic():
+            appointment = Appointment.objects.create(
+                patient=request.user,
+                doctor=doctor,
+                department=data["department"],
+                requested_at_slot=slot,
+            )
+    except IntegrityError:
+        return error_response(
+            "선택한 시간은 다른 예약에서 먼저 선점되었습니다.",
+            status_code=status.HTTP_409_CONFLICT,
+        )
     notify(
         recipient_id=doctor.id,
         category="appointment",
