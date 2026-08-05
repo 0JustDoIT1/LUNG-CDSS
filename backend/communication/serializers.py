@@ -21,11 +21,15 @@ class MessageMentionSerializer(serializers.ModelSerializer):
 class ChatThreadSerializer(serializers.ModelSerializer):
     other_participant_name = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
+    last_message_at = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatThread
-        fields = ["id", "related_case", "other_participant_name", "last_message", "unread_count", "created_at"]
+        fields = [
+            "id", "related_case", "other_participant_name", "last_message",
+            "last_message_at", "unread_count", "created_at",
+        ]
 
     def get_other_participant_name(self, obj):
         request = self.context.get("request")
@@ -36,10 +40,20 @@ class ChatThreadSerializer(serializers.ModelSerializer):
         msg = obj.messages.order_by("-created_at").first()
         return msg.content if msg else None
 
+    def get_last_message_at(self, obj):
+        msg = obj.messages.order_by("-created_at").first()
+        return msg.created_at if msg else None
+
     def get_unread_count(self, obj):
-        # 읽음추적 테이블(MessageReadStatus)은 의료진앱 정책상 제거됨 —
-        # "안읽음" 배지는 지금은 단순히 최근 N분 내 메시지 존재여부로 근사.
-        return 0
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return 0
+
+        participant = obj.participants.filter(user=request.user).first()
+        unread = obj.messages.exclude(sender=request.user)
+        if participant and participant.last_read_at:
+            unread = unread.filter(created_at__gt=participant.last_read_at)
+        return unread.count()
 
 
 class NotificationSerializer(serializers.ModelSerializer):

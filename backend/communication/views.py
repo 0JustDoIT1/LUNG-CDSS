@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import F, Max, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -35,7 +35,12 @@ def thread_list(request):
     UX상 자연스럽지만 여기서는 "이미 생성된 스레드"만 반환하고,
     최초 대화는 start_thread로 상대를 지정해 생성한다.
     """
-    threads = ChatThread.objects.filter(participants__user=request.user).distinct()
+    threads = (
+        ChatThread.objects.filter(participants__user=request.user)
+        .annotate(last_message_at_sort=Max("messages__created_at"))
+        .order_by(F("last_message_at_sort").desc(nulls_last=True), "-created_at")
+        .distinct()
+    )
     return Response(ChatThreadSerializer(threads, many=True, context={"request": request}).data)
 
 
@@ -90,7 +95,12 @@ def message_list_create(request, thread_id):
 
     if request.method == "GET":
         messages = thread.messages.select_related("sender")
-        return Response(MessageSerializer(messages, many=True).data)
+        data = MessageSerializer(messages, many=True).data
+        if data:
+            ChatThreadParticipant.objects.filter(
+                thread=thread, user=request.user
+            ).update(last_read_at=data[-1]["created_at"])
+        return Response(data)
 
     content = request.data.get("content")
     voice_url = request.data.get("voice_url")

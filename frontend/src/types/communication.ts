@@ -3,6 +3,7 @@ export interface ChatThread {
   related_case: string | null;
   other_participant_name: string | null;
   last_message: string | null;
+  last_message_at: string | null;
   unread_count: number;
   created_at: string;
 }

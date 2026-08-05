@@ -23,6 +23,7 @@ class ChatThread(models.Model):
 class ChatThreadParticipant(models.Model):
     thread = models.ForeignKey(ChatThread, on_delete=models.CASCADE, related_name="participants")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_threads")
+    last_read_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
