@@ -20,6 +20,7 @@ class SymptomSubmitSerializer(serializers.Serializer):
 
 class SymptomCheckSerializer(serializers.ModelSerializer):
     patient_name = serializers.CharField(source="patient.name", read_only=True)
+    symptoms = SymptomSubmitSerializer(read_only=True)
 
     class Meta:
         model = SymptomCheck
