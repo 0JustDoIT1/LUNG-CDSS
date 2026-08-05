@@ -127,6 +127,13 @@ def create_appointment(request):
     appointment = Appointment.objects.create(
         patient=request.user, doctor=doctor, department=data["department"], requested_at_slot=slot,
     )
+    notify(
+        recipient_id=doctor.id,
+        category="appointment",
+        title="새 예약 신청",
+        body=f"{request.user.name}님이 {slot.strftime('%m월 %d일 %H:%M')} 예약을 신청했습니다.",
+        deep_link=f"/appointments/{appointment.id}",
+    )
     return Response(AppointmentSerializer(appointment).data, status=status.HTTP_201_CREATED)
 
 
@@ -145,6 +152,13 @@ def cancel_appointment(request, appointment_id):
     appt = get_object_or_404(Appointment, id=appointment_id, patient=request.user)
     appt.status = Appointment.Status.CANCELLED
     appt.save(update_fields=["status"])
+    notify(
+        recipient_id=appt.doctor_id,
+        category="appointment",
+        title="예약 취소",
+        body=f"{request.user.name}님이 {appt.department} 예약을 취소했습니다.",
+        deep_link=f"/appointments/{appt.id}",
+    )
     return Response(AppointmentSerializer(appt).data)
 
 

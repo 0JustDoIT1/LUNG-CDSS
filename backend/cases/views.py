@@ -443,6 +443,14 @@ def review_case(request, case_id):
         case.status = Case.Status.CONFIRMED
         case.save(update_fields=["status"])
 
+    notify(
+        recipient_id=case.patient_id,
+        category="case_review",
+        title="검사결과가 공개되었습니다",
+        body=f"{case.specimen_id} 검사결과를 확인할 수 있습니다.",
+        deep_link=f"/results/{case.id}",
+    )
+
     return Response(CaseDetailSerializer(case, context={"request": request}).data)
 
 

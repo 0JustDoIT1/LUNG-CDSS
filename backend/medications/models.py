@@ -28,6 +28,7 @@ class MedicationLog(models.Model):
     scheduled_time = models.DateTimeField()
     taken = models.BooleanField(default=False)
     taken_at = models.DateTimeField(blank=True, null=True)
+    reminder_sent_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ["scheduled_time"]

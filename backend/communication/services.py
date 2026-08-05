@@ -10,6 +10,8 @@ FCM 발송 실패는 notify() 자체를 실패시키지 않는다 — 알림 히
 
 import logging
 
+from django.db import transaction
+
 from .models import Notification
 
 logger = logging.getLogger(__name__)
@@ -18,6 +20,9 @@ logger = logging.getLogger(__name__)
 def notify(recipient_id, category, title, body, deep_link=None):
     from accounts.models import NotificationPreference
 
+    if category not in Notification.Category.values:
+        raise ValueError(f"Unsupported notification category: {category}")
+
     pref = NotificationPreference.objects.filter(user_id=recipient_id, category=category).first()
     if pref is not None and not pref.enabled:
         return None
@@ -25,11 +30,13 @@ def notify(recipient_id, category, title, body, deep_link=None):
     notification = Notification.objects.create(
         recipient_id=recipient_id, category=category, title=title, body=body, deep_link=deep_link or "",
     )
-    _send_fcm(recipient_id, title, body, deep_link)
+    transaction.on_commit(
+        lambda: _send_fcm(recipient_id, category, title, body, deep_link or ""),
+    )
     return notification
 
 
-def _send_fcm(recipient_id, title, body, deep_link):
+def _send_fcm(recipient_id, category, title, body, deep_link):
     from accounts.models import DeviceToken
 
     tokens = list(DeviceToken.objects.filter(user_id=recipient_id))
@@ -51,7 +58,7 @@ def _send_fcm(recipient_id, title, body, deep_link):
     for device in tokens:
         message = messaging.Message(
             notification=messaging.Notification(title=title, body=body),
-            data={"deep_link": deep_link or "", "category": ""},
+            data={"deep_link": deep_link, "category": category},
             token=device.fcm_token,
         )
         try:

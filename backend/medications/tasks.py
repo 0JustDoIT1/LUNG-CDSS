@@ -9,6 +9,28 @@ from .models import MedicationLog
 
 
 @shared_task
+def send_due_medication_reminders():
+    now = timezone.now()
+    due_logs = MedicationLog.objects.filter(
+        taken=False,
+        reminder_sent_at__isnull=True,
+        scheduled_time__lte=now,
+        scheduled_time__gt=now - timedelta(minutes=5),
+    ).select_related("schedule")
+
+    for log in due_logs:
+        notify(
+            recipient_id=log.schedule.patient_id,
+            category="medication",
+            title="복약 시간입니다",
+            body=f"{log.schedule.drug_name} {log.schedule.dosage}을(를) 복용해주세요.",
+            deep_link=f"/medications/logs/{log.id}",
+        )
+        log.reminder_sent_at = now
+        log.save(update_fields=["reminder_sent_at"])
+
+
+@shared_task
 def check_medication_compliance():
     """
     스케줄 시간이 2시간 이상 지났는데 taken=False인 로그를 찾아 환자 본인에게만

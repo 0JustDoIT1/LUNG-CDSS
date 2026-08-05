@@ -195,6 +195,10 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE  # Asia/Seoul
 
 CELERY_BEAT_SCHEDULE = {
+    "medication-due-reminders": {
+        "task": "medications.tasks.send_due_medication_reminders",
+        "schedule": 60.0,
+    },
     "appointment-reminders-d7-d1": {
         "task": "appointments.tasks.send_appointment_reminders",
         "schedule": 3600.0,  # 매시 정각 실행, 대상 필터링은 task 내부에서
