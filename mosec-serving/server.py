@@ -153,7 +153,7 @@ class LungCDSSWorker(Worker):
         heatmap_path = upload_image_to_gcs(heatmap_img, f"reports/{case_id}/heatmap.png")
         print(f"[{case_id}] 결과 이미지 업로드 완료", flush=True)
 
-        return {
+        result = {
             "prediction_label": "LUAD" if luad_prob > lusc_prob else "LUSC",
             "luad_probability": luad_prob,
             "lusc_probability": lusc_prob,
@@ -162,6 +162,8 @@ class LungCDSSWorker(Worker):
             **nuclei_summary,
             "gene_predictions": gene_predictions_result,
         }
+        print(f"[{case_id}] 응답조립 완료, 타입확인: {[(k, type(v)) for k, v in result.items()]}", flush=True)
+        return result
 
 if __name__ == "__main__":
     server = Server()
