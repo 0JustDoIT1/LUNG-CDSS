@@ -1,13 +1,15 @@
 import datetime
 
-from django.db.models import Count, Q
+from django.db.models import Count, Exists, OuterRef, Q
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from accounts.permissions import IsNurse, IsPatient
+from accounts.models import User
+from accounts.permissions import IsDoctorOrNurse, IsNurse, IsPatient
+from cases.models import Case
 
 from .models import MedicationLog, MedicationSchedule
 from .serializers import (
@@ -15,10 +17,39 @@ from .serializers import (
     MedicationScheduleCreateSerializer,
     MedicationScheduleSerializer,
     MonthlyComplianceSerializer,
+    PendingSetupPatientSerializer,
 )
 from core.responses import error_response, validation_error_response
 
 MAX_AUTOGEN_DAYS = 90  # end_date 미정인 처방도 무한정 로그를 만들지 않도록 상한
+
+
+@extend_schema(tags=['medications'], responses={200: PendingSetupPatientSerializer(many=True)})
+@api_view(['GET'])
+@permission_classes([IsDoctorOrNurse])
+def pending_setup_patients(request):
+    confirmed_cases = Case.objects.filter(
+        patient_id=OuterRef('pk'),
+        status=Case.Status.CONFIRMED,
+        confirmed_finding__isnull=False,
+    )
+    schedules = MedicationSchedule.objects.filter(patient_id=OuterRef('pk'))
+    patients = User.objects.filter(role=User.Role.PATIENT, is_active=True)
+    if request.user.role == User.Role.DOCTOR:
+        patients = patients.filter(patient_profile__assigned_doctor=request.user)
+    else:
+        nurse_profile = getattr(request.user, 'nurse_profile', None)
+        if nurse_profile is None:
+            return Response([])
+        patients = patients.filter(patient_profile__hospital_id=nurse_profile.hospital_id)
+
+    patients = (
+        patients
+        .annotate(has_confirmed_plan=Exists(confirmed_cases), has_schedule=Exists(schedules))
+        .filter(has_confirmed_plan=True, has_schedule=False)
+        .order_by('name', 'id')
+    )
+    return Response(PendingSetupPatientSerializer(patients, many=True).data)
 
 
 @extend_schema(tags=["medications"], request=MedicationScheduleCreateSerializer, responses={201: MedicationScheduleSerializer})

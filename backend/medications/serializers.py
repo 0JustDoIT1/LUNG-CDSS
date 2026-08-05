@@ -42,3 +42,8 @@ class MonthlyComplianceSerializer(serializers.Serializer):
     missed_count = serializers.IntegerField()
     compliance_rate = serializers.IntegerField(allow_null=True)
     daily = DailyComplianceSerializer(many=True)
+
+
+class PendingSetupPatientSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
