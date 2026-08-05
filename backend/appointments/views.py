@@ -193,7 +193,7 @@ def create_appointment(request):
         category="appointment",
         title="새 예약 신청",
         body=f"{request.user.name}님이 {slot.strftime('%m월 %d일 %H:%M')} 예약을 신청했습니다.",
-        deep_link=f"/appointments/{appointment.id}",
+        deep_link=f"/doctor-dashboard/schedule?appointment={appointment.id}",
     )
     return Response(AppointmentSerializer(appointment).data, status=status.HTTP_201_CREATED)
 
@@ -375,3 +375,33 @@ def doctor_my_appointments(request):
         status=Appointment.Status.CANCELLED
     ).order_by("confirmed_slot")
     return Response(AppointmentSerializer(appointments, many=True).data)
+
+
+@extend_schema(tags=["appointments"], responses={200: AppointmentSerializer})
+@api_view(["POST"])
+@permission_classes([IsDoctor])
+def doctor_approve_appointment(request, appointment_id):
+    with transaction.atomic():
+        appointment = get_object_or_404(
+            Appointment.objects.select_for_update(),
+            id=appointment_id,
+            doctor=request.user,
+        )
+        if appointment.status != Appointment.Status.REQUESTED:
+            return error_response(
+                "승인 대기 중인 예약만 승인할 수 있습니다.",
+                status_code=status.HTTP_409_CONFLICT,
+            )
+
+        appointment.status = Appointment.Status.CONFIRMED
+        appointment.confirmed_slot = appointment.requested_at_slot
+        appointment.save(update_fields=["status", "confirmed_slot"])
+
+    notify(
+        recipient_id=appointment.patient_id,
+        category="appointment",
+        title="예약 확정",
+        body=f"{appointment.department} 예약이 확정되었습니다.",
+        deep_link=f"/appointments/{appointment.id}",
+    )
+    return Response(AppointmentSerializer(appointment).data)

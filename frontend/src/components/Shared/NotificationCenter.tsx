@@ -34,8 +34,16 @@ function CategoryIcon({ category }: { category: NotificationCategory }): React.J
 }
 
 function normalizeDeepLink(deepLink: string): string {
-  if (!deepLink.startsWith("/")) return `/${deepLink}`;
-  return deepLink;
+  const normalized = deepLink.startsWith("/") ? deepLink : `/${deepLink}`;
+
+  // Older appointment notifications point to a detail route that does not
+  // exist in the doctor web app. Keep those stored notifications usable.
+  const legacyAppointmentMatch = normalized.match(/^\/appointments\/([^/]+)\/?$/);
+  if (legacyAppointmentMatch) {
+    return `/doctor-dashboard/schedule?appointment=${encodeURIComponent(legacyAppointmentMatch[1])}`;
+  }
+
+  return normalized;
 }
 
 export default function NotificationCenter(): React.JSX.Element {

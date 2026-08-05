@@ -12,3 +12,24 @@ export interface DoctorOffDay {
   date: string;
   reason: string;
 }
+
+export type AppointmentStatus =
+  | "requested"
+  | "confirmed"
+  | "reminded_d7"
+  | "reminded_d1"
+  | "checked_in"
+  | "completed"
+  | "cancelled"
+  | "no_show";
+
+export interface DoctorAppointment {
+  id: string;
+  patient_name: string;
+  doctor_name: string;
+  department: string;
+  requested_at_slot: string;
+  confirmed_slot: string | null;
+  status: AppointmentStatus;
+  created_at: string;
+}

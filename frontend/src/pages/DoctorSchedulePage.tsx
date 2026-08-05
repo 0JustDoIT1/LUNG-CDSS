@@ -1,15 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { CalendarClock, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import {
+  approveDoctorAppointment,
   createDoctorOffDay,
   deleteDoctorOffDay,
+  getDoctorAppointments,
   getDoctorOffDays,
   getDoctorWeeklySchedule,
   updateDoctorWeeklySchedule,
 } from "../api/appointments";
 import Header from "../components/Shared/Header";
-import type { DoctorOffDay, ScheduleDay, SchedulePeriod, WeeklyScheduleEntry } from "../types/appointment";
+import type { DoctorAppointment, DoctorOffDay, ScheduleDay, SchedulePeriod, WeeklyScheduleEntry } from "../types/appointment";
+
+const APPOINTMENT_STATUS_LABEL: Record<DoctorAppointment["status"], string> = {
+  requested: "승인 대기",
+  confirmed: "예약 확정",
+  reminded_d7: "예약 확정",
+  reminded_d1: "예약 확정",
+  checked_in: "접수 완료",
+  completed: "진료 완료",
+  cancelled: "취소",
+  no_show: "미방문",
+};
 
 const DAYS: Array<{ value: ScheduleDay; label: string }> = [
   { value: "mon", label: "월" },
@@ -202,19 +216,23 @@ function emptySchedule(): WeeklyScheduleEntry[] {
 }
 
 export default function DoctorSchedulePage(): React.JSX.Element {
+  const [searchParams] = useSearchParams();
+  const selectedAppointmentId = searchParams.get("appointment");
   const [schedule, setSchedule] = useState<WeeklyScheduleEntry[]>(emptySchedule);
   const [offDays, setOffDays] = useState<DoctorOffDay[]>([]);
+  const [appointments, setAppointments] = useState<DoctorAppointment[]>([]);
   const [date, setDate] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    void Promise.all([getDoctorWeeklySchedule(), getDoctorOffDays()])
-      .then(([scheduleData, offDayData]) => {
+    void Promise.all([getDoctorWeeklySchedule(), getDoctorOffDays(), getDoctorAppointments()])
+      .then(([scheduleData, offDayData, appointmentData]) => {
         if (!active) return;
         const loaded = emptySchedule().map((entry) => {
           const saved = scheduleData.find((item) => item.day_of_week === entry.day_of_week && item.period === entry.period);
@@ -222,6 +240,7 @@ export default function DoctorSchedulePage(): React.JSX.Element {
         });
         setSchedule(loaded);
         setOffDays(offDayData);
+        setAppointments(appointmentData);
       })
       .catch(() => {
         if (active) setError("진료 일정을 불러오지 못했습니다.");
@@ -288,6 +307,21 @@ export default function DoctorSchedulePage(): React.JSX.Element {
     }
   }
 
+  async function approveAppointment(id: string): Promise<void> {
+    setApprovingId(id);
+    setError(null);
+    setMessage(null);
+    try {
+      const updated = await approveDoctorAppointment(id);
+      setAppointments((current) => current.map((item) => item.id === id ? updated : item));
+      setMessage(`${updated.patient_name}님의 예약을 승인했습니다.`);
+    } catch {
+      setError("예약을 승인하지 못했습니다. 예약 상태를 다시 확인해주세요.");
+    } finally {
+      setApprovingId(null);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f7f8fa]">
       <Header />
@@ -304,7 +338,85 @@ export default function DoctorSchedulePage(): React.JSX.Element {
         {loading ? (
           <div className="flex min-h-72 items-center justify-center rounded-2xl border border-gray-200 bg-white"><Loader2 className="h-6 w-6 animate-spin text-teal-600" /></div>
         ) : (
-          <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-5">
+            <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50/80 px-5 py-4">
+                <CalendarClock className="h-4 w-4 text-teal-600" />
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-900">예약 신청 목록</h2>
+                  <p className="mt-1 text-xs text-gray-500">환자가 신청한 예약 시간과 처리 상태입니다.</p>
+                </div>
+              </div>
+              <div className="p-5">
+                {appointments.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-gray-400">예약 신청이 없습니다.</p>
+                ) : (
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    {appointments.map((appointment) => {
+                      const selected = appointment.id === selectedAppointmentId;
+                      const appointmentAt = appointment.confirmed_slot ?? appointment.requested_at_slot;
+                      return (
+                        <article
+                          key={appointment.id}
+                          id={`appointment-${appointment.id}`}
+                          className={`rounded-xl border p-4 transition ${
+                            selected
+                              ? "border-teal-500 bg-teal-50 ring-2 ring-teal-100"
+                              : "border-gray-200 bg-white"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="font-semibold text-gray-900">{appointment.patient_name}</p>
+                              <p className="mt-1 text-xs text-gray-500">{appointment.department}</p>
+                            </div>
+                            <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
+                              appointment.status === "requested"
+                                ? "bg-amber-100 text-amber-700"
+                                : appointment.status === "cancelled" || appointment.status === "no_show"
+                                  ? "bg-rose-100 text-rose-700"
+                                  : "bg-teal-100 text-teal-700"
+                            }`}>
+                              {APPOINTMENT_STATUS_LABEL[appointment.status]}
+                            </span>
+                          </div>
+                          <p className="mt-3 text-sm font-medium text-gray-700">
+                            {new Date(appointmentAt).toLocaleString("ko-KR", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                              weekday: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                          <p className="mt-2 text-[11px] text-gray-400">
+                            신청 {new Date(appointment.created_at).toLocaleString("ko-KR")}
+                          </p>
+                          {appointment.status === "requested" ? (
+                            <button
+                              type="button"
+                              onClick={() => void approveAppointment(appointment.id)}
+                              disabled={approvingId !== null}
+                              className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-teal-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:opacity-50"
+                            >
+                              {approvingId === appointment.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <CheckCircle2 className="h-4 w-4" />
+                              )}
+                              {approvingId === appointment.id ? "승인 처리 중..." : "예약 승인"}
+                            </button>
+                          ) : null}
+                        </article>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
             <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
               <div className="border-b border-gray-100 bg-gray-50/80 px-5 py-4">
                 <h2 className="text-sm font-semibold text-gray-900">주간 진료 일정</h2>
@@ -370,6 +482,7 @@ export default function DoctorSchedulePage(): React.JSX.Element {
                 </div>
               </div>
             </section>
+          </div>
           </div>
         )}
       </main>

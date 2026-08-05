@@ -1,5 +1,15 @@
 import apiClient from "./client";
-import type { DoctorOffDay, WeeklyScheduleEntry } from "../types/appointment";
+import type { DoctorAppointment, DoctorOffDay, WeeklyScheduleEntry } from "../types/appointment";
+
+export async function getDoctorAppointments() {
+  const { data } = await apiClient.get<DoctorAppointment[]>("/appointments/doctor/mine/");
+  return data;
+}
+
+export async function approveDoctorAppointment(id: string) {
+  const { data } = await apiClient.post<DoctorAppointment>(`/appointments/doctor/${id}/approve/`);
+  return data;
+}
 
 export async function getDoctorWeeklySchedule() {
   const { data } = await apiClient.get<WeeklyScheduleEntry[]>("/appointments/doctor/weekly-schedule/");
