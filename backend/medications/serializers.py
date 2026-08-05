@@ -47,3 +47,13 @@ class MonthlyComplianceSerializer(serializers.Serializer):
 class PendingSetupPatientSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     name = serializers.CharField()
+
+
+class MedicationReminderRequestSerializer(serializers.Serializer):
+    patient_id = serializers.UUIDField()
+    message = serializers.CharField(required=False, allow_blank=False)
+
+
+class MedicationReminderResponseSerializer(serializers.Serializer):
+    accepted = serializers.BooleanField()
+    notification_id = serializers.UUIDField(allow_null=True)

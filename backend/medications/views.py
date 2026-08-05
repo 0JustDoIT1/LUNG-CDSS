@@ -1,19 +1,24 @@
 import datetime
+import uuid
 
 from django.db.models import Count, Exists, OuterRef, Q
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.models import User
 from accounts.permissions import IsDoctorOrNurse, IsNurse, IsPatient
 from cases.models import Case
+from communication.services import notify
 
 from .models import MedicationLog, MedicationSchedule
 from .serializers import (
     MedicationLogSerializer,
+    MedicationReminderRequestSerializer,
+    MedicationReminderResponseSerializer,
     MedicationScheduleCreateSerializer,
     MedicationScheduleSerializer,
     MonthlyComplianceSerializer,
@@ -81,15 +86,90 @@ def _generate_logs(schedule):
     MedicationLog.objects.bulk_create(logs)
 
 
-@extend_schema(tags=["medications"], responses={200: MedicationLogSerializer(many=True)})
+def _nurse_can_access_patient(nurse, patient):
+    nurse_profile = getattr(nurse, "nurse_profile", None)
+    patient_profile = getattr(patient, "patient_profile", None)
+    return bool(
+        nurse_profile
+        and patient_profile
+        and nurse_profile.hospital_id == patient_profile.hospital_id
+    )
+
+
+@extend_schema(
+    tags=["medications"],
+    parameters=[
+        OpenApiParameter(
+            "patient_id", str, OpenApiParameter.QUERY,
+            description="간호사가 같은 병원 환자를 조회할 때 필수. 환자 본인 조회 시 생략합니다.",
+            required=False,
+        ),
+    ],
+    responses={200: MedicationLogSerializer(many=True)},
+)
 @api_view(["GET"])
-@permission_classes([IsPatient])
+@permission_classes([IsAuthenticated])
 def today_logs(request):
+    if request.user.role == User.Role.PATIENT:
+        patient = request.user
+    elif request.user.role == User.Role.NURSE:
+        patient_id = request.query_params.get("patient_id")
+        if not patient_id:
+            return error_response("patient_id is required for nurses.", status_code=status.HTTP_400_BAD_REQUEST)
+        try:
+            patient_id = uuid.UUID(patient_id)
+        except (TypeError, ValueError):
+            return error_response("patient_id must be a valid UUID.", status_code=status.HTTP_400_BAD_REQUEST)
+        patient = User.objects.filter(id=patient_id, role=User.Role.PATIENT).first()
+        if patient is None:
+            return error_response("Patient not found.", status_code=status.HTTP_404_NOT_FOUND)
+        if not _nurse_can_access_patient(request.user, patient):
+            return error_response("You cannot access this patient.", status_code=status.HTTP_403_FORBIDDEN)
+    else:
+        return error_response("Permission denied.", status_code=status.HTTP_403_FORBIDDEN)
+
     today = timezone.localdate()
     logs = MedicationLog.objects.filter(
-        schedule__patient=request.user, scheduled_time__date=today
+        schedule__patient=patient, scheduled_time__date=today
     ).select_related("schedule").order_by("scheduled_time")
     return Response(MedicationLogSerializer(logs, many=True).data)
+
+
+@extend_schema(
+    tags=["medications"],
+    request=MedicationReminderRequestSerializer,
+    responses={202: MedicationReminderResponseSerializer},
+)
+@api_view(["POST"])
+@permission_classes([IsNurse])
+def send_medication_reminder(request):
+    serializer = MedicationReminderRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return validation_error_response(serializer.errors)
+    patient_id = serializer.validated_data["patient_id"]
+
+    patient = User.objects.filter(id=patient_id, role=User.Role.PATIENT).first()
+    if patient is None:
+        return error_response("Patient not found.", status_code=status.HTTP_404_NOT_FOUND)
+    if not _nurse_can_access_patient(request.user, patient):
+        return error_response("You cannot access this patient.", status_code=status.HTTP_403_FORBIDDEN)
+
+    body = serializer.validated_data.get("message", "복약 시간입니다. 처방된 약을 복용해 주세요.")
+
+    notification = notify(
+        recipient_id=patient.id,
+        category="medication",
+        title="복약 알림",
+        body=body,
+        deep_link="/medications",
+    )
+    return Response(
+        {
+            "accepted": notification is not None,
+            "notification_id": str(notification.id) if notification else None,
+        },
+        status=status.HTTP_202_ACCEPTED,
+    )
 
 
 @extend_schema(tags=["medications"], responses={200: MedicationLogSerializer})

@@ -7,7 +7,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import User
+from accounts.models import Hospital, NurseProfile, PatientProfile, User
 
 from .models import MedicationLog, MedicationSchedule
 from .tasks import send_due_medication_reminders
@@ -94,3 +94,98 @@ class MonthlyComplianceApiTests(APITestCase):
         self.assertEqual(response.data["missed_count"], 0)
         self.assertIsNone(response.data["compliance_rate"])
         self.assertEqual(response.data["daily"], [])
+
+
+class NurseMedicationApiTests(APITestCase):
+    def setUp(self):
+        self.hospital = Hospital.objects.create(name="Medication Hospital")
+        self.other_hospital = Hospital.objects.create(name="Other Hospital")
+        self.nurse = User.objects.create_staff(User.Role.NURSE, "Nurse")
+        NurseProfile.objects.create(
+            user=self.nurse,
+            department="Oncology",
+            hospital=self.hospital,
+        )
+        self.patient = User.objects.create_patient(name="Patient")
+        PatientProfile.objects.create(
+            user=self.patient,
+            patient_number="MEDPAT01",
+            birth_date=timezone.localdate().replace(year=1990),
+            hospital=self.hospital,
+        )
+        self.other_patient = User.objects.create_patient(name="Other Patient")
+        PatientProfile.objects.create(
+            user=self.other_patient,
+            patient_number="MEDPAT02",
+            birth_date=timezone.localdate().replace(year=1991),
+            hospital=self.other_hospital,
+        )
+        self.schedule = MedicationSchedule.objects.create(
+            patient=self.patient,
+            drug_name="Drug A",
+            dosage="1 tablet",
+            times_per_day=["09:00", "18:00"],
+            start_date=timezone.localdate(),
+            set_by=self.nurse,
+        )
+        now = timezone.localtime()
+        MedicationLog.objects.create(
+            schedule=self.schedule,
+            scheduled_time=now.replace(hour=9, minute=0, second=0, microsecond=0),
+            taken=True,
+            taken_at=now,
+        )
+        MedicationLog.objects.create(
+            schedule=self.schedule,
+            scheduled_time=now.replace(hour=18, minute=0, second=0, microsecond=0),
+        )
+        self.client.force_authenticate(self.nurse)
+
+    def test_nurse_can_get_same_hospital_patients_today_logs(self):
+        response = self.client.get(
+            reverse("medication-logs-today"),
+            {"patient_id": str(self.patient.id)},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data[0]["drug_name"], "Drug A")
+        self.assertTrue(response.data[0]["taken"])
+        self.assertFalse(response.data[1]["taken"])
+
+    def test_nurse_cannot_get_other_hospital_patients_logs(self):
+        response = self.client.get(
+            reverse("medication-logs-today"),
+            {"patient_id": str(self.other_patient.id)},
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @patch("medications.views.notify")
+    def test_nurse_can_send_medication_reminder(self, notify_mock):
+        notify_mock.return_value = None
+
+        response = self.client.post(
+            reverse("medication-reminder-send"),
+            {"patient_id": str(self.patient.id), "message": "약 드세요"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+        notify_mock.assert_called_once_with(
+            recipient_id=self.patient.id,
+            category="medication",
+            title="복약 알림",
+            body="약 드세요",
+            deep_link="/medications",
+        )
+
+    @patch("medications.views.notify")
+    def test_nurse_cannot_remind_other_hospital_patient(self, notify_mock):
+        response = self.client.post(
+            reverse("medication-reminder-send"),
+            {"patient_id": str(self.other_patient.id)},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        notify_mock.assert_not_called()
