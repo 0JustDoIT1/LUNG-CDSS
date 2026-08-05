@@ -276,7 +276,7 @@ def guardian_my_patients(request):
 @api_view(["GET"])
 @permission_classes([IsGuardian])
 def guardian_patient_summary(request, patient_id):
-    """검사결과 상태 / 다음예약 / 최근 증상체크 요약. 열람권한(GuardianLink) 먼저 확인."""
+    """검사결과 상태 / 다음예약 요약. 개인 증상 기록은 환자 본인만 조회한다."""
     if not GuardianLink.objects.filter(
         guardian=request.user, patient_id=patient_id, accepted_at__isnull=False
     ).exists():
@@ -284,19 +284,15 @@ def guardian_patient_summary(request, patient_id):
 
     from appointments.models import Appointment
     from cases.models import Case
-    from symptoms.models import SymptomCheck
 
     latest_case = Case.objects.filter(patient_id=patient_id).order_by("-uploaded_at").first()
     next_appt = Appointment.objects.filter(
         patient_id=patient_id, status__in=["confirmed", "reminded_d7", "reminded_d1"]
     ).order_by("confirmed_slot").first()
-    latest_check = SymptomCheck.objects.filter(patient_id=patient_id).order_by("-checked_at").first()
 
     return Response({
         "case_status": latest_case.status if latest_case else None,
         "next_appointment": next_appt.confirmed_slot if next_appt else None,
-        "latest_risk_level": latest_check.risk_level if latest_check else None,
-        "latest_checked_at": latest_check.checked_at if latest_check else None,
     })
 
 

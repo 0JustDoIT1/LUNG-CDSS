@@ -17,16 +17,9 @@ class SymptomCheck(models.Model):
                                  limit_choices_to={"role": "patient"})
     checked_at = models.DateTimeField(auto_now_add=True)
     symptoms = models.JSONField()
+    memo = models.TextField(blank=True, default="")
+    # 환자에게 제공하는 참고 정보이며 의료진 알림/검토 흐름에는 사용하지 않는다.
     risk_level = models.CharField(max_length=10, choices=RiskLevel.choices)
-
-    # RED 등급은 이 값과 무관하게 무조건 간호사/의사에게 전달됨 (앱 정책, views.py에서 강제)
-    visible_to_nurse = models.BooleanField(default=True)
-
-    nurse_reviewed = models.BooleanField(default=False)
-    nurse_reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
-                                           related_name="reviewed_symptom_checks",
-                                           limit_choices_to={"role": "nurse"})
-    nurse_reviewed_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ["-checked_at"]

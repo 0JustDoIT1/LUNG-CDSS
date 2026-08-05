@@ -16,16 +16,16 @@ class SymptomSubmitSerializer(serializers.Serializer):
     weight_loss = serializers.ChoiceField(choices=["없음", "있음"])
     appetite = serializers.ChoiceField(choices=["평소와 같음", "감소"])
     fatigue = serializers.ChoiceField(choices=["없음", "약간", "심함"])
+    memo = serializers.CharField(required=False, allow_blank=True, max_length=2000, default="")
 
 
 class SymptomCheckSerializer(serializers.ModelSerializer):
     patient_name = serializers.CharField(source="patient.name", read_only=True)
-    symptoms = SymptomSubmitSerializer(read_only=True)
+    symptoms = serializers.DictField(read_only=True)
 
     class Meta:
         model = SymptomCheck
         fields = [
-            "id", "patient_name", "checked_at", "symptoms", "risk_level",
-            "visible_to_nurse", "nurse_reviewed", "nurse_reviewed_at",
+            "id", "patient_name", "checked_at", "symptoms", "memo", "risk_level",
         ]
         read_only_fields = fields
