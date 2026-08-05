@@ -2,7 +2,7 @@ import uuid
 
 from django.core.cache import cache
 from django.utils import timezone
-from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -15,6 +15,8 @@ from .permissions import IsDoctor, IsGuardian, IsMedicalStaff, IsPatient
 from .models import DeviceToken, DoctorProfile, GuardianLink, Hospital, NotificationPreference, PatientAuth, PatientProfile, StaffAuth, User
 from .serializers import (
     DeviceTokenSerializer,
+    DeviceTokenDeleteSerializer,
+    DeviceTokenResponseSerializer,
     DoctorProfileUpdateSerializer,
     GuardianLinkSerializer,
     GuardianRegisterSerializer,
@@ -389,6 +391,12 @@ def notification_preference_update(request):
 
 # ── FCM 디바이스 토큰 등록 ────────────────────────────────────────────
 
+@extend_schema_view(
+    post=extend_schema(
+        tags=["accounts"], request=DeviceTokenSerializer,
+        responses={200: DeviceTokenResponseSerializer, 201: DeviceTokenResponseSerializer},
+    ),
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def register_device_token(request):
@@ -397,11 +405,62 @@ def register_device_token(request):
         return validation_error_response(serializer.errors)
 
     data = serializer.validated_data
-    DeviceToken.objects.update_or_create(
-        user=request.user, app_type=data["app_type"], platform=data["platform"],
-        defaults={"fcm_token": data["fcm_token"]},
+    patient_roles = ("patient", "guardian")
+    expected_app = "patient_app" if request.user.role in patient_roles else "medical_app"
+    if data["app_type"] != expected_app:
+        return error_response(
+            "사용자 역할과 app_type이 일치하지 않습니다.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    with transaction.atomic():
+        DeviceToken.objects.filter(fcm_token=data["fcm_token"]).exclude(
+            user=request.user,
+            app_type=data["app_type"],
+            device_id=data["device_id"],
+        ).delete()
+        device, created = DeviceToken.objects.update_or_create(
+            user=request.user,
+            app_type=data["app_type"],
+            device_id=data["device_id"],
+            defaults={
+                "fcm_token": data["fcm_token"],
+                "platform": data["platform"],
+                "device_name": data["device_name"],
+            },
+        )
+    return Response(
+        DeviceTokenResponseSerializer(device).data,
+        status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
     )
-    return Response(status=status.HTTP_201_CREATED)
+
+
+@extend_schema(
+    tags=["accounts"],
+    parameters=[
+        OpenApiParameter(
+            "app_type", str, OpenApiParameter.QUERY,
+            enum=["patient_app", "medical_app"], required=True,
+        ),
+    ],
+    responses={204: OpenApiResponse(description="현재 기기의 FCM 토큰 연결 해제")},
+)
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def unregister_device_token(request, device_id):
+    serializer = DeviceTokenDeleteSerializer(data={
+        "app_type": request.query_params.get("app_type"),
+        "device_id": device_id,
+    })
+    if not serializer.is_valid():
+        return validation_error_response(serializer.errors)
+    data = serializer.validated_data
+    DeviceToken.objects.filter(
+        user=request.user,
+        app_type=data["app_type"],
+        device_id=data["device_id"],
+    ).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # ── 의료진: 환자 목록 조회 (복약스케줄 등록 시 patient UUID 선택용) ──────────

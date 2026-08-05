@@ -277,9 +277,19 @@ class DeviceToken(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="device_tokens")
     fcm_token = models.CharField(max_length=255)
+    device_id = models.CharField(max_length=255)
+    device_name = models.CharField(max_length=100, blank=True)
     app_type = models.CharField(max_length=20, choices=AppType.choices)
     platform = models.CharField(max_length=10, choices=Platform.choices)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "app_type", "device_id"],
+                name="uniq_user_app_device",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.user.name} · {self.app_type}/{self.platform}"

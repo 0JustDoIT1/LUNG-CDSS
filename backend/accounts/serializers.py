@@ -4,6 +4,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from .models import (
+    DeviceToken,
     DoctorProfile,
     GuardianLink,
     Hospital,
@@ -205,6 +206,22 @@ class DeviceTokenSerializer(serializers.Serializer):
     fcm_token = serializers.CharField()
     app_type = serializers.ChoiceField(choices=["patient_app", "medical_app"])
     platform = serializers.ChoiceField(choices=["ios", "android"])
+    device_id = serializers.CharField(max_length=255)
+    device_name = serializers.CharField(max_length=100, required=False, allow_blank=True, default="")
+
+
+class DeviceTokenDeleteSerializer(serializers.Serializer):
+    app_type = serializers.ChoiceField(choices=["patient_app", "medical_app"])
+    device_id = serializers.CharField(max_length=255)
+
+
+class DeviceTokenResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeviceToken
+        fields = [
+            "id", "fcm_token", "platform", "app_type",
+            "device_id", "device_name", "updated_at",
+        ]
 
 
 class PatientListItemSerializer(serializers.ModelSerializer):

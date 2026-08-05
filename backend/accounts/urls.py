@@ -18,6 +18,7 @@ urlpatterns = [
     path("notifications/preferences/", views.notification_preference_list, name="notification-pref-list"),
     path("notifications/preferences/update/", views.notification_preference_update, name="notification-pref-update"),
     path("device-token/", views.register_device_token, name="device-token-register"),
+    path("device-token/<str:device_id>/", views.unregister_device_token, name="device-token-unregister"),
 
     path("refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("logout/", views.logout, name="logout"),

@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Hospital, PatientProfile, User
+from .models import DeviceToken, Hospital, PatientProfile, User
 
 
 class PatientRegisterGenderTests(APITestCase):
@@ -125,5 +125,60 @@ class PatientProfileUpdateTests(APITestCase):
         response = self.client.patch(self.url, {"gender": "female"}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class DeviceTokenApiTests(APITestCase):
+    def setUp(self):
+        self.patient = User.objects.create_patient(name="Patient One")
+        self.client.force_authenticate(self.patient)
+        self.url = reverse("device-token-register")
+
+    def _payload(self, **overrides):
+        payload = {
+            "fcm_token": "fcm-token-one",
+            "platform": "android",
+            "app_type": "patient_app",
+            "device_id": "device-one",
+            "device_name": "Pixel",
+        }
+        payload.update(overrides)
+        return payload
+
+    def test_register_and_refresh_token_for_same_device(self):
+        created = self.client.post(self.url, self._payload(), format="json")
+        updated = self.client.post(
+            self.url,
+            self._payload(fcm_token="fcm-token-two"),
+            format="json",
+        )
+
+        self.assertEqual(created.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(updated.status_code, status.HTTP_200_OK)
+        self.assertEqual(DeviceToken.objects.count(), 1)
+        self.assertEqual(DeviceToken.objects.get().fcm_token, "fcm-token-two")
+
+    def test_multiple_devices_are_supported(self):
+        self.client.post(self.url, self._payload(), format="json")
+        self.client.post(
+            self.url,
+            self._payload(
+                fcm_token="fcm-token-two",
+                device_id="device-two",
+                device_name="Tablet",
+            ),
+            format="json",
+        )
+
+        self.assertEqual(DeviceToken.objects.filter(user=self.patient).count(), 2)
+
+    def test_delete_unregisters_only_current_device(self):
+        self.client.post(self.url, self._payload(), format="json")
+
+        response = self.client.delete(
+            reverse("device-token-unregister", args=["device-one"]) + "?app_type=patient_app",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(DeviceToken.objects.filter(user=self.patient).exists())
 
 # Create your tests here.
