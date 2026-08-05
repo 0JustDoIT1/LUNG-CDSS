@@ -18,6 +18,7 @@ class Case(models.Model):
         PROCESSING = "processing", "Processing"
         PENDING_REVIEW = "pending_review", "Pending review"
         CONFIRMED = "confirmed", "Confirmed"
+        REJECTED = "rejected", "Rejected"
         FAILED = "failed", "Failed"
 
     class Step(models.TextChoices):
@@ -148,6 +149,7 @@ class ConfirmedFinding(models.Model):
 
 class CaseReviewLog(models.Model):
     class Action(models.TextChoices):
+        REJECTED = "rejected", "미승인"
         CONFIRMED = "confirmed", "그대로 승인"
         EDITED = "edited", "수정 후 확정"
 

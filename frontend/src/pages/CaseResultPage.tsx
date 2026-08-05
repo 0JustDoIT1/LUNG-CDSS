@@ -5,6 +5,7 @@ import { getCase } from "../api/cases";
 import Header from "../components/Shared/Header";
 import { UnifiedCaseResultSections } from "../components/dashboard/UnifiedCaseResultSections";
 import { CaseReviewHistory } from "../components/dashboard/CaseReviewHistory";
+import { ReviewActionCell } from "../components/dashboard/ReviewActionCell";
 import { PrintableReport } from "../components/dashboard/PrintableReport";
 import { STATUS_CLS, STATUS_LABELS, type CaseDetail } from "../types/case";
 import { getStoredItem } from "../utils/storage";
@@ -100,7 +101,7 @@ function ResultContent(): React.JSX.Element {
     );
   }
 
-  const hasResult = ["pending_review", "confirmed"].includes(caseData.status);
+  const hasResult = ["pending_review", "confirmed", "rejected"].includes(caseData.status);
 
   return (
     <div className="space-y-5">
@@ -159,7 +160,26 @@ function ResultContent(): React.JSX.Element {
         </section>
       )}
 
-      {caseData.status === "confirmed" && getStoredItem("user_role") === "doctor" ? (
+      {caseData.status === "pending_review" && getStoredItem("user_role") === "doctor" ? (
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="text-base font-semibold text-gray-900">의사 판독 결정</h2>
+          <p className="mt-1 mb-4 text-sm text-gray-500">
+            AI 분석 결과를 승인하거나, 미승인 이유를 작성해 반려할 수 있습니다.
+          </p>
+          <ReviewActionCell
+            caseId={caseData.id}
+            status={caseData.status}
+            onReviewed={(_caseId, nextStatus) => {
+              setCaseData((current) => current ? {
+                ...current,
+                status: nextStatus,
+              } : current);
+            }}
+          />
+        </section>
+      ) : null}
+
+      {(caseData.status === "confirmed" || caseData.status === "rejected") && getStoredItem("user_role") === "doctor" ? (
         <CaseReviewHistory caseId={caseData.id} />
       ) : null}
 

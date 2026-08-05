@@ -3,6 +3,7 @@ export type CaseStatus =
   | "processing"
   | "pending_review"
   | "confirmed"
+  | "rejected"
   | "failed";
 
 export type CaseStep =
@@ -125,14 +126,14 @@ export interface UploadUrlResponse {
 }
 
 export interface ReviewPayload {
-  action: "confirm" | "edit";
+  action: "confirm" | "edit" | "reject";
   final_subtype?: "LUAD" | "LUSC";
   final_note?: string;
 }
 
 export interface CaseReviewLog {
   id: string;
-  action: "confirmed" | "edited";
+  action: "confirmed" | "edited" | "rejected";
   subtype_at_time: "LUAD" | "LUSC";
   note_at_time: string;
   reviewer_name: string;
@@ -170,6 +171,7 @@ export const STATUS_LABELS: Record<CaseStatus, string> = {
   processing: "분석 중",
   pending_review: "검토 대기",
   confirmed: "확정",
+  rejected: "미승인",
   failed: "실패",
 };
 
@@ -178,6 +180,7 @@ export const STATUS_CLS: Record<CaseStatus, string> = {
   processing: "bg-blue-100 text-blue-700",
   pending_review: "bg-amber-100 text-amber-700",
   confirmed: "bg-green-100 text-green-700",
+  rejected: "bg-rose-100 text-rose-700",
   failed: "bg-rose-100 text-rose-700",
 };
 
