@@ -1,4 +1,5 @@
 import secrets
+from copy import deepcopy
 
 from django.core.cache import cache
 from django.utils import timezone
@@ -10,7 +11,8 @@ from rest_framework.response import Response
 from accounts.permissions import IsNurse, IsPatient
 
 from .models import IntakeForm
-from .serializers import IntakeFormSerializer, IntakeFormUpdateSerializer
+from .serializers import IntakeContentSerializer, IntakeFormSerializer, IntakeFormUpdateSerializer
+from .services import get_or_prepare_intake_form
 from core.responses import error_response, validation_error_response
 
 QR_TOKEN_TTL = 300  # 5분
@@ -26,10 +28,7 @@ QR_TOKEN_TTL = 300  # 5분
 @api_view(["GET", "PUT"])
 @permission_classes([IsPatient])
 def my_intake_form(request):
-    form, _ = IntakeForm.objects.get_or_create(
-        patient=request.user,
-        defaults={"content": {"status": "draft", "questions": []}},
-    )
+    form = get_or_prepare_intake_form(request.user)
 
     if request.method == "GET":
         return Response(IntakeFormSerializer(form).data)
@@ -37,9 +36,26 @@ def my_intake_form(request):
     serializer = IntakeFormUpdateSerializer(data=request.data)
     if not serializer.is_valid():
         return validation_error_response(serializer.errors)
-    content = serializer.validated_data["content"]
-    if content is None:
-        return error_response("content는 필수입니다", status_code=status.HTTP_400_BAD_REQUEST)
+    update_content = serializer.validated_data["content"]
+    stored_questions = form.content.get("questions", [])
+    incoming_questions = update_content["questions"]
+    stored_ids = [question["question_id"] for question in stored_questions]
+    incoming_ids = [question["question_id"] for question in incoming_questions]
+    if incoming_ids != stored_ids:
+        return validation_error_response({
+            "content": {"questions": ["question_id와 질문 순서는 변경할 수 없습니다."]},
+        })
+
+    content = deepcopy(form.content)
+    content["status"] = update_content["status"]
+    for stored_question, incoming_question in zip(content["questions"], incoming_questions):
+        stored_question["answer"] = incoming_question["answer"]
+
+    content_serializer = IntakeContentSerializer(data=content)
+    if not content_serializer.is_valid():
+        return validation_error_response(content_serializer.errors)
+    content = content_serializer.validated_data
+
     form.content = content
     form.submitted_at = timezone.now() if content["status"] == "submitted" else None
     form.save(update_fields=["content", "submitted_at", "updated_at"])

@@ -73,8 +73,24 @@ class IntakeContentSerializer(serializers.Serializer):
         return attrs
 
 
+class IntakeAnswerUpdateSerializer(serializers.Serializer):
+    question_id = serializers.CharField(max_length=100)
+    answer = IntakeAnswerField(allow_null=True)
+
+
+class IntakeContentUpdateSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=['draft', 'submitted'])
+    questions = IntakeAnswerUpdateSerializer(many=True)
+
+    def validate_questions(self, questions):
+        question_ids = [question['question_id'] for question in questions]
+        if len(question_ids) != len(set(question_ids)):
+            raise serializers.ValidationError('question_id는 중복될 수 없습니다.')
+        return questions
+
+
 class IntakeFormUpdateSerializer(serializers.Serializer):
-    content = IntakeContentSerializer()
+    content = IntakeContentUpdateSerializer()
 
 
 class IntakeFormSerializer(serializers.ModelSerializer):
