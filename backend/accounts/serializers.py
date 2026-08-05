@@ -124,6 +124,8 @@ class PatientRegisterSerializer(serializers.Serializer):
     birth_date = serializers.DateField()
     hospital_id = serializers.UUIDField()
     phone_number = serializers.RegexField(regex=r'^01[0-9]-?\d{3,4}-?\d{4}$')
+    # 선택사항 — 안 보내도 가입은 되고(NULL), 나중에 PUT patient/profile/로 채울 수 있음.
+    gender = serializers.ChoiceField(choices=["male", "female"], required=False, allow_null=True)
 
 
 class PatientProfileSerializer(serializers.ModelSerializer):
@@ -163,7 +165,8 @@ class GuardianLinkSerializer(serializers.ModelSerializer):
 class DoctorProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = DoctorProfile
-        fields = ["photo_url", "specialty_tags"]
+        fields = ["photo_url", "specialty_tags", "department", "license_number"]
+        read_only_fields = ["department", "license_number"]  # 가입 시 확정, 여기선 조회만
 
 
 class HospitalSerializer(serializers.ModelSerializer):
@@ -181,3 +184,13 @@ class DeviceTokenSerializer(serializers.Serializer):
     fcm_token = serializers.CharField()
     app_type = serializers.ChoiceField(choices=["patient_app", "medical_app"])
     platform = serializers.ChoiceField(choices=["ios", "android"])
+
+
+class PatientListItemSerializer(serializers.ModelSerializer):
+    """의료진(의사/간호사)이 환자 UUID를 얻기 위한 목록용 — 최소 정보만."""
+    id = serializers.UUIDField(source="user.id", read_only=True)
+    name = serializers.CharField(source="user.name", read_only=True)
+
+    class Meta:
+        model = PatientProfile
+        fields = ["id", "name", "patient_number", "birth_date", "gender", "assigned_doctor"]

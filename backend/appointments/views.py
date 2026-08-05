@@ -284,3 +284,19 @@ def doctor_weekly_schedule(request):
     return Response([
         {"day_of_week": r.day_of_week, "period": r.period, "available": r.available} for r in rows
     ])
+
+
+# ── 의사: 본인 예약목록 조회 ──────────────────────────────────────────
+
+@extend_schema(tags=["appointments"], responses={200: AppointmentSerializer(many=True)})
+@api_view(["GET"])
+@permission_classes([IsDoctor])
+def doctor_my_appointments(request):
+    """
+    /mine/ 은 환자 전용("내 예약")이라 의사 계정으론 항상 403이 났음 —
+    의사가 본인이 진료하는 예약목록을 보려면 별도 엔드포인트가 필요했음.
+    """
+    appointments = Appointment.objects.filter(doctor=request.user).exclude(
+        status=Appointment.Status.CANCELLED
+    ).order_by("confirmed_slot")
+    return Response(AppointmentSerializer(appointments, many=True).data)

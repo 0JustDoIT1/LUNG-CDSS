@@ -8,6 +8,7 @@ urlpatterns = [
     path("doctors/<uuid:doctor_id>/slots/", views.available_slots, name="appt-slots"),
     path("", views.create_appointment, name="appt-create"),
     path("mine/", views.my_appointments, name="appt-mine"),
+    path("doctor/mine/", views.doctor_my_appointments, name="appt-doctor-mine"),
     path("<uuid:appointment_id>/cancel/", views.cancel_appointment, name="appt-cancel"),
 
     path("queue/", views.request_queue, name="appt-queue"),

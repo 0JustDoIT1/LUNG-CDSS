@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .permissions import IsGuardian, IsPathologist, IsPatient
+from .permissions import IsDoctor, IsGuardian, IsMedicalStaff, IsPatient
 
 from .models import DeviceToken, DoctorProfile, GuardianLink, Hospital, NotificationPreference, PatientAuth, PatientProfile, StaffAuth, User
 from .serializers import (
@@ -26,7 +26,6 @@ from .serializers import (
     StaffLoginSerializer,
     StaffSignupSerializer,
 )
-from .permissions import IsDoctor
 from .services import SocialTokenError, verify_social_token
 from core.responses import error_response, validation_error_response
 
@@ -152,7 +151,9 @@ def patient_register(request):
     # 병원 기존 환자DB와의 자동매칭 로직 없음(의도적) — 서비스 시작 시점부터
     # 모든 환자가 이 시스템으로 신규가입하는 전제라, 연결할 "과거 기록" 자체가
     # 존재하지 않음. 추후 기존 시스템에서 데이터 이관이 필요해지면 그때 재검토.
-    PatientProfile.objects.create(user=user, birth_date=data["birth_date"], hospital=hospital)
+    PatientProfile.objects.create(
+        user=user, birth_date=data["birth_date"], hospital=hospital, gender=data.get("gender"),
+    )
 
     cache.delete(f"signup_session:{data['signup_token']}")
 
@@ -326,22 +327,12 @@ def doctor_profile(request):
 # ── 병원 정보 (약도/전화/주소) — 병원 1곳 고정이라 파라미터 없이 조회 ──────
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def hospital_info(request):
     hospital = Hospital.objects.first()
     if hospital is None:
         return error_response("등록된 병원이 없습니다", status_code=status.HTTP_404_NOT_FOUND)
     return Response(HospitalSerializer(hospital).data)
-
-
-@api_view(["GET"])
-@permission_classes([IsPathologist])
-def patient_list(request):
-    patients = User.objects.filter(
-        role=User.Role.PATIENT,
-        is_active=True,
-    ).order_by("name").values("id", "name")
-    return Response(list(patients))
 
 
 # ── 알림 설정 (카테고리별 on/off) ─────────────────────────────────────
@@ -386,3 +377,30 @@ def register_device_token(request):
         defaults={"fcm_token": data["fcm_token"]},
     )
     return Response(status=status.HTTP_201_CREATED)
+
+
+# ── 의료진: 환자 목록 조회 (복약스케줄 등록 시 patient UUID 선택용) ──────────
+
+@extend_schema(tags=["accounts"])
+@api_view(["GET"])
+@permission_classes([IsMedicalStaff])
+def staff_patient_list(request):
+    """
+    병원이 1곳으로 고정된 전제라 별도 필터링 없이 전체 활성 환자를 반환한다.
+    검색어(search)로 이름 부분일치 필터 가능.
+    """
+    queryset = PatientProfile.objects.select_related("user").filter(user__is_active=True)
+
+    search = request.query_params.get("search")
+    if search:
+        queryset = queryset.filter(user__name__icontains=search.strip())
+
+    results = []
+    for profile in queryset.order_by("user__name"):
+        results.append({
+            "id": str(profile.user_id),
+            "name": profile.user.name,
+            "patient_number": profile.patient_number,
+            "birth_date": profile.birth_date,
+        })
+    return Response(results)

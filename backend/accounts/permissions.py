@@ -39,3 +39,14 @@ class IsDoctorOrNurse(BasePermission):
             and request.user.is_authenticated
             and request.user.role in ("doctor", "nurse")
         )
+
+
+class IsMedicalStaff(BasePermission):
+    """Allow every clinical staff role, including pathologists."""
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role in ("doctor", "nurse", "pathologist")
+        )

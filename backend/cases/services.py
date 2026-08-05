@@ -35,7 +35,7 @@ def call_mosec_predict(case_id: str, slide_gcs_path: str, timeout: int = 900) ->
     return response.json()
 
 
-def call_mosec_thumbnail(case_id: str, slide_gcs_path: str, timeout: int = 180) -> dict:
+def call_mosec_thumbnail(case_id: str, slide_gcs_path: str, timeout: int = 900) -> dict:
     """
     업로드 직후 썸네일만 빠르게 생성. GPU가 필요 없는 별도 CPU 전용 서비스(thumbnail-serving) 호출.
     반환: {"slide_thumbnail_gcs_path": "gs://..."}
