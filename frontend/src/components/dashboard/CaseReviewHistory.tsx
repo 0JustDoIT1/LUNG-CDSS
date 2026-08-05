@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, History, Loader2, PencilLine } from "lucide-react";
+import { CheckCircle2, History, Loader2, PencilLine, XCircle } from "lucide-react";
 import { getCaseReviewLogs } from "../../api/cases";
 import type { CaseReviewLog } from "../../types/case";
 
@@ -52,16 +52,17 @@ export function CaseReviewHistory({ caseId }: { caseId: string }): React.JSX.Ele
           <ol className="space-y-4">
             {logs.map((log) => {
               const edited = log.action === "edited";
-              const Icon = edited ? PencilLine : CheckCircle2;
+              const rejected = log.action === "rejected";
+              const Icon = rejected ? XCircle : edited ? PencilLine : CheckCircle2;
               return (
                 <li key={log.id} className="flex gap-3">
-                  <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${edited ? "bg-amber-100 text-amber-700" : "bg-teal-100 text-teal-700"}`}>
+                  <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${rejected ? "bg-rose-100 text-rose-700" : edited ? "bg-amber-100 text-amber-700" : "bg-teal-100 text-teal-700"}`}>
                     <Icon className="h-4 w-4" />
                   </span>
                   <div className="min-w-0 flex-1 border-b border-gray-100 pb-4 last:border-0">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-sm font-medium text-gray-900">
-                        {edited ? "수정 후 확정" : "AI 결과 승인"} · {log.subtype_at_time}
+                        {rejected ? "미승인" : edited ? "수정 후 확정" : "AI 결과 승인"} · {log.subtype_at_time}
                       </p>
                       <time className="text-xs tabular-nums text-gray-400">
                         {new Date(log.created_at).toLocaleString("ko-KR")}

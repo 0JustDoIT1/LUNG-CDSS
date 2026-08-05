@@ -35,6 +35,7 @@ const STATUS_DOT: Record<CaseStatus, string> = {
   processing: "bg-blue-500",
   pending_review: "bg-amber-500",
   confirmed: "bg-green-700",
+  rejected: "bg-rose-600",
   failed: "bg-rose-500",
 };
 
@@ -467,9 +468,9 @@ export default function Dashboard(): React.JSX.Element {
     }
   }, []);
 
-  const handleReviewed = useCallback((caseId: string) => {
+  const handleReviewed = useCallback((caseId: string, nextStatus: "confirmed" | "rejected") => {
     setCases((prev) =>
-      prev.map((c) => (c.id === caseId ? { ...c, status: "confirmed", is_confirmed: true } : c))
+      prev.map((c) => (c.id === caseId ? { ...c, status: nextStatus, is_confirmed: nextStatus === "confirmed" } : c))
     );
   }, []);
 

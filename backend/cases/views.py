@@ -1,3 +1,4 @@
+import logging
 import os
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -35,6 +36,14 @@ from .services import call_mosec_predict, call_mosec_thumbnail
 from core.responses import error_response, validation_error_response
 
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
+logger = logging.getLogger(__name__)
+
+
+def _is_specimen_id_unique_violation(exc):
+    """Return True only for the database constraint on Case.specimen_id."""
+    cause = exc.__cause__
+    diag = getattr(cause, "diag", None)
+    return getattr(diag, "constraint_name", None) == "cases_case_specimen_id_key"
 
 
 def _notify_analysis_outcome(case, succeeded):
@@ -169,11 +178,20 @@ def case_list_create(request):
             slide_gcs_path=slide_gcs_path,
             status=Case.Status.UPLOADED,
         )
-    except IntegrityError as e:
-        # 위에서 patient/specimen_id 둘 다 미리 확인했으므로, 여기 걸리면
-        # 진짜 예상 못 한 제약조건 위반 — "검체ID 중복"으로 단정짓지 않고
-        # 실제 원인을 그대로 노출해서 디버깅 가능하게 함.
-        return error_response(f"케이스 생성에 실패했습니다: {e}", status_code=status.HTTP_409_CONFLICT)
+    except IntegrityError as exc:
+        if not _is_specimen_id_unique_violation(exc):
+            logger.exception(
+                "Case creation failed due to a database integrity error "
+                "(specimen_id=%s, patient_id=%s, uploaded_by_id=%s)",
+                specimen_id,
+                patient.id,
+                request.user.id,
+            )
+            return error_response(
+                "케이스를 등록하는 중 DB 무결성 오류가 발생했습니다.",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        return error_response(f"이미 등록된 검체 ID입니다: {specimen_id}", status_code=status.HTTP_409_CONFLICT)
 
     try:
         thumb_result = call_mosec_thumbnail(str(case.id), case.slide_gcs_path)
@@ -331,6 +349,12 @@ def review_case(request, case_id):
     except Case.DoesNotExist:
         return error_response("케이스를 찾을 수 없습니다", status_code=status.HTTP_404_NOT_FOUND)
 
+    if case.status != Case.Status.PENDING_REVIEW:
+        return error_response(
+            "검토 대기 상태의 케이스만 판독할 수 있습니다.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
     if hasattr(case, "confirmed_finding"):
         return error_response("이미 확정된 케이스입니다", status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -347,6 +371,19 @@ def review_case(request, case_id):
         final_subtype = latest_result.prediction_label
         final_note = latest_result.treatment_note or ""
         log_action = CaseReviewLog.Action.CONFIRMED
+    elif data["action"] == "reject":
+        rejection_reason = data["final_note"].strip()
+        with transaction.atomic():
+            CaseReviewLog.objects.create(
+                case=case,
+                reviewer=request.user,
+                action="rejected",
+                subtype_at_time=latest_result.prediction_label or "",
+                note_at_time=rejection_reason,
+            )
+            case.status = Case.Status.REJECTED
+            case.save(update_fields=["status"])
+        return Response(CaseDetailSerializer(case, context={"request": request}).data)
     else:
         final_subtype = data["final_subtype"]
         final_note = data.get("final_note", "")

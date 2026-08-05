@@ -156,11 +156,13 @@ class CaseDetailSerializer(serializers.ModelSerializer):
 class ReviewActionSerializer(serializers.Serializer):
     """승인/반려 공통 입력. action=confirm이면 그대로, edit이면 subtype/note 필수."""
 
-    action = serializers.ChoiceField(choices=["confirm", "edit"])
+    action = serializers.ChoiceField(choices=["confirm", "edit", "reject"])
     final_subtype = serializers.ChoiceField(choices=["LUAD", "LUSC"], required=False)
     final_note = serializers.CharField(required=False, allow_blank=True)
 
     def validate(self, attrs):
         if attrs["action"] == "edit" and not attrs.get("final_subtype"):
             raise serializers.ValidationError({"final_subtype": "반려(수정) 시 최종 아형은 필수입니다."})
+        if attrs["action"] == "reject" and not attrs.get("final_note", "").strip():
+            raise serializers.ValidationError({"final_note": "미승인 이유를 입력해주세요."})
         return attrs
