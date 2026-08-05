@@ -151,14 +151,22 @@ def patient_register(request):
     # 병원 기존 환자DB와의 자동매칭 로직 없음(의도적) — 서비스 시작 시점부터
     # 모든 환자가 이 시스템으로 신규가입하는 전제라, 연결할 "과거 기록" 자체가
     # 존재하지 않음. 추후 기존 시스템에서 데이터 이관이 필요해지면 그때 재검토.
-    PatientProfile.objects.create(
+    patient_profile = PatientProfile.objects.create(
         user=user, birth_date=data["birth_date"], hospital=hospital, gender=data.get("gender"),
     )
 
     cache.delete(f"signup_session:{data['signup_token']}")
 
     tokens = _issue_tokens(user)
-    return Response({**tokens, "role": "patient", "is_new_user": True}, status=status.HTTP_201_CREATED)
+    return Response(
+        {
+            **tokens,
+            "role": "patient",
+            "is_new_user": True,
+            "gender": patient_profile.gender,
+        },
+        status=status.HTTP_201_CREATED,
+    )
 
 
 # ── 공통: 로그아웃 (의사/간호사/병리사/환자 전체) ────────────────────────

@@ -13,4 +13,4 @@ COPY . .
 
 ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "server.py"]
+CMD ["python", "server.py", "--timeout", "900000"]

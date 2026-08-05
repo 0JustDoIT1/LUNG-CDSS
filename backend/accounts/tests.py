@@ -1,10 +1,55 @@
 from datetime import date
 
+from django.core.cache import cache
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from .models import Hospital, PatientProfile, User
+
+
+class PatientRegisterGenderTests(APITestCase):
+    def setUp(self):
+        self.hospital = Hospital.objects.create(name="Registration Hospital")
+        self.signup_token = "gender-signup-token"
+        cache.set(
+            f"signup_session:{self.signup_token}",
+            {"provider": "google", "social_uid": "gender-user", "name": "Patient Gender"},
+            timeout=300,
+        )
+
+    def test_register_saves_and_returns_gender(self):
+        response = self.client.post(
+            reverse("patient-register"),
+            {
+                "signup_token": self.signup_token,
+                "birth_date": "1990-01-01",
+                "hospital_id": str(self.hospital.id),
+                "phone_number": "010-1234-5678",
+                "gender": "female",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["gender"], "female")
+        self.assertEqual(PatientProfile.objects.get(user__name="Patient Gender").gender, "female")
+
+    def test_register_allows_omitted_gender_for_existing_client_compatibility(self):
+        response = self.client.post(
+            reverse("patient-register"),
+            {
+                "signup_token": self.signup_token,
+                "birth_date": "1990-01-01",
+                "hospital_id": str(self.hospital.id),
+                "phone_number": "010-1234-5678",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIsNone(response.data["gender"])
+        self.assertIsNone(PatientProfile.objects.get(user__name="Patient Gender").gender)
 
 
 class StaffPatientListPermissionTests(APITestCase):
