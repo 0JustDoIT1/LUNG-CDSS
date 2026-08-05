@@ -2,7 +2,7 @@ import uuid
 
 from django.core.cache import cache
 from django.utils import timezone
-from drf_spectacular.utils import OpenApiResponse, extend_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -21,6 +21,7 @@ from .serializers import (
     HospitalSerializer,
     NotificationPreferenceSerializer,
     PatientProfileSerializer,
+    PatientProfileUpdateSerializer,
     PatientRegisterSerializer,
     SocialLoginSerializer,
     StaffLoginSerializer,
@@ -299,20 +300,36 @@ def guardian_patient_summary(request, patient_id):
 
 # ── 환자 프로필 (이름/환자번호/소속병원 읽기전용, 생년월일/성별만 수정가능) ──
 
-@extend_schema(tags=["accounts"], responses={200: PatientProfileSerializer})
-@api_view(["GET", "PUT"])
+@extend_schema_view(
+    get=extend_schema(tags=["accounts"], responses={200: PatientProfileSerializer}),
+    put=extend_schema(
+        tags=["accounts"], request=PatientProfileUpdateSerializer,
+        responses={200: PatientProfileSerializer},
+    ),
+    patch=extend_schema(
+        tags=["accounts"], request=PatientProfileUpdateSerializer,
+        responses={200: PatientProfileSerializer},
+    ),
+)
+@api_view(["GET", "PUT", "PATCH"])
 @permission_classes([IsPatient])
 def patient_profile(request):
-    profile = PatientProfile.objects.select_related("user", "hospital").get(user=request.user)
+    try:
+        profile = PatientProfile.objects.select_related("user", "hospital").get(user=request.user)
+    except PatientProfile.DoesNotExist:
+        return error_response(
+            "환자 프로필을 찾을 수 없습니다.",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
     if request.method == "GET":
         return Response(PatientProfileSerializer(profile).data)
 
-    serializer = PatientProfileSerializer(profile, data=request.data, partial=True)
+    serializer = PatientProfileUpdateSerializer(profile, data=request.data, partial=True)
     if not serializer.is_valid():
         return validation_error_response(serializer.errors)
-    serializer.save()
-    return Response(serializer.data)
+    profile = serializer.save()
+    return Response(PatientProfileSerializer(profile).data)
 
 
 # ── 의사 프로필 (사진/태그) ───────────────────────────────────────────

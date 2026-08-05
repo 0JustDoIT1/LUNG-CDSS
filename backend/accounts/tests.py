@@ -83,4 +83,47 @@ class StaffPatientListPermissionTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+
+class PatientProfileUpdateTests(APITestCase):
+    def setUp(self):
+        hospital = Hospital.objects.create(name="Profile Hospital")
+        self.patient = User.objects.create_patient(name="Old Name")
+        self.profile = PatientProfile.objects.create(
+            user=self.patient,
+            patient_number="PROFILE1",
+            birth_date=date(1990, 1, 1),
+            hospital=hospital,
+        )
+        self.url = reverse("patient-profile")
+
+    def test_patch_updates_only_supplied_editable_fields(self):
+        self.client.force_authenticate(self.patient)
+
+        response = self.client.patch(
+            self.url,
+            {"name": "New Name", "gender": "male"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["name"], "New Name")
+        self.assertEqual(response.data["gender"], "male")
+        self.assertEqual(response.data["birth_date"], "1990-01-01")
+
+    def test_missing_patient_profile_returns_not_found(self):
+        patient_without_profile = User.objects.create_patient(name="No Profile")
+        self.client.force_authenticate(patient_without_profile)
+
+        response = self.client.patch(self.url, {"gender": "female"}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_non_patient_is_forbidden(self):
+        doctor = User.objects.create_staff(User.Role.DOCTOR, "Doctor One")
+        self.client.force_authenticate(doctor)
+
+        response = self.client.patch(self.url, {"gender": "female"}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 # Create your tests here.

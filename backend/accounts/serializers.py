@@ -147,6 +147,27 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class PatientProfileUpdateSerializer(serializers.ModelSerializer):
+    """Fields a patient may update; all fields are optional for PUT/PATCH."""
+
+    name = serializers.CharField(source="user.name", required=False)
+    birth_date = serializers.DateField(required=False)
+    gender = serializers.ChoiceField(
+        choices=["male", "female"], required=False, allow_null=True,
+    )
+
+    class Meta:
+        model = PatientProfile
+        fields = ["name", "birth_date", "gender"]
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", None)
+        if user_data and "name" in user_data:
+            instance.user.name = user_data["name"]
+            instance.user.save(update_fields=["name"])
+        return super().update(instance, validated_data)
+
+
 # ── 보호자 ────────────────────────────────────────────────────────
 
 class GuardianRegisterSerializer(serializers.Serializer):
