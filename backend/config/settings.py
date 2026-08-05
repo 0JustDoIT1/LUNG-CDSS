@@ -34,6 +34,9 @@ DEBUG = True
 ALLOWED_HOSTS = ["lung-cdss.kro.kr", "www.lung-cdss.kro.kr", "localhost", "127.0.0.1", "34.170.97.4"]
 
 
+ALLOWED_HOSTS.append('backend')
+
+
 # Application definition
 
 INSTALLED_APPS = [
