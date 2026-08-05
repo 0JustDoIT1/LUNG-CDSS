@@ -41,6 +41,49 @@ class MedicationReminderTaskTests(TestCase):
         self.assertIsNotNone(log.reminder_sent_at)
 
 
+class MedicationScheduleCreateApiTests(APITestCase):
+    def setUp(self):
+        self.patient = User.objects.create_patient(name="Schedule Patient")
+        self.nurse = User.objects.create_staff(User.Role.NURSE, "Schedule Nurse")
+        self.client.force_authenticate(self.nurse)
+        self.url = reverse("medication-schedule-create")
+
+    def test_rejects_integer_times_per_day_with_400(self):
+        response = self.client.post(
+            self.url,
+            {
+                "patient": str(self.patient.id),
+                "drug_name": "Salbutamol",
+                "dosage": "1 tablet",
+                "times_per_day": 2,
+                "start_date": timezone.localdate().isoformat(),
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("times_per_day", response.data["error"]["details"])
+        self.assertFalse(MedicationSchedule.objects.filter(patient=self.patient).exists())
+
+    def test_accepts_hhmm_time_list_and_generates_logs(self):
+        response = self.client.post(
+            self.url,
+            {
+                "patient": str(self.patient.id),
+                "drug_name": "Salbutamol",
+                "dosage": "1 tablet",
+                "times_per_day": ["18:00", "09:00"],
+                "start_date": timezone.localdate().isoformat(),
+                "end_date": timezone.localdate().isoformat(),
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["times_per_day"], ["09:00", "18:00"])
+        self.assertEqual(MedicationLog.objects.filter(schedule_id=response.data["id"]).count(), 2)
+
+
 class MonthlyComplianceApiTests(APITestCase):
     def setUp(self):
         self.patient = User.objects.create_patient(name="Patient Monthly")

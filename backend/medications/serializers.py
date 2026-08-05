@@ -4,10 +4,31 @@ from .models import MedicationLog, MedicationSchedule
 
 
 class MedicationScheduleCreateSerializer(serializers.ModelSerializer):
+    times_per_day = serializers.ListField(
+        child=serializers.RegexField(
+            regex=r"^(?:[01]\d|2[0-3]):[0-5]\d$",
+            error_messages={"invalid": "Use HH:MM in 24-hour format (for example, 09:00)."},
+        ),
+        allow_empty=False,
+        help_text='Daily dose times as unique 24-hour HH:MM strings, e.g. ["09:00", "18:00"].',
+    )
+
     class Meta:
         model = MedicationSchedule
         fields = ["id", "patient", "drug_name", "dosage", "times_per_day", "start_date", "end_date"]
         read_only_fields = ["id"]
+
+    def validate_times_per_day(self, value):
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError("Dose times must not contain duplicates.")
+        return sorted(value)
+
+    def validate(self, attrs):
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date")
+        if start_date and end_date and end_date < start_date:
+            raise serializers.ValidationError({"end_date": "End date must not be before start date."})
+        return attrs
 
 
 class MedicationScheduleSerializer(serializers.ModelSerializer):
