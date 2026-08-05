@@ -1,6 +1,5 @@
 import logging
 import os
-
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import Q
@@ -10,13 +9,11 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-
 from accounts.models import User
 from accounts.permissions import IsDoctor, IsPathologist
 from communication.services import notify
 from rag.exceptions import RAGServiceError
 from rag.rag_service import generate_treatment_note
-
 from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upload_url
 from .models import (
     AIAnalysisResult,
@@ -68,7 +65,6 @@ def _notify_analysis_outcome(case, succeeded):
                     else f"/analysis/{case.id}"
                 ),
             )
-
         if succeeded:
             doctor_ids = User.objects.filter(role=User.Role.DOCTOR, is_active=True).values_list("id", flat=True)
             for doctor_id in doctor_ids:
@@ -92,8 +88,6 @@ def _notify_analysis_outcome(case, succeeded):
     ],
     responses={200: CaseListSerializer(many=True)},
 )
-
-
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def case_list_create(request):
@@ -161,6 +155,7 @@ def case_list_create(request):
         ).first()
     except (ValidationError, ValueError):
         patient = None
+
     if patient is None:
         return error_response(
             "선택한 환자를 찾을 수 없거나 비활성 상태입니다.",
