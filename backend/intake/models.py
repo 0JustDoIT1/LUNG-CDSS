@@ -11,7 +11,7 @@ class IntakeForm(models.Model):
     patient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intake_forms",
                                  limit_choices_to={"role": "patient"})
     content = models.JSONField()  # 복용약물/알레르기/흡연력/가족력 등
-    submitted_at = models.DateTimeField(auto_now_add=True)
+    submitted_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

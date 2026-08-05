@@ -1,7 +1,8 @@
 import secrets
 
 from django.core.cache import cache
-from drf_spectacular.utils import extend_schema
+from django.utils import timezone
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -9,26 +10,39 @@ from rest_framework.response import Response
 from accounts.permissions import IsNurse, IsPatient
 
 from .models import IntakeForm
-from .serializers import IntakeFormSerializer
+from .serializers import IntakeFormSerializer, IntakeFormUpdateSerializer
 from core.responses import error_response, validation_error_response
 
 QR_TOKEN_TTL = 300  # 5분
 
 
-@extend_schema(tags=["intake"], responses={200: IntakeFormSerializer})
+@extend_schema_view(
+    get=extend_schema(tags=["intake"], responses={200: IntakeFormSerializer}),
+    put=extend_schema(
+        tags=["intake"], request=IntakeFormUpdateSerializer,
+        responses={200: IntakeFormSerializer},
+    ),
+)
 @api_view(["GET", "PUT"])
 @permission_classes([IsPatient])
 def my_intake_form(request):
-    form, _ = IntakeForm.objects.get_or_create(patient=request.user, defaults={"content": {}})
+    form, _ = IntakeForm.objects.get_or_create(
+        patient=request.user,
+        defaults={"content": {"status": "draft", "questions": []}},
+    )
 
     if request.method == "GET":
         return Response(IntakeFormSerializer(form).data)
 
-    content = request.data.get("content")
+    serializer = IntakeFormUpdateSerializer(data=request.data)
+    if not serializer.is_valid():
+        return validation_error_response(serializer.errors)
+    content = serializer.validated_data["content"]
     if content is None:
         return error_response("content는 필수입니다", status_code=status.HTTP_400_BAD_REQUEST)
     form.content = content
-    form.save(update_fields=["content", "updated_at"])
+    form.submitted_at = timezone.now() if content["status"] == "submitted" else None
+    form.save(update_fields=["content", "submitted_at", "updated_at"])
     return Response(IntakeFormSerializer(form).data)
 
 
