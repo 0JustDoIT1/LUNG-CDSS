@@ -24,3 +24,21 @@ class MedicationLogSerializer(serializers.ModelSerializer):
         model = MedicationLog
         fields = ["id", "drug_name", "dosage", "scheduled_time", "taken", "taken_at"]
         read_only_fields = ["id", "drug_name", "dosage", "scheduled_time"]
+
+
+class DailyComplianceSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    scheduled_count = serializers.IntegerField()
+    taken_count = serializers.IntegerField()
+    missed_count = serializers.IntegerField()
+    compliance_rate = serializers.IntegerField(allow_null=True)
+
+
+class MonthlyComplianceSerializer(serializers.Serializer):
+    month = serializers.RegexField(regex=r"^\d{4}-\d{2}$")
+    timezone = serializers.CharField()
+    scheduled_count = serializers.IntegerField()
+    taken_count = serializers.IntegerField()
+    missed_count = serializers.IntegerField()
+    compliance_rate = serializers.IntegerField(allow_null=True)
+    daily = DailyComplianceSerializer(many=True)
