@@ -5,6 +5,8 @@ from . import views
 urlpatterns = [
     path("cases/", views.case_list_create, name="case-list-create"),
     path("cases/upload-url/", views.get_upload_url, name="get-upload-url"),
+    path("cases/my-results/", views.my_results, name="my-results"),
+    path("cases/my-results/<uuid:case_id>/", views.my_result_detail, name="my-result-detail"),
     path("cases/<uuid:case_id>/", views.case_detail, name="case-detail"),
     path("cases/<uuid:case_id>/predict/", views.predict_case, name="predict-case"),
     path("cases/<uuid:case_id>/step/", views.update_case_step, name="update-case-step"),

@@ -10,7 +10,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from accounts.models import User
-from accounts.permissions import IsDoctor, IsPathologist
+from accounts.permissions import IsDoctor, IsPathologist, IsPatient
 from communication.services import notify
 from rag.exceptions import RAGServiceError
 from rag.rag_service import generate_treatment_note
@@ -30,6 +30,7 @@ from .serializers import (
     CaseDetailSerializer,
     CaseFindingSerializer,
     CaseListSerializer,
+    PatientResultSerializer,
     ReviewActionSerializer,
 )
 from .services import call_mosec_predict, call_mosec_thumbnail
@@ -37,6 +38,18 @@ from core.responses import error_response, validation_error_response
 
 INTERNAL_CALLBACK_TOKEN = os.environ.get("INTERNAL_CALLBACK_TOKEN")
 logger = logging.getLogger(__name__)
+
+
+def _released_patient_results(user):
+    return (
+        Case.objects.filter(
+            patient=user,
+            status=Case.Status.CONFIRMED,
+            confirmed_finding__isnull=False,
+        )
+        .select_related("confirmed_finding__based_on_result")
+        .prefetch_related("confirmed_finding__based_on_result__gene_predictions")
+    )
 
 
 def _is_specimen_id_unique_violation(exc):
@@ -233,6 +246,29 @@ def case_detail(request, case_id):
     delete_slide_file(case.slide_gcs_path)
     case.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@extend_schema(tags=["cases"], responses={200: PatientResultSerializer(many=True)})
+@api_view(["GET"])
+@permission_classes([IsPatient])
+def my_results(request):
+    """Return only this patient's doctor-confirmed (released) results."""
+    results = _released_patient_results(request.user).order_by("-confirmed_finding__confirmed_at")
+    return Response(PatientResultSerializer(results, many=True).data)
+
+
+@extend_schema(tags=["cases"], responses={200: PatientResultSerializer})
+@api_view(["GET"])
+@permission_classes([IsPatient])
+def my_result_detail(request, case_id):
+    """Return one released result; hide unreleased and other patients' cases as 404."""
+    case = _released_patient_results(request.user).filter(id=case_id).first()
+    if case is None:
+        return error_response(
+            "공개된 검사결과를 찾을 수 없습니다.",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+    return Response(PatientResultSerializer(case).data)
 
 
 @extend_schema(tags=["cases"])

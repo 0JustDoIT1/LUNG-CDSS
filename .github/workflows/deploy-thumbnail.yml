@@ -41,5 +41,5 @@ jobs:
           gcloud run deploy thumbnail-serving \
             --image=us-central1-docker.pkg.dev/shining-lamp-492601-f9/lung-cdss-repo/thumbnail:latest \
             --region=us-central1 \
-            --memory=1Gi --cpu=1 --port=8000 --timeout=900 \
-            --min-instances=0 --max-instances=1 --no-allow-unauthenticated
+            --memory=1Gi --cpu=1 --port=8000 --timeout=900 --concurrency=1 \
+            --min-instances=0 --max-instances=3 --no-allow-unauthenticated

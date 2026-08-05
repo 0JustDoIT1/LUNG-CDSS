@@ -33,6 +33,37 @@ class GenePredictionSerializer(serializers.ModelSerializer):
         fields = ["gene_name", "likelihood"]
 
 
+class PatientResultSerializer(serializers.ModelSerializer):
+    """Confirmed AI values that are safe to expose in the patient app."""
+
+    case_id = serializers.UUIDField(source="id", read_only=True)
+    final_subtype = serializers.CharField(source="confirmed_finding.final_subtype", read_only=True)
+    final_note = serializers.CharField(source="confirmed_finding.final_note", read_only=True)
+    luad_probability = serializers.FloatField(
+        source="confirmed_finding.based_on_result.luad_probability", read_only=True, allow_null=True,
+    )
+    lusc_probability = serializers.FloatField(
+        source="confirmed_finding.based_on_result.lusc_probability", read_only=True, allow_null=True,
+    )
+    gene_predictions = GenePredictionSerializer(
+        source="confirmed_finding.based_on_result.gene_predictions", many=True, read_only=True,
+    )
+    is_released = serializers.SerializerMethodField()
+    confirmed_at = serializers.DateTimeField(source="confirmed_finding.confirmed_at", read_only=True)
+    released_at = serializers.DateTimeField(source="confirmed_finding.confirmed_at", read_only=True)
+
+    class Meta:
+        model = Case
+        fields = [
+            "case_id", "specimen_id", "final_subtype", "final_note",
+            "luad_probability", "lusc_probability", "gene_predictions",
+            "is_released", "confirmed_at", "released_at",
+        ]
+
+    def get_is_released(self, obj):
+        return True
+
+
 class AIAnalysisResultSerializer(serializers.ModelSerializer):
     nuclei_patches = NucleiPatchSerializer(many=True, read_only=True)
     gene_predictions = GenePredictionSerializer(many=True, read_only=True)
