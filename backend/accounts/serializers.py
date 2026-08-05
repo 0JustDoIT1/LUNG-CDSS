@@ -198,7 +198,9 @@ class HospitalSerializer(serializers.ModelSerializer):
 
 
 class NotificationPreferenceSerializer(serializers.Serializer):
-    category = serializers.ChoiceField(choices=["medication", "appointment", "chat", "triage", "case_review"])
+    category = serializers.ChoiceField(
+        choices=["all", "medication", "appointment", "chat", "triage", "case_review"],
+    )
     enabled = serializers.BooleanField()
 
 

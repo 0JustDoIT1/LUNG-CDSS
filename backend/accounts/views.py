@@ -364,17 +364,30 @@ def hospital_info(request):
 
 # ── 알림 설정 (카테고리별 on/off) ─────────────────────────────────────
 
+@extend_schema(
+    tags=["accounts"],
+    responses={200: NotificationPreferenceSerializer(many=True)},
+)
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def notification_preference_list(request):
     """설정 안 한 카테고리는 기본값 enabled=True로 채워서 반환."""
     existing = {p.category: p.enabled for p in NotificationPreference.objects.filter(user=request.user)}
     all_categories = ["medication", "appointment", "chat", "triage", "case_review"]
-    return Response([
+    preferences = [
         {"category": c, "enabled": existing.get(c, True)} for c in all_categories
+    ]
+    return Response([
+        {"category": "all", "enabled": all(item["enabled"] for item in preferences)},
+        *preferences,
     ])
 
 
+@extend_schema(
+    tags=["accounts"],
+    request=NotificationPreferenceSerializer,
+    responses={200: NotificationPreferenceSerializer},
+)
 @api_view(["PATCH"])
 @permission_classes([IsAuthenticated])
 def notification_preference_update(request):
@@ -383,6 +396,16 @@ def notification_preference_update(request):
         return validation_error_response(serializer.errors)
 
     data = serializer.validated_data
+    if data["category"] == "all":
+        all_categories = ["medication", "appointment", "chat", "triage", "case_review"]
+        for category in all_categories:
+            NotificationPreference.objects.update_or_create(
+                user=request.user,
+                category=category,
+                defaults={"enabled": data["enabled"]},
+            )
+        return Response({"category": "all", "enabled": data["enabled"]})
+
     pref, _ = NotificationPreference.objects.update_or_create(
         user=request.user, category=data["category"], defaults={"enabled": data["enabled"]},
     )

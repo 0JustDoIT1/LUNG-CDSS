@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import DeviceToken, Hospital, PatientProfile, User
+from .models import DeviceToken, Hospital, NotificationPreference, PatientProfile, User
 
 
 class PatientRegisterGenderTests(APITestCase):
@@ -180,5 +180,44 @@ class DeviceTokenApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(DeviceToken.objects.filter(user=self.patient).exists())
+
+
+class NotificationPreferenceApiTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_patient(name="Notification Patient")
+        self.client.force_authenticate(self.user)
+        self.list_url = reverse("notification-pref-list")
+        self.update_url = reverse("notification-pref-update")
+
+    def test_get_returns_all_and_each_category_with_default_true(self):
+        response = self.client.get(self.list_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [item["category"] for item in response.data],
+            ["all", "medication", "appointment", "chat", "triage", "case_review"],
+        )
+        self.assertTrue(all(item["enabled"] for item in response.data))
+
+    def test_patch_updates_one_category(self):
+        response = self.client.patch(
+            self.update_url,
+            {"category": "chat", "enabled": False},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {"category": "chat", "enabled": False})
+        self.assertFalse(NotificationPreference.objects.get(user=self.user, category="chat").enabled)
+
+    def test_patch_all_updates_every_category(self):
+        response = self.client.patch(
+            self.update_url,
+            {"category": "all", "enabled": False},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(NotificationPreference.objects.filter(user=self.user, enabled=False).count(), 5)
 
 # Create your tests here.
