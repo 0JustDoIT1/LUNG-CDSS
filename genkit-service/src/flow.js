@@ -7,9 +7,11 @@ import { callMcpTool } from "./mcpClient.js";
 const RAG_SEARCH_URL =
   process.env.RAG_SEARCH_URL || "http://realtime:8001/internal/rag/search";
 
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+
 const ai = genkit({
   plugins: [googleAI()],
-  model: googleAI.model("gemini-2.5-flash"),
+  model: googleAI.model(GEMINI_MODEL),
 });
 
 function mcpText(result) {
