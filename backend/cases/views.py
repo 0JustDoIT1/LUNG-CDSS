@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from accounts.models import User
 from accounts.permissions import IsDoctor, IsPathologist, IsPatient
 from communication.services import notify
+from clinical.services import record_audit
 from rag.exceptions import RAGServiceError
 from rag.rag_service import generate_treatment_note
 from .gcs_signed_url import delete_case_reports, delete_slide_file, generate_upload_url
@@ -21,6 +22,7 @@ from .models import (
     CaseFavorite,
     CaseFinding,
     CaseReviewLog,
+    CaseReanalysisRequest,
     ConfirmedFinding,
     GenePrediction,
     NucleiPatch,
@@ -435,6 +437,7 @@ def review_case(request, case_id):
             )
             case.status = Case.Status.REJECTED
             case.save(update_fields=["status"])
+        record_audit(actor=request.user, action="case.rejected", resource_type="case", resource_id=case.id, metadata={"patient_id": str(case.patient_id), "reason": rejection_reason})
         return Response(CaseDetailSerializer(case, context={"request": request}).data)
     else:
         final_subtype = data["final_subtype"]
@@ -459,6 +462,8 @@ def review_case(request, case_id):
         case.status = Case.Status.CONFIRMED
         case.save(update_fields=["status"])
 
+    record_audit(actor=request.user, action="case.confirmed", resource_type="case", resource_id=case.id, metadata={"patient_id": str(case.patient_id)})
+
     notify(
         recipient_id=case.patient_id,
         category="case_review",
@@ -477,6 +482,33 @@ def case_review_log_list(request, case_id):
     logs = CaseReviewLog.objects.filter(case_id=case_id).select_related("reviewer")
     from .serializers import CaseReviewLogSerializer
     return Response(CaseReviewLogSerializer(logs, many=True).data)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsDoctor])
+def case_reanalysis_requests(request, case_id):
+    try:
+        case = Case.objects.get(id=case_id)
+    except Case.DoesNotExist:
+        return error_response("케이스를 찾을 수 없습니다.", status_code=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        rows = CaseReanalysisRequest.objects.filter(case=case).select_related("requested_by")
+        return Response([{
+            "id": str(row.id), "reason": row.reason, "status": row.status,
+            "requested_by_name": row.requested_by.name, "created_at": row.created_at,
+        } for row in rows])
+
+    reason = str(request.data.get("reason", "")).strip()
+    if not reason:
+        return error_response("재분석 요청 사유를 입력해주세요.", status_code=status.HTTP_400_BAD_REQUEST)
+    if CaseReanalysisRequest.objects.filter(case=case, status__in=["pending", "processing"]).exists():
+        return error_response("이미 진행 중인 재분석 요청이 있습니다.", status_code=status.HTTP_409_CONFLICT)
+    row = CaseReanalysisRequest.objects.create(case=case, requested_by=request.user, reason=reason)
+    record_audit(actor=request.user, action="case.reanalysis_requested", resource_type="case", resource_id=case.id, metadata={"patient_id": str(case.patient_id), "reason": reason})
+    if case.uploaded_by_id:
+        notify(recipient_id=case.uploaded_by_id, category="case_review", title="케이스 재분석 요청", body=f"{case.specimen_id}: {reason}", deep_link=f"/cases/{case.id}/result")
+    return Response({"id": str(row.id), "reason": row.reason, "status": row.status, "requested_by_name": request.user.name, "created_at": row.created_at}, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(tags=["cases"])

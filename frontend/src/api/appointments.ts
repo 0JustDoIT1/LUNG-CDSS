@@ -11,6 +11,19 @@ export async function approveDoctorAppointment(id: string) {
   return data;
 }
 
+export async function rejectDoctorAppointment(id: string, reason: string) {
+  const { data } = await apiClient.post<DoctorAppointment>(`/appointments/doctor/${id}/reject/`, { reason });
+  return data;
+}
+
+export async function proposeDoctorAppointmentTime(id: string, proposedSlot: string, reason: string) {
+  const { data } = await apiClient.post<DoctorAppointment>(`/appointments/doctor/${id}/propose-time/`, {
+    proposed_slot: proposedSlot,
+    reason,
+  });
+  return data;
+}
+
 export async function getDoctorWeeklySchedule() {
   const { data } = await apiClient.get<WeeklyScheduleEntry[]>("/appointments/doctor/weekly-schedule/");
   return data;

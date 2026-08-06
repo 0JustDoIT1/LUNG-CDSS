@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from accounts.models import DoctorOffDay, DoctorProfile, DoctorWeeklySchedule, User
 from accounts.permissions import IsDoctor, IsNurse, IsPatient
 from communication.services import notify
+from clinical.services import record_audit
 
 from .models import Appointment
 from .serializers import (
@@ -395,7 +396,10 @@ def doctor_approve_appointment(request, appointment_id):
 
         appointment.status = Appointment.Status.CONFIRMED
         appointment.confirmed_slot = appointment.requested_at_slot
-        appointment.save(update_fields=["status", "confirmed_slot"])
+        appointment.reviewed_at = timezone.now()
+        appointment.save(update_fields=["status", "confirmed_slot", "reviewed_at"])
+
+    record_audit(actor=request.user, action="appointment.approved", resource_type="appointment", resource_id=appointment.id, metadata={"patient_id": str(appointment.patient_id)})
 
     notify(
         recipient_id=appointment.patient_id,
@@ -404,4 +408,44 @@ def doctor_approve_appointment(request, appointment_id):
         body=f"{appointment.department} 예약이 확정되었습니다.",
         deep_link=f"/appointments/{appointment.id}",
     )
+    return Response(AppointmentSerializer(appointment).data)
+
+
+@api_view(["POST"])
+@permission_classes([IsDoctor])
+def doctor_reject_appointment(request, appointment_id):
+    reason = str(request.data.get("reason", "")).strip()
+    if not reason:
+        return error_response("반려 사유를 입력해주세요.", status_code=status.HTTP_400_BAD_REQUEST)
+    appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user, status=Appointment.Status.REQUESTED)
+    appointment.status = Appointment.Status.REJECTED
+    appointment.rejection_reason = reason
+    appointment.reviewed_at = timezone.now()
+    appointment.save(update_fields=["status", "rejection_reason", "reviewed_at"])
+    record_audit(actor=request.user, action="appointment.rejected", resource_type="appointment", resource_id=appointment.id, metadata={"patient_id": str(appointment.patient_id), "reason": reason})
+    notify(recipient_id=appointment.patient_id, category="appointment", title="예약 반려", body=reason, deep_link=f"/appointments/{appointment.id}")
+    return Response(AppointmentSerializer(appointment).data)
+
+
+@api_view(["POST"])
+@permission_classes([IsDoctor])
+def doctor_propose_time(request, appointment_id):
+    proposed_slot = request.data.get("proposed_slot")
+    reason = str(request.data.get("reason", "")).strip()
+    if not proposed_slot:
+        return error_response("대체 시간을 입력해주세요.", status_code=status.HTTP_400_BAD_REQUEST)
+    from django.utils.dateparse import parse_datetime
+    parsed_slot = parse_datetime(proposed_slot)
+    if parsed_slot is not None and timezone.is_naive(parsed_slot):
+        parsed_slot = timezone.make_aware(parsed_slot, timezone.get_current_timezone())
+    if parsed_slot is None or parsed_slot <= timezone.now():
+        return error_response("유효한 미래 시간을 입력해주세요.", status_code=status.HTTP_400_BAD_REQUEST)
+    appointment = get_object_or_404(Appointment, id=appointment_id, doctor=request.user, status=Appointment.Status.REQUESTED)
+    appointment.status = Appointment.Status.TIME_PROPOSED
+    appointment.proposed_slot = parsed_slot
+    appointment.proposal_reason = reason
+    appointment.reviewed_at = timezone.now()
+    appointment.save(update_fields=["status", "proposed_slot", "proposal_reason", "reviewed_at"])
+    record_audit(actor=request.user, action="appointment.time_proposed", resource_type="appointment", resource_id=appointment.id, metadata={"patient_id": str(appointment.patient_id), "proposed_slot": parsed_slot.isoformat(), "reason": reason})
+    notify(recipient_id=appointment.patient_id, category="appointment", title="예약 시간 변경 제안", body=reason or parsed_slot.strftime("%m월 %d일 %H:%M"), deep_link=f"/appointments/{appointment.id}")
     return Response(AppointmentSerializer(appointment).data)

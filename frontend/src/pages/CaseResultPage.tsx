@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, AlertCircle, Loader2, Printer, RefreshCw } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCase } from "../api/cases";
+import { requestCaseReanalysis } from "../api/clinical";
 import Header from "../components/Shared/Header";
 import { UnifiedCaseResultSections } from "../components/dashboard/UnifiedCaseResultSections";
 import { CaseReviewHistory } from "../components/dashboard/CaseReviewHistory";
@@ -20,6 +21,8 @@ function ResultContent(): React.JSX.Element {
   const [caseData, setCaseData] = useState<CaseDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reanalysisReason, setReanalysisReason] = useState("");
+  const [reanalysisMessage, setReanalysisMessage] = useState<string | null>(null);
 
   const loadCase = useCallback(async () => {
     if (!id) {
@@ -181,6 +184,15 @@ function ResultContent(): React.JSX.Element {
 
       {(caseData.status === "confirmed" || caseData.status === "rejected") && getStoredItem("user_role") === "doctor" ? (
         <CaseReviewHistory caseId={caseData.id} />
+      ) : null}
+
+      {caseData.status === "rejected" && getStoredItem("user_role") === "doctor" ? (
+        <section className="rounded-2xl border border-amber-200 bg-white p-5 shadow-sm">
+          <h2 className="font-semibold text-gray-900">재분석 요청</h2>
+          <textarea value={reanalysisReason} onChange={(event) => setReanalysisReason(event.target.value)} rows={3} placeholder="재분석이 필요한 이유를 입력해주세요." className="mt-3 w-full rounded-lg border border-gray-200 p-3 text-sm" />
+          <button type="button" disabled={!reanalysisReason.trim()} onClick={() => void requestCaseReanalysis(caseData.id, reanalysisReason.trim()).then(() => { setReanalysisMessage("재분석을 요청했습니다."); setReanalysisReason(""); }).catch(() => setReanalysisMessage("재분석 요청에 실패했습니다."))} className="mt-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">재분석 요청</button>
+          {reanalysisMessage ? <p className="mt-2 text-sm text-gray-600">{reanalysisMessage}</p> : null}
+        </section>
       ) : null}
 
       {hasResult ? <PrintableReport caseData={caseData} /> : null}

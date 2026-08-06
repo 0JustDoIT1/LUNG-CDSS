@@ -13,6 +13,8 @@ import {
   Minus,
   Plus,
   Contrast,
+  CalendarDays,
+  Clock3,
 } from "lucide-react";
 import type {
   CaseStatus,
@@ -28,6 +30,8 @@ import { DoctorStickyNote } from "../components/dashboard/DoctorStickyNote";
 import Header from "../components/Shared/Header";
 import apiClient from "../api/client";
 import { getAllCases } from "../api/cases";
+import { approveDoctorAppointment, getDoctorAppointments } from "../api/appointments";
+import type { DoctorAppointment } from "../types/appointment";
 import { getStoredItem, setStoredItem } from "../utils/storage";
 
 const STATUS_DOT: Record<CaseStatus, string> = {
@@ -47,6 +51,30 @@ const HIGH_CONTRAST_STORAGE_KEY = "dashboard_a11y_high_contrast";
 const FONT_SCALE_STEPS = [0.875, 1, 1.125, 1.25] as const;
 const BASE_ROOT_FONT_PX = 16;
 const CASE_REFRESH_INTERVAL_MS = 30_000;
+const APPOINTMENT_REFRESH_INTERVAL_MS = 15_000;
+
+const APPOINTMENT_STATUS_LABEL: Record<DoctorAppointment["status"], string> = {
+  requested: "승인 대기",
+  confirmed: "예약 확정",
+  reminded_d7: "예약 확정",
+  reminded_d1: "예약 확정",
+  checked_in: "접수 완료",
+  completed: "진료 완료",
+  cancelled: "취소",
+  rejected: "반려",
+  time_proposed: "시간 제안",
+  no_show: "미방문",
+};
+
+function appointmentDate(appointment: DoctorAppointment): Date {
+  return new Date(appointment.confirmed_slot ?? appointment.requested_at_slot);
+}
+
+function isSameLocalDate(left: Date, right: Date): boolean {
+  return left.getFullYear() === right.getFullYear()
+    && left.getMonth() === right.getMonth()
+    && left.getDate() === right.getDate();
+}
 
 function readStoredFontScale(): number {
   if (typeof window === "undefined") return 1;
@@ -285,9 +313,216 @@ function RightSidebar({ urgent, reviewPending, onOpen }: RightSidebarProps): Rea
 }
 
 // ----------------------------- 컴포넌트 -----------------------------
+function TodaySchedule({
+  appointments,
+  loading,
+  now,
+  onOpenSchedule,
+  onApprove,
+  approvingId,
+}: {
+  appointments: DoctorAppointment[];
+  loading: boolean;
+  now: Date;
+  onOpenSchedule: (appointmentId?: string) => void;
+  onApprove: (appointmentId: string) => void;
+  approvingId: string | null;
+}): React.JSX.Element {
+  const [statusFilter, setStatusFilter] = useState<"all" | DoctorAppointment["status"]>("all");
+  const [patientSearch, setPatientSearch] = useState("");
+  const [hideCompleted, setHideCompleted] = useState(true);
+
+  const todayAppointments = useMemo(
+    () => appointments
+      .filter((appointment) => appointment.status !== "cancelled")
+      .filter((appointment) => isSameLocalDate(appointmentDate(appointment), now))
+      .sort((left, right) => {
+        const leftWaiting = left.status === "requested" ? 0 : 1;
+        const rightWaiting = right.status === "requested" ? 0 : 1;
+        return leftWaiting - rightWaiting || appointmentDate(left).getTime() - appointmentDate(right).getTime();
+      }),
+    [appointments, now],
+  );
+
+  const visibleAppointments = useMemo(() => {
+    const query = patientSearch.trim().toLowerCase();
+    return todayAppointments.filter((appointment) => {
+      if (statusFilter === "confirmed" && !["confirmed", "reminded_d7", "reminded_d1"].includes(appointment.status)) return false;
+      if (statusFilter !== "all" && statusFilter !== "confirmed" && appointment.status !== statusFilter) return false;
+      if (hideCompleted && appointment.status === "completed") return false;
+      return !query || appointment.patient_name.toLowerCase().includes(query);
+    });
+  }, [hideCompleted, patientSearch, statusFilter, todayAppointments]);
+
+  const pendingCount = todayAppointments.filter((appointment) => appointment.status === "requested").length;
+  const confirmedCount = todayAppointments.filter((appointment) =>
+    ["confirmed", "reminded_d7", "reminded_d1"].includes(appointment.status)
+  ).length;
+  const completedCount = todayAppointments.filter((appointment) => appointment.status === "completed").length;
+  const nextAppointment = [...todayAppointments]
+    .filter((appointment) => !["completed", "no_show"].includes(appointment.status))
+    .sort((left, right) => appointmentDate(left).getTime() - appointmentDate(right).getTime())
+    .find((appointment) => appointmentDate(appointment).getTime() >= now.getTime());
+
+  function remainingLabel(appointment: DoctorAppointment): string {
+    const remainingMinutes = Math.max(0, Math.ceil((appointmentDate(appointment).getTime() - now.getTime()) / 60_000));
+    if (remainingMinutes < 60) return `${remainingMinutes}분 후`;
+    const hours = Math.floor(remainingMinutes / 60);
+    const minutes = remainingMinutes % 60;
+    return minutes ? `${hours}시간 ${minutes}분 후` : `${hours}시간 후`;
+  }
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between gap-3 border-b border-gray-100 bg-gray-50/70 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
+            <CalendarDays className="h-4 w-4" />
+          </span>
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">오늘의 진료 일정</h2>
+            <p className="mt-0.5 text-[11px] text-gray-400">
+              {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onOpenSchedule()}
+          className="rounded-lg px-3 py-1.5 text-xs font-semibold text-teal-700 transition hover:bg-teal-50"
+        >
+          일정 관리
+        </button>
+      </div>
+
+      <div className="space-y-4 p-4">
+        <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+            <p className="text-[11px] text-gray-500">오늘 예약</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-gray-900">{todayAppointments.length}</p>
+          </div>
+          <div className="rounded-xl border border-amber-100 bg-amber-50/60 px-3 py-2.5">
+            <p className="text-[11px] text-amber-700">승인 대기</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-amber-800">{pendingCount}</p>
+          </div>
+          <div className="rounded-xl border border-teal-100 bg-teal-50/60 px-3 py-2.5">
+            <p className="text-[11px] text-teal-700">예약 확정</p>
+            <p className="mt-1 text-xl font-bold tabular-nums text-teal-800">{confirmedCount}</p>
+          </div>
+          <div className="rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2.5">
+            <p className="text-[11px] text-blue-700">다음 진료</p>
+            <p className="mt-1 truncate text-sm font-bold text-blue-900">
+              {nextAppointment ? `${nextAppointment.patient_name} · ${remainingLabel(nextAppointment)}` : "예정 없음"}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[180px] flex-1 sm:max-w-xs">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+            <input
+              value={patientSearch}
+              onChange={(event) => setPatientSearch(event.target.value)}
+              placeholder="환자명 검색"
+              className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-xs outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as "all" | DoctorAppointment["status"])}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 outline-none focus:border-teal-400"
+          >
+            <option value="all">전체 상태</option>
+            <option value="requested">승인 대기</option>
+            <option value="confirmed">예약 확정</option>
+            <option value="checked_in">접수 완료</option>
+            <option value="completed">진료 완료</option>
+            <option value="no_show">미방문</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => setHideCompleted((current) => !current)}
+            className={`rounded-lg border px-3 py-2 text-xs font-medium transition ${
+              hideCompleted
+                ? "border-gray-900 bg-gray-900 text-white"
+                : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            완료 일정 {hideCompleted ? "펼치기" : "접기"} ({completedCount})
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="h-20 animate-pulse rounded-xl bg-gray-100" />
+            ))}
+          </div>
+        ) : todayAppointments.length === 0 ? (
+          <p className="py-5 text-center text-sm text-gray-400">오늘 예정된 진료가 없습니다.</p>
+        ) : visibleAppointments.length === 0 ? (
+          <p className="py-5 text-center text-sm text-gray-400">검색 조건에 맞는 일정이 없습니다.</p>
+        ) : (
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleAppointments.map((appointment) => {
+              const date = appointmentDate(appointment);
+              const waiting = appointment.status === "requested";
+              return (
+                <article
+                  key={appointment.id}
+                  className={`rounded-xl border p-3.5 transition ${
+                    waiting ? "border-amber-200 bg-amber-50/30" : "border-gray-200"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => onOpenSchedule(appointment.id)}
+                    className="flex w-full items-center gap-3 text-left"
+                  >
+                    <span className="flex min-w-14 flex-col items-center rounded-lg bg-white px-2 py-2 text-gray-700 shadow-sm">
+                      <Clock3 className="mb-1 h-3.5 w-3.5 text-teal-600" />
+                      <span className="text-xs font-bold tabular-nums">
+                        {date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-gray-900">{appointment.patient_name}</span>
+                      <span className="mt-0.5 block truncate text-xs text-gray-500">{appointment.department}</span>
+                    </span>
+                    <span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold ${
+                      waiting ? "bg-amber-100 text-amber-700" : "bg-teal-100 text-teal-700"
+                    }`}>
+                      {APPOINTMENT_STATUS_LABEL[appointment.status]}
+                    </span>
+                  </button>
+                  {waiting ? (
+                    <button
+                      type="button"
+                      onClick={() => onApprove(appointment.id)}
+                      disabled={approvingId !== null}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-teal-600 px-3 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      {approvingId === appointment.id ? "승인 처리 중..." : "예약 바로 승인"}
+                    </button>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function Dashboard(): React.JSX.Element {
   const navigate = useNavigate();
   const [cases, setCases] = useState<CaseListItem[]>([]);
+  const [appointments, setAppointments] = useState<DoctorAppointment[]>([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(true);
+  const [approvingAppointmentId, setApprovingAppointmentId] = useState<string | null>(null);
+  const [appointmentMessage, setAppointmentMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<CaseStatus | "">("");
@@ -338,6 +573,31 @@ export default function Dashboard(): React.JSX.Element {
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000 * 30);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadAppointments(): Promise<void> {
+      try {
+        const data = await getDoctorAppointments();
+        if (active) setAppointments(data);
+      } catch (appointmentError) {
+        console.error("Failed to load today's appointments", appointmentError);
+      } finally {
+        if (active) setAppointmentsLoading(false);
+      }
+    }
+
+    void loadAppointments();
+    const refreshTimer = window.setInterval(() => void loadAppointments(), APPOINTMENT_REFRESH_INTERVAL_MS);
+    const refreshOnFocus = () => void loadAppointments();
+    window.addEventListener("focus", refreshOnFocus);
+    return () => {
+      active = false;
+      window.clearInterval(refreshTimer);
+      window.removeEventListener("focus", refreshOnFocus);
+    };
   }, []);
 
   // 글자 크기: html 루트 font-size를 조정해 rem 기반 Tailwind 클래스 전체에 반영.
@@ -472,6 +732,23 @@ export default function Dashboard(): React.JSX.Element {
     setCases((prev) =>
       prev.map((c) => (c.id === caseId ? { ...c, status: nextStatus, is_confirmed: nextStatus === "confirmed" } : c))
     );
+  }, []);
+
+  const approveAppointment = useCallback(async (appointmentId: string): Promise<void> => {
+    setApprovingAppointmentId(appointmentId);
+    setAppointmentMessage(null);
+    try {
+      const updated = await approveDoctorAppointment(appointmentId);
+      setAppointments((current) => current.map((appointment) =>
+        appointment.id === appointmentId ? updated : appointment
+      ));
+      setAppointmentMessage(`${updated.patient_name}님의 예약을 승인했습니다.`);
+    } catch (approvalError) {
+      console.error("Failed to approve appointment", approvalError);
+      setAppointmentMessage("예약 승인에 실패했습니다. 예약 상태를 다시 확인해주세요.");
+    } finally {
+      setApprovingAppointmentId(null);
+    }
   }, []);
 
   const moveSelection = useCallback(
@@ -649,6 +926,29 @@ export default function Dashboard(): React.JSX.Element {
             <MetricCard label="실패" value={metrics.failed} tone={metrics.failed > 0 ? "rose" : "default"} icon={XCircle} />
             <MetricCard label="검토 필요" value={metrics.review} tone={metrics.review > 0 ? "amber" : "default"} icon={ClipboardCheck} />
           </div>
+
+          {appointmentMessage ? (
+            <p className={`rounded-lg px-4 py-2.5 text-sm ${
+              appointmentMessage.includes("실패")
+                ? "bg-rose-50 text-rose-700"
+                : "bg-teal-50 text-teal-700"
+            }`}>
+              {appointmentMessage}
+            </p>
+          ) : null}
+
+          <TodaySchedule
+            appointments={appointments}
+            loading={appointmentsLoading}
+            now={now}
+            onOpenSchedule={(appointmentId) => navigate(
+              appointmentId
+                ? `/doctor-dashboard/schedule?appointment=${encodeURIComponent(appointmentId)}`
+                : "/doctor-dashboard/schedule",
+            )}
+            onApprove={(appointmentId) => void approveAppointment(appointmentId)}
+            approvingId={approvingAppointmentId}
+          />
 
           {urgent.length > 0 && (
             <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3">

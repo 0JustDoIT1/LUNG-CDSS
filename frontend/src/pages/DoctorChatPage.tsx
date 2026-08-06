@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Loader2, MessageCircle, Plus, Send, Users } from "lucide-react";
 import { useParams } from "react-router-dom";
@@ -26,6 +26,7 @@ export default function DoctorChatPage(): React.JSX.Element {
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -75,6 +76,10 @@ export default function DoctorChatPage(): React.JSX.Element {
     [selectedThreadId, threads]
   );
 
+  useEffect(() => {
+    if (!messagesLoading) messagesEndRef.current?.scrollIntoView({ block: "end" });
+  }, [messages, messagesLoading, selectedThreadId]);
+
   async function handleStartThread(): Promise<void> {
     if (!newCounterpartId) return;
     setError(null);
@@ -110,10 +115,10 @@ export default function DoctorChatPage(): React.JSX.Element {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa]">
+    <div className="h-screen overflow-hidden bg-[#f7f8fa]">
       <Header />
-      <main className="mx-auto w-full max-w-[1400px] p-4 lg:p-6">
-        <div className="mb-5">
+      <main className="mx-auto flex h-[calc(100dvh-64px)] w-full max-w-[1400px] flex-col overflow-hidden p-4 lg:p-6">
+        <div className="mb-4 shrink-0">
           <p className="text-xs font-medium text-teal-600">협진 커뮤니케이션</p>
           <h1 className="mt-1 text-2xl font-semibold text-gray-900">의료진 채팅</h1>
           <p className="mt-1 text-sm text-gray-500">같은 진료과 간호사와 안전하게 메시지를 주고받습니다.</p>
@@ -121,8 +126,8 @@ export default function DoctorChatPage(): React.JSX.Element {
 
         {error ? <p className="mb-3 rounded-lg bg-rose-50 px-4 py-2.5 text-sm text-rose-600">{error}</p> : null}
 
-        <div className="grid min-h-[650px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm md:grid-cols-[320px_1fr]">
-          <aside className="border-b border-gray-200 md:border-b-0 md:border-r">
+        <div className="grid min-h-0 flex-1 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm md:grid-cols-[320px_1fr]">
+          <aside className="min-h-0 overflow-hidden border-b border-gray-200 md:border-b-0 md:border-r">
             <div className="border-b border-gray-100 p-4">
               <label htmlFor="chat-counterpart" className="mb-1.5 block text-xs font-medium text-gray-600">
                 새 대화 시작
@@ -151,7 +156,7 @@ export default function DoctorChatPage(): React.JSX.Element {
               </div>
             </div>
 
-            <div className="max-h-[570px] overflow-y-auto">
+            <div className="max-h-48 overflow-y-auto md:h-[calc(100%-105px)] md:max-h-none">
               {loading ? (
                 <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-teal-600" /></div>
               ) : threads.length === 0 ? (
@@ -179,14 +184,14 @@ export default function DoctorChatPage(): React.JSX.Element {
             </div>
           </aside>
 
-          <section className="flex min-h-[500px] flex-col">
+          <section className="flex min-h-0 flex-col overflow-hidden">
             {selectedThread ? (
               <>
                 <header className="border-b border-gray-100 px-5 py-4">
                   <p className="font-semibold text-gray-900">{selectedThread.other_participant_name ?? "의료진"}</p>
                   <p className="text-xs text-gray-400">의료진 전용 대화</p>
                 </header>
-                <div className="flex-1 space-y-3 overflow-y-auto bg-gray-50/50 p-5">
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-gray-50/50 p-5">
                   {messagesLoading ? (
                     <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-teal-600" /></div>
                   ) : messages.length === 0 ? (
@@ -205,8 +210,9 @@ export default function DoctorChatPage(): React.JSX.Element {
                       </div>
                     );
                   })}
+                  <div ref={messagesEndRef} aria-hidden="true" />
                 </div>
-                <form onSubmit={(event) => void handleSend(event)} className="flex gap-2 border-t border-gray-100 p-4">
+                <form onSubmit={(event) => void handleSend(event)} className="sticky bottom-0 flex shrink-0 gap-2 border-t border-gray-100 bg-white p-4 shadow-[0_-4px_12px_rgba(15,23,42,0.04)]">
                   <textarea
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}

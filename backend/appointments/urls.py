@@ -10,6 +10,8 @@ urlpatterns = [
     path("mine/", views.my_appointments, name="appt-mine"),
     path("doctor/mine/", views.doctor_my_appointments, name="appt-doctor-mine"),
     path("doctor/<uuid:appointment_id>/approve/", views.doctor_approve_appointment, name="appt-doctor-approve"),
+    path("doctor/<uuid:appointment_id>/reject/", views.doctor_reject_appointment, name="appt-doctor-reject"),
+    path("doctor/<uuid:appointment_id>/propose-time/", views.doctor_propose_time, name="appt-doctor-propose-time"),
     path("<uuid:appointment_id>/cancel/", views.cancel_appointment, name="appt-cancel"),
 
     path("queue/", views.request_queue, name="appt-queue"),
