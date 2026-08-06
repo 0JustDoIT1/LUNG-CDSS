@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { CalendarClock, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Loader2, Plus, Save, Trash2 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   approveDoctorAppointment,
   createDoctorOffDay,
@@ -9,6 +9,8 @@ import {
   getDoctorAppointments,
   getDoctorOffDays,
   getDoctorWeeklySchedule,
+  proposeDoctorAppointmentTime,
+  rejectDoctorAppointment,
   updateDoctorWeeklySchedule,
 } from "../api/appointments";
 import Header from "../components/Shared/Header";
@@ -22,8 +24,11 @@ const APPOINTMENT_STATUS_LABEL: Record<DoctorAppointment["status"], string> = {
   checked_in: "접수 완료",
   completed: "진료 완료",
   cancelled: "취소",
+  rejected: "반려",
+  time_proposed: "시간 제안",
   no_show: "미방문",
 };
+const APPOINTMENTS_PER_PAGE = 6;
 
 const DAYS: Array<{ value: ScheduleDay; label: string }> = [
   { value: "mon", label: "월" },
@@ -216,16 +221,22 @@ function emptySchedule(): WeeklyScheduleEntry[] {
 }
 
 export default function DoctorSchedulePage(): React.JSX.Element {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const selectedAppointmentId = searchParams.get("appointment");
   const [schedule, setSchedule] = useState<WeeklyScheduleEntry[]>(emptySchedule);
   const [offDays, setOffDays] = useState<DoctorOffDay[]>([]);
   const [appointments, setAppointments] = useState<DoctorAppointment[]>([]);
+  const [appointmentPage, setAppointmentPage] = useState(1);
   const [date, setDate] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [actionAppointmentId, setActionAppointmentId] = useState<string | null>(null);
+  const [actionMode, setActionMode] = useState<"reject" | "propose" | null>(null);
+  const [actionReason, setActionReason] = useState("");
+  const [proposedSlot, setProposedSlot] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -241,6 +252,10 @@ export default function DoctorSchedulePage(): React.JSX.Element {
         setSchedule(loaded);
         setOffDays(offDayData);
         setAppointments(appointmentData);
+        if (selectedAppointmentId) {
+          const selectedIndex = appointmentData.findIndex((appointment) => appointment.id === selectedAppointmentId);
+          if (selectedIndex >= 0) setAppointmentPage(Math.floor(selectedIndex / APPOINTMENTS_PER_PAGE) + 1);
+        }
       })
       .catch(() => {
         if (active) setError("진료 일정을 불러오지 못했습니다.");
@@ -251,7 +266,16 @@ export default function DoctorSchedulePage(): React.JSX.Element {
     return () => {
       active = false;
     };
-  }, []);
+  }, [selectedAppointmentId]);
+
+  const appointmentPageCount = Math.max(1, Math.ceil(appointments.length / APPOINTMENTS_PER_PAGE));
+  const paginatedAppointments = useMemo(
+    () => appointments.slice(
+      (appointmentPage - 1) * APPOINTMENTS_PER_PAGE,
+      appointmentPage * APPOINTMENTS_PER_PAGE,
+    ),
+    [appointmentPage, appointments],
+  );
 
   const scheduleMap = useMemo(
     () => new Map(schedule.map((entry) => [`${entry.day_of_week}:${entry.period}`, entry.available])),
@@ -322,6 +346,41 @@ export default function DoctorSchedulePage(): React.JSX.Element {
     }
   }
 
+  async function rejectAppointment(id: string): Promise<void> {
+    if (!actionReason.trim()) return;
+    setApprovingId(id);
+    try {
+      const updated = await rejectDoctorAppointment(id, actionReason.trim());
+      setAppointments((current) => current.map((item) => item.id === id ? updated : item));
+      setMessage(`${updated.patient_name}님의 예약을 반려했습니다.`);
+      setActionAppointmentId(null);
+      setActionMode(null);
+      setActionReason("");
+    } catch {
+      setError("예약을 반려하지 못했습니다.");
+    } finally {
+      setApprovingId(null);
+    }
+  }
+
+  async function proposeTime(id: string): Promise<void> {
+    if (!proposedSlot || !actionReason.trim()) return;
+    setApprovingId(id);
+    try {
+      const updated = await proposeDoctorAppointmentTime(id, proposedSlot, actionReason.trim());
+      setAppointments((current) => current.map((item) => item.id === id ? updated : item));
+      setMessage(`${updated.patient_name}님에게 대체 시간을 제안했습니다.`);
+      setActionAppointmentId(null);
+      setActionMode(null);
+      setActionReason("");
+      setProposedSlot("");
+    } catch {
+      setError("대체 시간을 제안하지 못했습니다.");
+    } finally {
+      setApprovingId(null);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f7f8fa]">
       <Header />
@@ -352,7 +411,7 @@ export default function DoctorSchedulePage(): React.JSX.Element {
                   <p className="py-6 text-center text-sm text-gray-400">예약 신청이 없습니다.</p>
                 ) : (
                   <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    {appointments.map((appointment) => {
+                    {paginatedAppointments.map((appointment) => {
                       const selected = appointment.id === selectedAppointmentId;
                       const appointmentAt = appointment.confirmed_slot ?? appointment.requested_at_slot;
                       return (
@@ -393,26 +452,86 @@ export default function DoctorSchedulePage(): React.JSX.Element {
                           <p className="mt-2 text-[11px] text-gray-400">
                             신청 {new Date(appointment.created_at).toLocaleString("ko-KR")}
                           </p>
+                          <button type="button" onClick={() => navigate(`/doctor-dashboard/patients/${appointment.patient_id}`)} className="mt-3 text-xs font-semibold text-teal-700 hover:underline">환자 상세 보기</button>
                           {appointment.status === "requested" ? (
+                            <div className="mt-4 grid grid-cols-3 gap-2">
                             <button
                               type="button"
                               onClick={() => void approveAppointment(appointment.id)}
                               disabled={approvingId !== null}
-                              className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-teal-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:opacity-50"
+                              className="inline-flex items-center justify-center gap-1 rounded-lg bg-teal-600 px-2 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-50"
                             >
                               {approvingId === appointment.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 <CheckCircle2 className="h-4 w-4" />
                               )}
-                              {approvingId === appointment.id ? "승인 처리 중..." : "예약 승인"}
+                              승인
                             </button>
+                            <button type="button" onClick={() => { setActionAppointmentId(appointment.id); setActionMode("reject"); setActionReason(""); setProposedSlot(""); }} disabled={approvingId !== null} className="rounded-lg border border-rose-200 px-2 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50">반려</button>
+                            <button type="button" onClick={() => { setActionAppointmentId(appointment.id); setActionMode("propose"); setActionReason(""); setProposedSlot(""); }} disabled={approvingId !== null} className="rounded-lg border border-blue-200 px-2 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-50 disabled:opacity-50">시간 제안</button>
+                            </div>
+                          ) : null}
+                          {actionAppointmentId === appointment.id && actionMode ? (
+                            <div className={`mt-3 space-y-2 rounded-xl border p-3 ${actionMode === "reject" ? "border-rose-100 bg-rose-50/50" : "border-blue-100 bg-blue-50/50"}`}>
+                              <p className="text-xs font-semibold text-gray-800">{actionMode === "reject" ? "예약 반려" : "대체 시간 제안"}</p>
+                              {actionMode === "propose" ? (
+                                <input type="datetime-local" value={proposedSlot} min={new Date().toISOString().slice(0, 16)} onChange={(event) => setProposedSlot(event.target.value)} className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm" />
+                              ) : null}
+                              <textarea value={actionReason} onChange={(event) => setActionReason(event.target.value)} rows={3} maxLength={500} placeholder={actionMode === "reject" ? "반려 사유를 입력해주세요." : "시간 변경 사유를 입력해주세요."} className="w-full resize-y rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm" />
+                              <div className="flex justify-end gap-2">
+                                <button type="button" onClick={() => { setActionAppointmentId(null); setActionMode(null); }} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600">취소</button>
+                                <button type="button" onClick={() => actionMode === "reject" ? void rejectAppointment(appointment.id) : void proposeTime(appointment.id)} disabled={!actionReason.trim() || (actionMode === "propose" && !proposedSlot) || approvingId !== null} className={`rounded-lg px-3 py-2 text-xs font-semibold text-white disabled:opacity-40 ${actionMode === "reject" ? "bg-rose-600" : "bg-blue-600"}`}>{approvingId === appointment.id ? "처리 중..." : actionMode === "reject" ? "반려 확정" : "시간 제안 보내기"}</button>
+                              </div>
+                            </div>
                           ) : null}
                         </article>
                       );
                     })}
                   </div>
                 )}
+                {appointments.length > APPOINTMENTS_PER_PAGE ? (
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
+                    <p className="text-xs text-gray-500">
+                      총 {appointments.length}건 · {appointmentPage}/{appointmentPageCount} 페이지
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setAppointmentPage((current) => Math.max(1, current - 1))}
+                        disabled={appointmentPage === 1}
+                        aria-label="이전 예약 페이지"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-35"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                      {Array.from({ length: appointmentPageCount }, (_, index) => index + 1).map((page) => (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => setAppointmentPage(page)}
+                          aria-current={page === appointmentPage ? "page" : undefined}
+                          className={`h-8 min-w-8 rounded-lg px-2 text-xs font-semibold transition ${
+                            page === appointmentPage
+                              ? "bg-teal-600 text-white"
+                              : "border border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setAppointmentPage((current) => Math.min(appointmentPageCount, current + 1))}
+                        disabled={appointmentPage === appointmentPageCount}
+                        aria-label="다음 예약 페이지"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-35"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </section>
 

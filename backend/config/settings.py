@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'appointments',
     'intake',
     'communication',
+    'clinical',
 ]
 
 REST_FRAMEWORK = {

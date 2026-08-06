@@ -43,13 +43,15 @@ class AppointmentCreateSerializer(serializers.Serializer):
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
+    patient_id = serializers.UUIDField(source="patient.id", read_only=True)
     patient_name = serializers.CharField(source="patient.name", read_only=True)
     doctor_name = serializers.CharField(source="doctor.name", read_only=True)
 
     class Meta:
         model = Appointment
         fields = [
-            "id", "patient_name", "doctor_name", "department",
+            "id", "patient_id", "patient_name", "doctor_name", "department",
             "requested_at_slot", "confirmed_slot", "status", "created_at",
+            "rejection_reason", "proposed_slot", "proposal_reason", "reviewed_at",
         ]
         read_only_fields = fields

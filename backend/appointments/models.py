@@ -15,6 +15,8 @@ class Appointment(models.Model):
         CHECKED_IN = "checked_in", "방문완료"
         COMPLETED = "completed", "진료완료"
         CANCELLED = "cancelled", "취소"
+        REJECTED = "rejected", "반려"
+        TIME_PROPOSED = "time_proposed", "대체 시간 제안"
         NO_SHOW = "no_show", "미방문"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -29,6 +31,10 @@ class Appointment(models.Model):
     processed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
                                       related_name="processed_appointments",
                                       limit_choices_to={"role": "nurse"})
+    rejection_reason = models.TextField(blank=True, null=True)
+    proposed_slot = models.DateTimeField(blank=True, null=True)
+    proposal_reason = models.TextField(blank=True, null=True)
+    reviewed_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

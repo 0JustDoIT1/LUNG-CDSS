@@ -203,3 +203,22 @@ class CaseFavorite(models.Model):
 
     def __str__(self):
         return f"{self.user.name} ♥ {self.case.specimen_id}"
+
+
+class CaseReanalysisRequest(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        PROCESSING = "processing", "Processing"
+        COMPLETED = "completed", "Completed"
+        CANCELLED = "cancelled", "Cancelled"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="reanalysis_requests")
+    requested_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name="requested_reanalyses")
+    reason = models.TextField()
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]

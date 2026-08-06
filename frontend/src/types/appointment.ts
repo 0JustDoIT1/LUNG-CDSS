@@ -21,10 +21,13 @@ export type AppointmentStatus =
   | "checked_in"
   | "completed"
   | "cancelled"
+  | "rejected"
+  | "time_proposed"
   | "no_show";
 
 export interface DoctorAppointment {
   id: string;
+  patient_id: string;
   patient_name: string;
   doctor_name: string;
   department: string;
@@ -32,4 +35,8 @@ export interface DoctorAppointment {
   confirmed_slot: string | null;
   status: AppointmentStatus;
   created_at: string;
+  rejection_reason: string | null;
+  proposed_slot: string | null;
+  proposal_reason: string | null;
+  reviewed_at: string | null;
 }
