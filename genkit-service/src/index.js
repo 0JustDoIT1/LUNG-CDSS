@@ -44,8 +44,13 @@ app.post("/ai/chat", verifyToken, async (req, res) => {
   try {
     const result = await runWithAuthToken(req.rawToken, () => chatFlow({ message }));
     return res.json({ answer: result.answer });
-  } catch {
-    console.error("chatFlow 실행 실패");
+  } catch (error) {
+    console.error("chatFlow 실행 실패", {
+      name: error?.name,
+      message: error?.message,
+      status: error?.status,
+      code: error?.code,
+    });
     return res.status(502).json({
       error: {
         code: "CHATBOT_UPSTREAM_ERROR",
