@@ -11,9 +11,48 @@ LicenseVerificationError / SocialTokenError를 던지는 지점만 실제 연동
 """
 
 import os
+import uuid
 
 import requests
+from PIL import Image, UnidentifiedImageError
 
+from cases.gcs_signed_url import GCS_BUCKET, get_bucket
+
+class ProfilePhotoError(Exception):
+    pass
+
+
+MAX_PROFILE_PHOTO_SIZE = 5 * 1024 * 1024
+PROFILE_PHOTO_FORMATS = {
+    "JPEG": ("jpg", "image/jpeg"),
+    "PNG": ("png", "image/png"),
+    "WEBP": ("webp", "image/webp"),
+}
+
+
+def upload_doctor_profile_photo(user_id, image_file) -> str:
+    if image_file.size > MAX_PROFILE_PHOTO_SIZE:
+        raise ProfilePhotoError("이미지는 5MB 이하만 업로드할 수 있습니다.")
+
+    try:
+        image = Image.open(image_file)
+        image_format = image.format
+        image.verify()
+    except (UnidentifiedImageError, OSError, ValueError):
+        raise ProfilePhotoError("JPEG, PNG 또는 WebP 이미지 파일만 업로드할 수 있습니다.")
+    finally:
+        image_file.seek(0)
+
+    if image_format not in PROFILE_PHOTO_FORMATS:
+        raise ProfilePhotoError("JPEG, PNG 또는 WebP 이미지 파일만 업로드할 수 있습니다.")
+
+    extension, content_type = PROFILE_PHOTO_FORMATS[image_format]
+    blob_name = f"doctor-profiles/{user_id}/{uuid.uuid4()}.{extension}"
+    blob = get_bucket().blob(blob_name)
+    blob.cache_control = "public, max-age=31536000, immutable"
+    blob.upload_from_file(image_file, content_type=content_type, rewind=True)
+    blob.make_public()
+    return blob.public_url
 
 class SocialTokenError(Exception):
     pass

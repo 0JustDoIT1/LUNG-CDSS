@@ -1,11 +1,13 @@
 from datetime import date
+from unittest.mock import patch
 
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import DeviceToken, Hospital, NotificationPreference, PatientProfile, User
+from .models import DeviceToken, DoctorProfile, Hospital, NotificationPreference, PatientProfile, User
 
 
 class PatientRegisterGenderTests(APITestCase):
@@ -219,6 +221,46 @@ class NotificationPreferenceApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(NotificationPreference.objects.filter(user=self.user, enabled=False).count(), 5)
+
+class DoctorProfilePhotoUploadTests(APITestCase):
+    def setUp(self):
+        hospital = Hospital.objects.create(name="Photo Hospital")
+        self.doctor = User.objects.create_staff(User.Role.DOCTOR, "Photo Doctor")
+        DoctorProfile.objects.create(
+            user=self.doctor,
+            license_number="123456",
+            department="Oncology",
+            hospital=hospital,
+        )
+        self.url = reverse("doctor-profile-photo")
+
+    @patch("accounts.views.upload_doctor_profile_photo")
+    def test_doctor_can_upload_profile_photo(self, upload_mock):
+        upload_mock.return_value = "https://storage.googleapis.com/test/doctor.jpg"
+        self.client.force_authenticate(self.doctor)
+        photo = SimpleUploadedFile("doctor.jpg", b"image-content", content_type="image/jpeg")
+
+        response = self.client.post(self.url, {"photo": photo}, format="multipart")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["photo_url"], upload_mock.return_value)
+        upload_mock.assert_called_once()
+
+    def test_missing_photo_is_rejected(self):
+        self.client.force_authenticate(self.doctor)
+
+        response = self.client.post(self.url, {}, format="multipart")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_non_doctor_is_forbidden(self):
+        patient = User.objects.create_patient(name="Patient")
+        self.client.force_authenticate(patient)
+        photo = SimpleUploadedFile("photo.jpg", b"image-content", content_type="image/jpeg")
+
+        response = self.client.post(self.url, {"photo": photo}, format="multipart")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class HospitalInfoApiTests(APITestCase):
     def test_anonymous_user_can_get_hospital_info(self):

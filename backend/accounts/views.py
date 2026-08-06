@@ -4,9 +4,10 @@ from django.core.cache import cache
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -33,7 +34,7 @@ from .serializers import (
     StaffLoginSerializer,
     StaffSignupSerializer,
 )
-from .services import SocialTokenError, verify_social_token
+from .services import ProfilePhotoError, SocialTokenError, upload_doctor_profile_photo, verify_social_token
 from core.responses import error_response, validation_error_response
 
 SIGNUP_SESSION_TTL = 600  # 10분
@@ -413,6 +414,29 @@ def doctor_profile(request):
     serializer.save()
     return Response(serializer.data)
 
+@extend_schema(tags=["accounts"])
+@api_view(["POST"])
+@permission_classes([IsDoctor])
+@parser_classes([MultiPartParser, FormParser])
+def upload_doctor_photo(request):
+    image_file = request.FILES.get("photo")
+    if image_file is None:
+        return error_response(
+            "photo 이미지 파일이 필요합니다.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        photo_url = upload_doctor_profile_photo(request.user.id, image_file)
+    except ProfilePhotoError as exc:
+        return error_response(str(exc), status_code=status.HTTP_400_BAD_REQUEST)
+    except Exception:
+        return error_response(
+            "프로필 사진 업로드에 실패했습니다.",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+    return Response({"photo_url": photo_url}, status=status.HTTP_201_CREATED)
 
 # ── 병원 정보 (약도/전화/주소) — 병원 1곳 고정이라 파라미터 없이 조회 ──────
 
