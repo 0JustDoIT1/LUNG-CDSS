@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from accounts.permissions import IsNurse, IsPatient
+from accounts.permissions import IsDoctorOrNurse, IsNurse, IsPatient
 
 from .models import IntakeForm
 from .serializers import IntakeContentSerializer, IntakeFormSerializer, IntakeFormUpdateSerializer
@@ -64,7 +64,7 @@ def my_intake_form(request):
 
 @extend_schema(tags=["intake"])
 @api_view(["GET"])
-@permission_classes([IsNurse])
+@permission_classes([IsDoctorOrNurse])
 def patient_intake_form(request, patient_id):
     """간호사/의사가 환자 상세정보 화면에서 문진표 조회 (읽기전용)."""
     form = IntakeForm.objects.filter(patient_id=patient_id).first()
