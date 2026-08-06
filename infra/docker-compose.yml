@@ -2,8 +2,8 @@ services:
   nginx:
     build: ./nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
@@ -15,7 +15,7 @@ services:
     build:
       context: ../frontend
     expose:
-      - "80"
+      - '80'
     restart: unless-stopped
 
   backend:
@@ -29,7 +29,7 @@ services:
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/gcs-key.json
     expose:
-      - "8000"
+      - '8000'
     restart: unless-stopped
     # depends_on:
     #   - postgres
@@ -51,7 +51,7 @@ services:
   redis:
     image: redis:7-alpine
     expose:
-      - "6379"
+      - '6379'
     restart: unless-stopped
 
   celery_worker:
@@ -97,7 +97,7 @@ services:
       - DJANGO_INTERNAL_BASE_URL=http://backend:8000
       - REDIS_CHAT_URL=redis://redis:6379/2
     expose:
-      - "8001"
+      - '8001'
     depends_on:
       - redis
       - backend
@@ -116,7 +116,7 @@ services:
       - RAG_SEARCH_URL=http://realtime:8001/internal/rag/search
       - PORT=8002
     expose:
-      - "8002"
+      - '8002'
     depends_on:
       - backend
       - realtime
