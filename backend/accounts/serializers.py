@@ -184,6 +184,31 @@ class GuardianLinkSerializer(serializers.ModelSerializer):
         fields = ["id", "invite_code", "guardian_name", "invited_at", "accepted_at"]
 
 
+class GuardianAppointmentSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    requested_at_slot = serializers.DateTimeField(read_only=True)
+    confirmed_slot = serializers.DateTimeField(read_only=True, allow_null=True)
+    department = serializers.CharField(read_only=True)
+    doctor_name = serializers.CharField(source="doctor.name", read_only=True)
+    status = serializers.CharField(read_only=True)
+
+
+class GuardianMedicationLogSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    drug_name = serializers.CharField(source="schedule.drug_name", read_only=True)
+    dosage = serializers.CharField(source="schedule.dosage", read_only=True)
+    scheduled_time = serializers.DateTimeField(read_only=True)
+    taken = serializers.BooleanField(read_only=True)
+    taken_at = serializers.DateTimeField(read_only=True, allow_null=True)
+
+
+class GuardianReleasedResultSerializer(serializers.Serializer):
+    final_subtype = serializers.CharField(source="confirmed_finding.final_subtype", read_only=True)
+    final_note = serializers.CharField(source="confirmed_finding.final_note", read_only=True)
+    confirmed_at = serializers.DateTimeField(source="confirmed_finding.confirmed_at", read_only=True)
+    released_at = serializers.DateTimeField(source="confirmed_finding.confirmed_at", read_only=True)
+
+
 class DoctorProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = DoctorProfile

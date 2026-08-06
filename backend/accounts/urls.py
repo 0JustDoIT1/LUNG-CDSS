@@ -29,5 +29,8 @@ urlpatterns = [
     path("guardian/links/<uuid:link_id>/", views.guardian_unlink, name="guardian-unlink"),
     path("guardian/register/", views.guardian_register, name="guardian-register"),
     path("guardian/patients/", views.guardian_my_patients, name="guardian-my-patients"),
+    path("guardian/patients/<uuid:patient_id>/appointments/", views.guardian_patient_appointments, name="guardian-patient-appointments"),
+    path("guardian/patients/<uuid:patient_id>/medications/", views.guardian_patient_medications, name="guardian-patient-medications"),
+    path("guardian/patients/<uuid:patient_id>/results/", views.guardian_patient_results, name="guardian-patient-results"),
     path("guardian/patients/<uuid:patient_id>/summary/", views.guardian_patient_summary, name="guardian-patient-summary"),
 ]

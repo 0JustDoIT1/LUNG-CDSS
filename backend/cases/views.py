@@ -104,6 +104,14 @@ def _notify_analysis_outcome(case, succeeded):
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def case_list_create(request):
+    if request.user.role not in (
+        User.Role.PATIENT,
+        User.Role.DOCTOR,
+        User.Role.NURSE,
+        User.Role.PATHOLOGIST,
+    ):
+        return error_response("권한이 없습니다", status_code=status.HTTP_403_FORBIDDEN)
+
     if request.method == "GET":
         queryset = Case.objects.select_related("patient").prefetch_related("ai_results", "confirmed_finding")
 
@@ -221,6 +229,14 @@ def case_list_create(request):
 @api_view(["GET", "DELETE"])
 @permission_classes([IsAuthenticated])
 def case_detail(request, case_id):
+    if request.user.role not in (
+        User.Role.PATIENT,
+        User.Role.DOCTOR,
+        User.Role.NURSE,
+        User.Role.PATHOLOGIST,
+    ):
+        return error_response("권한이 없습니다", status_code=status.HTTP_403_FORBIDDEN)
+
     try:
         case = Case.objects.get(id=case_id)
     except Case.DoesNotExist:

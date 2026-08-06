@@ -5,6 +5,7 @@ from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import TokenError
@@ -18,7 +19,10 @@ from .serializers import (
     DeviceTokenDeleteSerializer,
     DeviceTokenResponseSerializer,
     DoctorProfileUpdateSerializer,
+    GuardianAppointmentSerializer,
     GuardianLinkSerializer,
+    GuardianMedicationLogSerializer,
+    GuardianReleasedResultSerializer,
     GuardianRegisterSerializer,
     HospitalSerializer,
     NotificationPreferenceSerializer,
@@ -273,25 +277,87 @@ def guardian_my_patients(request):
     return Response([{"patient_id": str(l.patient_id), "patient_name": l.patient.name} for l in links])
 
 
+def get_guardian_patient_or_403(request, patient_id):
+    if request.user.role != User.Role.GUARDIAN:
+        raise PermissionDenied("권한이 없습니다")
+
+    link = GuardianLink.objects.select_related("patient").filter(
+        guardian=request.user,
+        patient_id=patient_id,
+        accepted_at__isnull=False,
+        patient__is_active=True,
+    ).first()
+    if link is None:
+        raise PermissionDenied("권한이 없습니다")
+    return link.patient
+
+
+@api_view(["GET"])
+@permission_classes([IsGuardian])
+def guardian_patient_appointments(request, patient_id):
+    patient = get_guardian_patient_or_403(request, patient_id)
+
+    from appointments.models import Appointment
+
+    appointments = (
+        Appointment.objects.filter(patient=patient)
+        .exclude(status=Appointment.Status.CANCELLED)
+        .select_related("doctor")
+        .order_by("-requested_at_slot")
+    )
+    return Response(GuardianAppointmentSerializer(appointments, many=True).data)
+
+
+@api_view(["GET"])
+@permission_classes([IsGuardian])
+def guardian_patient_medications(request, patient_id):
+    patient = get_guardian_patient_or_403(request, patient_id)
+
+    from medications.models import MedicationLog
+
+    logs = (
+        MedicationLog.objects.filter(
+            schedule__patient=patient,
+            scheduled_time__date=timezone.localdate(),
+        )
+        .select_related("schedule")
+        .order_by("scheduled_time")
+    )
+    return Response(GuardianMedicationLogSerializer(logs, many=True).data)
+
+
+@api_view(["GET"])
+@permission_classes([IsGuardian])
+def guardian_patient_results(request, patient_id):
+    patient = get_guardian_patient_or_403(request, patient_id)
+
+    from cases.models import Case
+
+    results = (
+        Case.objects.filter(
+            patient=patient,
+            status=Case.Status.CONFIRMED,
+            confirmed_finding__isnull=False,
+        )
+        .select_related("confirmed_finding")
+        .order_by("-confirmed_finding__confirmed_at")
+    )
+    return Response(GuardianReleasedResultSerializer(results, many=True).data)
+
+
 @api_view(["GET"])
 @permission_classes([IsGuardian])
 def guardian_patient_summary(request, patient_id):
-    """검사결과 상태 / 다음예약 요약. 개인 증상 기록은 환자 본인만 조회한다."""
-    if not GuardianLink.objects.filter(
-        guardian=request.user, patient_id=patient_id, accepted_at__isnull=False
-    ).exists():
-        return error_response("권한이 없습니다", status_code=status.HTTP_403_FORBIDDEN)
+    """다음 예약 요약. 검사결과는 공개 결과 전용 endpoint에서만 조회한다."""
+    get_guardian_patient_or_403(request, patient_id)
 
     from appointments.models import Appointment
-    from cases.models import Case
 
-    latest_case = Case.objects.filter(patient_id=patient_id).order_by("-uploaded_at").first()
     next_appt = Appointment.objects.filter(
         patient_id=patient_id, status__in=["confirmed", "reminded_d7", "reminded_d1"]
     ).order_by("confirmed_slot").first()
 
     return Response({
-        "case_status": latest_case.status if latest_case else None,
         "next_appointment": next_appt.confirmed_slot if next_appt else None,
     })
 
