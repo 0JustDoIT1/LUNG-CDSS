@@ -339,7 +339,8 @@ def guardian_patient_results(request, patient_id):
             status=Case.Status.CONFIRMED,
             confirmed_finding__isnull=False,
         )
-        .select_related("confirmed_finding")
+        .select_related("confirmed_finding__based_on_result")
+        .prefetch_related("confirmed_finding__based_on_result__gene_predictions")
         .order_by("-confirmed_finding__confirmed_at")
     )
     return Response(GuardianReleasedResultSerializer(results, many=True).data)

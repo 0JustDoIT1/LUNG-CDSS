@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from appointments.models import Appointment
-from cases.models import AIAnalysisResult, Case, ConfirmedFinding
+from cases.models import AIAnalysisResult, Case, ConfirmedFinding, GenePrediction
 from medications.models import MedicationLog, MedicationSchedule
 
 from .models import GuardianLink, User
@@ -156,6 +156,8 @@ class GuardianReadOnlyApiTests(APITestCase):
             lusc_probability=0.1,
             treatment_note="private",
         )
+        GenePrediction.objects.create(ai_result=ai_result, gene_name="EGFR", likelihood=0.64)
+        GenePrediction.objects.create(ai_result=ai_result, gene_name="TP53", likelihood=0.31)
         if with_finding:
             ConfirmedFinding.objects.create(
                 case=case,
@@ -177,16 +179,40 @@ class GuardianReadOnlyApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["final_subtype"], "LUAD")
-        self.assertEqual(response.data[0]["final_note"], "공개 안내")
+        self.assertEqual(
+            response.data[0]["gene_predictions"],
+            [
+                {"gene_name": "EGFR", "likelihood": 0.64},
+                {"gene_name": "TP53", "likelihood": 0.31},
+            ],
+        )
         self.assertEqual(
             set(response.data[0]),
-            {"final_subtype", "final_note", "confirmed_at", "released_at"},
+            {"final_subtype", "gene_predictions", "confirmed_at", "released_at"},
         )
         forbidden = {
-            "prediction_label", "luad_probability", "lusc_probability", "gene_predictions",
-            "heatmap_url", "nuclei_patches", "treatment_note",
+            "prediction_label", "luad_probability", "lusc_probability", "final_note",
+            "heatmap_url", "nuclei_patches", "nuclei_density_score", "treatment_note",
         }
         self.assertTrue(forbidden.isdisjoint(response.data[0]))
+
+    def test_patient_result_api_contract_is_unchanged(self):
+        self._create_result(self.patient, "PATIENT-CONTRACT", Case.Status.CONFIRMED, True)
+        self.client.force_authenticate(self.patient)
+
+        response = self.client.get(reverse("my-results"))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["final_note"], "공개 안내")
+        self.assertEqual(response.data[0]["luad_probability"], 0.9)
+        self.assertEqual(response.data[0]["lusc_probability"], 0.1)
+        self.assertEqual(
+            response.data[0]["gene_predictions"],
+            [
+                {"gene_name": "EGFR", "likelihood": 0.64},
+                {"gene_name": "TP53", "likelihood": 0.31},
+            ],
+        )
 
     def test_other_patient_results_are_forbidden(self):
         response = self.client.get(self.url("guardian-patient-results", self.other_patient))

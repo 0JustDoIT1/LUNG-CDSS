@@ -202,9 +202,18 @@ class GuardianMedicationLogSerializer(serializers.Serializer):
     taken_at = serializers.DateTimeField(read_only=True, allow_null=True)
 
 
+class GuardianGenePredictionSerializer(serializers.Serializer):
+    gene_name = serializers.CharField(read_only=True)
+    likelihood = serializers.FloatField(read_only=True, allow_null=True)
+
+
 class GuardianReleasedResultSerializer(serializers.Serializer):
     final_subtype = serializers.CharField(source="confirmed_finding.final_subtype", read_only=True)
-    final_note = serializers.CharField(source="confirmed_finding.final_note", read_only=True)
+    gene_predictions = GuardianGenePredictionSerializer(
+        source="confirmed_finding.based_on_result.gene_predictions",
+        many=True,
+        read_only=True,
+    )
     confirmed_at = serializers.DateTimeField(source="confirmed_finding.confirmed_at", read_only=True)
     released_at = serializers.DateTimeField(source="confirmed_finding.confirmed_at", read_only=True)
 
