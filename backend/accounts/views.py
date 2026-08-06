@@ -417,7 +417,7 @@ def doctor_profile(request):
 # ── 병원 정보 (약도/전화/주소) — 병원 1곳 고정이라 파라미터 없이 조회 ──────
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def hospital_info(request):
     hospital = Hospital.objects.first()
     if hospital is None:

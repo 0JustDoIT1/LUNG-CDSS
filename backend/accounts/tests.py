@@ -220,4 +220,14 @@ class NotificationPreferenceApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(NotificationPreference.objects.filter(user=self.user, enabled=False).count(), 5)
 
+class HospitalInfoApiTests(APITestCase):
+    def test_anonymous_user_can_get_hospital_info(self):
+        hospital = Hospital.objects.create(name="Public Hospital")
+
+        response = self.client.get(reverse("hospital-info"))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], str(hospital.id))
+        self.assertEqual(response.data["name"], hospital.name)
+
 # Create your tests here.
