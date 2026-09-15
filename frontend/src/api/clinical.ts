@@ -16,4 +16,20 @@ export const createClinicalNote = async (id: string, content: string) => (await 
 export const getPrescriptions = async (id: string) => (await apiClient.get<Prescription[]>(`/clinical/patients/${id}/prescriptions/`)).data;
 export const createPrescription = async (id: string, payload: Omit<Prescription, "id" | "doctor_name" | "created_at">) => (await apiClient.post<Prescription>(`/clinical/patients/${id}/prescriptions/`, payload)).data;
 export const requestCaseReanalysis = async (caseId: string, reason: string) => (await apiClient.post(`/cases/${caseId}/reanalysis-requests/`, { reason })).data;
+
+export interface TnmCandidateResult {
+  t_candidate: string;
+  n_candidate: string;
+  m_candidate: string;
+  ctnm_candidate: string;
+  stage_group_candidate: string | null;
+  stage_group_status: "candidate_ready" | "indeterminate";
+  warnings: string[];
+  m_evidence: { reasons: string[]; organ_counts: Record<string, number> };
+  finalization_status: "physician_review_required";
+  clinical_use_warning: string;
+}
+
+export const assessTnmCandidate = async (payload: { case_id?: string; t_candidate: string; n_candidate: string; imaging_evidence: Record<string, unknown> }) =>
+  (await apiClient.post<TnmCandidateResult>("/clinical/tnm/assessments/", payload)).data;
 export const getPatientAuditLogs = async (patientId: string) => (await apiClient.get<AuditLog[]>("/clinical/audit-logs/", { params: { patient_id: patientId } })).data;

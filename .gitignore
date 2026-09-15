@@ -66,3 +66,4 @@ infra/nginx/ssl/
 
 *.svs
 backend/*firebase-adminsdk*.json
+backend/gcs-key.json

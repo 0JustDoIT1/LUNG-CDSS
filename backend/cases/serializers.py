@@ -157,13 +157,14 @@ class CaseDetailSerializer(serializers.ModelSerializer):
     slide_thumbnail_url = serializers.SerializerMethodField()
     is_favorite = serializers.SerializerMethodField()
     patient_name = serializers.CharField(source="patient.name", read_only=True)
+    latest_tnm_assessment = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
         fields = [
             "id", "specimen_id", "status", "current_step", "patient_name",
             "slide_thumbnail_url", "uploaded_at", "analyzed_at", "completed_at",
-            "latest_ai_result", "confirmed_finding", "is_favorite",
+            "latest_ai_result", "confirmed_finding", "is_favorite", "latest_tnm_assessment",
         ]
 
     def get_latest_ai_result(self, obj):
@@ -182,6 +183,12 @@ class CaseDetailSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.favorited_by.filter(user=request.user).exists()
         return False
+
+    def get_latest_tnm_assessment(self, obj):
+        assessment = obj.tnm_assessments.select_related("doctor").first()
+        if not assessment:
+            return None
+        return {"id": str(assessment.id), "t_candidate": assessment.t_candidate, "n_candidate": assessment.n_candidate, "m_candidate": assessment.m_candidate, "stage_group_candidate": assessment.stage_group_candidate, "doctor_name": assessment.doctor.name, "created_at": assessment.created_at, "result": assessment.result}
 
 
 class ReviewActionSerializer(serializers.Serializer):

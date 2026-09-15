@@ -7,4 +7,5 @@ urlpatterns = [
     path("patients/<uuid:patient_id>/notes/", views.clinical_notes, name="clinical-notes"),
     path("patients/<uuid:patient_id>/prescriptions/", views.prescriptions, name="clinical-prescriptions"),
     path("audit-logs/", views.audit_logs, name="clinical-audit-logs"),
+    path("tnm/assessments/", views.tnm_assessment, name="tnm-assessment"),
 ]

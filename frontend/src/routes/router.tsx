@@ -15,6 +15,7 @@ import DoctorSchedulePage from "../pages/DoctorSchedulePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ErrorPage from "../pages/ErrorPage";
 import PatientDetailPage from "../pages/PatientDetailPage";
+import TnmAssessmentPage from "../pages/TnmAssessmentPage";
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
               { path: "/doctor-dashboard/schedule", element: <DoctorSchedulePage /> },
               { path: "/doctor-dashboard/profile", element: <DoctorProfilePage /> },
               { path: "/doctor-dashboard/patients/:id", element: <PatientDetailPage /> },
+              { path: "/doctor-dashboard/tnm", element: <TnmAssessmentPage /> },
             ],
           },
         ],

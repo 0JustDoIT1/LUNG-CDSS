@@ -1,6 +1,29 @@
 from rest_framework import serializers
 
-from .models import AuditLog, ClinicalNote, Prescription
+from .models import AuditLog, ClinicalNote, Prescription, TnmCandidateAssessment
+
+
+class TnmAssessmentRequestSerializer(serializers.Serializer):
+    case_id = serializers.UUIDField(required=False)
+    t_candidate = serializers.CharField(max_length=8)
+    n_candidate = serializers.CharField(max_length=8)
+    imaging_evidence = serializers.JSONField()
+
+    def validate_imaging_evidence(self, value):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("imaging_evidence must be an object.")
+        lesions = value.get("extrathoracic_lesions", [])
+        if not isinstance(lesions, list):
+            raise serializers.ValidationError("extrathoracic_lesions must be a list.")
+        return value
+
+
+class TnmCandidateAssessmentSerializer(serializers.ModelSerializer):
+    doctor_name = serializers.CharField(source="doctor.name", read_only=True)
+
+    class Meta:
+        model = TnmCandidateAssessment
+        fields = ["id", "case", "doctor_name", "t_candidate", "n_candidate", "m_candidate", "stage_group_candidate", "imaging_evidence", "result", "created_at"]
 
 
 class ClinicalNoteSerializer(serializers.ModelSerializer):

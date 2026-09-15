@@ -152,6 +152,16 @@ function ResultContent(): React.JSX.Element {
         </div>
       </header>
 
+      {getStoredItem("user_role") === "doctor" ? (
+        <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-200 bg-teal-50 p-4">
+          <div>
+            <p className="text-sm font-semibold text-teal-950">TNM9 후보 평가</p>
+            {caseData.latest_tnm_assessment ? <p className="mt-1 text-sm text-teal-800">c{caseData.latest_tnm_assessment.t_candidate}{caseData.latest_tnm_assessment.n_candidate}{caseData.latest_tnm_assessment.m_candidate}{caseData.latest_tnm_assessment.stage_group_candidate ? ` · Stage ${caseData.latest_tnm_assessment.stage_group_candidate}` : " · 판정 보류"} · 의사 검토 필요</p> : <p className="mt-1 text-sm text-teal-800">아직 이 케이스의 TNM 후보 평가가 없습니다.</p>}
+          </div>
+          <button type="button" onClick={() => navigate(`/doctor-dashboard/tnm?case_id=${caseData.id}`)} className="rounded-lg bg-teal-700 px-3.5 py-2 text-sm font-semibold text-white hover:bg-teal-800">TNM 후보 평가</button>
+        </section>
+      ) : null}
+
       {hasResult ? (
         <UnifiedCaseResultSections caseData={caseData} />
       ) : (

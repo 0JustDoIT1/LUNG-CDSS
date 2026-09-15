@@ -9,9 +9,10 @@ from cases.models import Case
 from medications.models import MedicationSchedule
 from core.responses import error_response, validation_error_response
 
-from .models import AuditLog, ClinicalNote, Prescription
-from .serializers import AuditLogSerializer, ClinicalNoteSerializer, PrescriptionSerializer
+from .models import AuditLog, ClinicalNote, Prescription, TnmCandidateAssessment
+from .serializers import AuditLogSerializer, ClinicalNoteSerializer, PrescriptionSerializer, TnmAssessmentRequestSerializer, TnmCandidateAssessmentSerializer
 from .services import record_audit
+from .tnm import assess
 
 
 def _patient_or_404(patient_id):
@@ -83,3 +84,24 @@ def audit_logs(request):
         logs = logs.filter(metadata__patient_id=patient_id)
     logs = logs[:200]
     return Response(AuditLogSerializer(logs, many=True).data)
+
+
+@api_view(["POST"])
+@permission_classes([IsDoctor])
+def tnm_assessment(request):
+    serializer = TnmAssessmentRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return validation_error_response(serializer.errors)
+    payload = serializer.validated_data.copy()
+    case_id = payload.pop("case_id", None)
+    result = assess(**payload)
+    assessment = None
+    if case_id:
+        case = Case.objects.filter(id=case_id).first()
+        if case is None:
+            return error_response("Case not found.", status_code=status.HTTP_404_NOT_FOUND)
+        assessment = TnmCandidateAssessment.objects.create(case=case, doctor=request.user, t_candidate=result["t_candidate"], n_candidate=result["n_candidate"], m_candidate=result["m_candidate"], stage_group_candidate=result["stage_group_candidate"], imaging_evidence=payload["imaging_evidence"], result=result)
+    record_audit(actor=request.user, action="tnm.candidate_assessed", resource_type="tnm_assessment", resource_id=assessment.id if assessment else "candidate", metadata={"case_id": str(case_id) if case_id else None, "t": result["t_candidate"], "n": result["n_candidate"], "m": result["m_candidate"], "stage": result["stage_group_candidate"]})
+    if assessment:
+        result["assessment_id"] = str(assessment.id)
+    return Response(result)

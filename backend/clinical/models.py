@@ -49,3 +49,20 @@ class AuditLog(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class TnmCandidateAssessment(models.Model):
+    """Immutable TNM9 decision-support candidate, never a final stage."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    case = models.ForeignKey("cases.Case", on_delete=models.CASCADE, related_name="tnm_assessments")
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="tnm_candidate_assessments")
+    t_candidate = models.CharField(max_length=8)
+    n_candidate = models.CharField(max_length=8)
+    m_candidate = models.CharField(max_length=20)
+    stage_group_candidate = models.CharField(max_length=30, null=True, blank=True)
+    imaging_evidence = models.JSONField(default=dict)
+    result = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

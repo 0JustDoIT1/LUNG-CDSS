@@ -71,6 +71,17 @@ export interface CaseListItem {
   is_favorite: boolean;
 }
 
+export interface TnmCandidateAssessment {
+  id: string;
+  t_candidate: string;
+  n_candidate: string;
+  m_candidate: string;
+  stage_group_candidate: string | null;
+  doctor_name: string;
+  created_at: string;
+  result: { warnings?: string[]; clinical_use_warning?: string };
+}
+
 export interface CaseDetail {
   id: string;
   specimen_id: string;
@@ -95,6 +106,7 @@ export interface CaseDetail {
   latest_ai_result: AIAnalysisResult | null;
   confirmed_finding: ConfirmedFinding | null;
   is_favorite: boolean;
+  latest_tnm_assessment?: TnmCandidateAssessment | null;
 }
 
 export interface CaseListParams {
